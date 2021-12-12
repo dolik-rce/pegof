@@ -13,7 +13,6 @@ static const char *dbg_str[] = { "Evaluating rule", "Matched rule", "Abandoning 
 }
 
 %source {
-#define PCC_ERROR(auxil) system__handle_syntax_error(auxil, SYNTAX_ERROR_UNKNOWN, range__void()) /* <-- caused by incompleteness of the grammar */
 #define PCC_GETCHAR(auxil) system__read_source_file(auxil)
 #define PCC_MALLOC(auxil, size) system__allocate_memory(auxil, size)
 #define PCC_REALLOC(auxil, ptr, size) system__reallocate_memory(auxil, ptr, size)

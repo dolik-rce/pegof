@@ -1,19 +1,3 @@
-/*
- * This code is hereby placed in the public domain.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHORS ''AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #ifndef INCLUDED_SYSTEM_H
 #define INCLUDED_SYSTEM_H
 
@@ -71,28 +55,12 @@ struct ast_node_tag {
     } managed;
 };
 
-typedef enum syntax_error_tag {
-    SYNTAX_ERROR_IF_WITHOUT_CONDITION,
-    SYNTAX_ERROR_IF_WITHOUT_STATEMENT,
-    SYNTAX_ERROR_ELSE_WITHOUT_STATEMENT,
-    SYNTAX_ERROR_LONE_ELSE,
-    SYNTAX_ERROR_WHILE_WITHOUT_CONDITION,
-    SYNTAX_ERROR_WHILE_WITHOUT_STATEMENT,
-    SYNTAX_ERROR_DO_WITHOUT_STATEMENT,
-    SYNTAX_ERROR_DO_WITHOUT_WHILE,
-    SYNTAX_ERROR_NO_ENDING_SEMICOLON,
-    SYNTAX_ERROR_UNCLOSED_COMMENT_BLOCK,
-    SYNTAX_ERROR_UNEXPECTED_TOKEN,
-    SYNTAX_ERROR_UNKNOWN
-} syntax_error_t;
-
 struct system_tag {
     struct system_input_tag {
         const char *path; /* the source file path */
         FILE *file; /* the source file pointer */
         char_array_t text; /* the source text */
         size_t_array_t line; /* the byte positions of the line head in the source text */
-        size_t ecount; /* the error count */
     } source;
     struct system_managed_tag {
         ast_node_t *first; /* the first managed AST node */
@@ -111,8 +79,6 @@ void system__deallocate_memory(system_t *obj, void *ptr);
 void system__open_source_file(system_t *obj, const char *path); /* the standard input if path == NULL */
 void system__close_source_file(system_t *obj);
 int system__read_source_file(system_t *obj);
-
-void system__handle_syntax_error(system_t *obj, syntax_error_t error, range_t range);
 
 ast_node_t *system__create_ast_node_terminal(system_t *obj, ast_node_type_t type, range_t range);
 ast_node_t *system__create_ast_node_unary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1);

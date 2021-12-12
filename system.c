@@ -1,19 +1,3 @@
-/*
- * This code is hereby placed in the public domain.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHORS ''AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #ifdef _MSC_VER
 #undef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS /* suppress the warning of fopen() use */
@@ -22,10 +6,6 @@
 #include "system.h"
 
 #include <stdlib.h>
-
-#ifndef ERROR_MAX
-#define ERROR_MAX 4 /* the maximum number of errors displayed at a time */
-#endif
 
 static void append_text_character_(system_t *obj, char c) {
     const size_t n = obj->source.text.n;
@@ -71,7 +51,6 @@ void system__initialize(system_t *obj) {
     obj->source.file = NULL;
     char_array__initialize(&(obj->source.text));
     size_t_array__initialize(&(obj->source.line));
-    obj->source.ecount = 0;
     obj->managed.first = NULL;
     obj->managed.last = NULL;
     append_line_head_(obj, 0);
@@ -345,53 +324,6 @@ void ast_node__destroy(ast_node_t *obj) {
         }
     }
     system__deallocate_memory(obj->system, obj);
-}
-
-void system__handle_syntax_error(system_t *obj, syntax_error_t error, range_t range) {
-    size_t line, col;
-    compute_line_and_column_(obj, range.min, &line, &col);
-    obj->source.ecount++;
-    switch (error) {
-    case SYNTAX_ERROR_IF_WITHOUT_CONDITION:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Condition missing after 'if'\n", line, col);
-        break;
-    case SYNTAX_ERROR_IF_WITHOUT_STATEMENT:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Statement missing after 'if' condition\n", line, col);
-        break;
-    case SYNTAX_ERROR_ELSE_WITHOUT_STATEMENT:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Statement missing after 'else'\n", line, col);
-        break;
-    case SYNTAX_ERROR_LONE_ELSE:
-        fprintf(stderr, "ERROR: line %zu, column %zu: 'else' without corresponding 'if'\n", line, col);
-        break;
-    case SYNTAX_ERROR_WHILE_WITHOUT_CONDITION:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Condition missing after 'while'\n", line, col);
-        break;
-    case SYNTAX_ERROR_WHILE_WITHOUT_STATEMENT:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Statement missing after 'while' condition\n", line, col);
-        break;
-    case SYNTAX_ERROR_DO_WITHOUT_STATEMENT:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Statement missing after 'do'\n", line, col);
-        break;
-    case SYNTAX_ERROR_DO_WITHOUT_WHILE:
-        fprintf(stderr, "ERROR: line %zu, column %zu: 'while' missing after 'do' statement\n", line, col);
-        break;
-    case SYNTAX_ERROR_NO_ENDING_SEMICOLON:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Ending semicolon missing\n", line, col);
-        break;
-    case SYNTAX_ERROR_UNCLOSED_COMMENT_BLOCK:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Unclosed comment block\n", line, col);
-        break;
-    case SYNTAX_ERROR_UNEXPECTED_TOKEN:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Unexpected token '%.*s'\n", line, col, (int)(range.max - range.min), obj->source.text.p + range.min);
-        break;
-    case SYNTAX_ERROR_UNKNOWN:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Unknown error\n", line, col);
-        break;
-    default:
-        fprintf(stderr, "ERROR: line %zu, column %zu: Undefined internal error\n", line, col);
-    }
-    if (obj->source.ecount >= ERROR_MAX) longjmp(obj->jmp, 1); /* never returns */
 }
 
 static void dump_ast_(system_t *obj, ast_node_t *node, int level) {

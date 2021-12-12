@@ -34,7 +34,6 @@ int main(int argc, char **argv) {
         parser = parser_create(&system);
         ast_node_t *ast;
         const int b = parser_parse(parser, &ast);
-        if (system.source.ecount > 0) longjmp(system.jmp, 1); /* never returns */
         if (b) {
             ret = 10; /* internal error */
             fprintf(stderr, "FATAL: Internal error\n");
