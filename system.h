@@ -94,6 +94,8 @@ void ast_node__prepend_child(ast_node_t *obj, ast_node_t *node);
 void ast_node__append_child(ast_node_t *obj, ast_node_t *node);
 void ast_node__destroy(ast_node_t *obj);
 
+void format__print_node(system_t *obj, ast_node_t *node);
+
 #ifdef __cplusplus
 }
 #endif

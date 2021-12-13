@@ -5,11 +5,11 @@
 
 %header {
 #include "system.h"
-
+/*
 static const char *dbg_str[] = { "Evaluating rule", "Matched rule", "Abandoning rule" };
 #define PCC_DEBUG(auxil, event, rule, level, pos, buffer, length) \
     fprintf(stderr, "%*s%s %s @%zu [%.*s]\n", (int)((level) * 2), "", dbg_str[event], rule, pos, (int)(length), buffer)
-
+*/
 }
 
 %source {
@@ -60,7 +60,7 @@ directive <-
         $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, range__new($0s, $0e), name, s);
     }
 
-code <- '%%' <.*> { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_CODE, range__new($1s, $1e)); }
+code <- '%%' [ \t\r\n]* <.*> { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_CODE, range__new($1s, $1e)); }
 
 alternation
     <- s:sequence _* "/" _* a:alternation
@@ -106,10 +106,10 @@ literal
     / '<' _* a:alternation _* '>' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_CAPTURE, range__new($0s, $0e), a); }
     / '(' _* a:alternation _* ')' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_GROUP, range__new($0s, $0e), a); }
 
-string <- ( "\"" ("\\" . / [^"])* "\"" / "'" ("\\" . / [^'])* "'" )
-    {
-        $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_STRING, range__new($0s, $0e));
-    }
+string
+    <- '"' <("\\" . / [^"])*> '"'{ $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_STRING, range__new($1s, $1e)); }
+    / "'" <("\\" . / [^'])*> "'" { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_STRING, range__new($2s, $2e)); }
+
 source <- '{' <([^{}]* source?)*> '}' { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_SOURCE, range__new($1s, $1e)); }
 
 character <- "\\" . / [^\]]

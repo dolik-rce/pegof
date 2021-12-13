@@ -18,13 +18,44 @@
 #include "parser.h"
 
 #include <stdio.h>
+#include <string.h>
+
+typedef enum command_tag {
+    CMD_AST,
+    CMD_FORMAT,
+    CMD_OPTIMIZE
+} command_t;
+
+
+const char *process_args(int argc, char **argv, command_t* cmd) {
+    if (argc == 2) {
+        *cmd = CMD_AST;
+        return argv[1];
+    } else if (argc == 3) {
+        if (strcmp("--ast", argv[1]) == 0) {
+            *cmd = CMD_AST;
+        } else if (strcmp("--format", argv[1]) == 0) {
+            *cmd = CMD_FORMAT;
+        } else if (strcmp("--optimize", argv[1]) == 0) {
+            *cmd = CMD_OPTIMIZE;
+        } else {
+            fprintf(stderr, "ERROR: Unknown option '%s'!\n", argv[1]);
+            return NULL;
+        }
+        return argv[2];
+    } else {
+        fprintf(stderr, "ERROR: Wrong number of arguments!\n");
+        return NULL; /* usage error */
+    }
+}
+
 
 int main(int argc, char **argv) {
-    if (argc > 2) {
-        fprintf(stderr, "ERROR: Too many arguments\n");
-        return 1; /* usage error */
+    command_t cmd;
+    const char *path = process_args(argc, argv, &cmd);
+    if (path == NULL) {
+        return 1;
     }
-    const char *path = (argc > 1) ? argv[1] : NULL;
     int ret = 0;
     system_t system;
     parser_context_t *parser = NULL;
@@ -40,7 +71,18 @@ int main(int argc, char **argv) {
                 /* <-- input text remaining due to incompleteness of the grammar */
         }
         else {
-            system__dump_ast(&system, ast);
+            switch (cmd) {
+            case CMD_AST:
+                system__dump_ast(&system, ast);
+                break;
+            case CMD_FORMAT:
+                format__print_node(&system, ast);
+                break;
+            case CMD_OPTIMIZE:
+                fprintf(stderr, "Not implemented yet, sorry...\n");
+                break;
+            default: break;
+            }
         }
     }
     else {
