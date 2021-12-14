@@ -156,9 +156,44 @@ void *format__print_code(system_t *obj, ast_node_t *node) {
     printf("%%%%\n%.*s\n", (int)(last_non_ws + 1 - node->range.min), obj->source.text.p + node->range.min);
 }
 
+ast_node_t *format__find_parent_by_type(ast_node_t *node, ast_node_type_t type) {
+    ast_node_t *result = node;
+    while (result->type != type) {
+        if (result->parent == NULL) {
+            return NULL;
+        }
+        result = result->parent;
+    }
+    return result;
+}
+
+void *format__print_comment(system_t *obj, ast_node_t *node) {
+    // We have to recognize three different comment positions:
+    //   1) top-level comment (parent is GRAMMAR) -> add newline, no indent
+    //   2) at the end of sequence in top-lefel alternation -> no newline, no indent
+    //   3) anywhere else -> add newline + indent
+    const char* suffix = "\n        ";
+    if (node->parent->type == AST_NODE_TYPE_GRAMMAR) {
+        suffix = "\n";
+    } else {
+        ast_node_t *parent_alternation = format__find_parent_by_type(node, AST_NODE_TYPE_ALTERNATION);
+        if (parent_alternation != NULL
+            && parent_alternation->parent->type == AST_NODE_TYPE_RULE
+            && node->parent->sibling.next == NULL)
+        {
+            suffix = "";
+        }
+    }
+
+    size_t last_non_ws = node->range.max;
+    while (isspace(obj->source.text.p[--last_non_ws])) {};
+    printf("# %.*s%s", (int)(last_non_ws + 1 - node->range.min), obj->source.text.p + node->range.min, suffix);
+}
+
 void format__print_node(system_t *obj, ast_node_t *node) {
     switch (node->type) {
     case AST_NODE_TYPE_GRAMMAR:         format__print_grammar(obj, node); break;
+    case AST_NODE_TYPE_COMMENT:         format__print_comment(obj, node); break;
     case AST_NODE_TYPE_RULE:            format__print_rule(obj, node); break;
     case AST_NODE_TYPE_DIRECTIVE:       format__print_directive(obj, node); break;
     case AST_NODE_TYPE_CODE:            format__print_code(obj, node); break;

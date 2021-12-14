@@ -41,6 +41,7 @@ statement_list
 statement
     <- r:rule { $$ = r; }
     / d:directive { $$ = d; }
+    / c:comment { $$ = c; }
 
 rule <- <identifier> _ '<-' _ a:alternation
     {
@@ -100,7 +101,8 @@ primary <- ( <pr:prefixOp?> l:literal <po:postfixOp?> (_* <s:source>)? )
 literal
     <- r:ruleref { $$ = r; }
     / s:string { $$ = s; }
-    / c:charClass { $$ = c; }
+    / cc:charClass { $$ = cc; }
+    / c:comment { $$ = c; }
     / '.' { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DOT, range__new($0s, $0e)); }
     / '$' [1-9][0-9]* { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_BACKREF, range__new($0s, $0e)); }
     / '<' _* a:alternation _* '>' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_CAPTURE, range__new($0s, $0e), a); }
@@ -130,6 +132,8 @@ ruleref
 prefixOp <- [&!] { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_PREFIX_OP, range__new($0s, $0e)); }
 postfixOp <- [?*+] { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_POSTFIX_OP, range__new($0s, $0e)); }
 
-comment <- '#' [^\n]* '\n'
-_ <- ([ \t\r\n] / comment)+
+comment <- _* '#' [ \t]* <[^\n]*> {
+    $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_COMMENT, range__new($1s, $1e));
+}
+_ <- [ \t\r\n]+
 EOF <- !.

@@ -330,6 +330,7 @@ static void dump_ast_(system_t *obj, ast_node_t *node, int level) {
     const char *type = "UNKNOWN";
     switch (node->type) {
     case AST_NODE_TYPE_GRAMMAR:             type = "GRAMMAR";             break;
+    case AST_NODE_TYPE_COMMENT:             type = "COMMENT";             break;
     case AST_NODE_TYPE_RULE:                type = "RULE";                break;
     case AST_NODE_TYPE_DIRECTIVE:           type = "DIRECTIVE";           break;
     case AST_NODE_TYPE_DIRECTIVE_NAME:      type = "DIRECTIVE_NAME";      break;

@@ -15,6 +15,7 @@ typedef struct ast_node_tag ast_node_t;
 
 typedef enum ast_node_type_tag {
     AST_NODE_TYPE_GRAMMAR,
+    AST_NODE_TYPE_COMMENT,
     AST_NODE_TYPE_RULE,
     AST_NODE_TYPE_DIRECTIVE,
     AST_NODE_TYPE_DIRECTIVE_NAME,
@@ -32,7 +33,7 @@ typedef enum ast_node_type_tag {
     AST_NODE_TYPE_DOT,
     AST_NODE_TYPE_BACKREF,
     AST_NODE_TYPE_GROUP,
-    AST_NODE_TYPE_CAPTURE,
+    AST_NODE_TYPE_CAPTURE
 } ast_node_type_t;
 
 struct ast_node_tag {
