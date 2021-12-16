@@ -207,6 +207,7 @@ void format__print_node(system_t *obj, ast_node_t *node) {
     case AST_NODE_TYPE_STRING:          format__print_string(obj, node); break;
 
     // everything else just print verbatim:
+    case AST_NODE_TYPE_RULE_NAME:
     case AST_NODE_TYPE_DIRECTIVE_NAME:
     case AST_NODE_TYPE_VAR:
     case AST_NODE_TYPE_PREFIX_OP:

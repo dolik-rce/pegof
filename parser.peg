@@ -45,7 +45,7 @@ statement
 
 rule <- <identifier> _ '<-' _ a:alternation
     {
-        ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, range__new($1s, $1e));
+        ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_RULE_NAME, range__new($1s, $1e));
         $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_RULE, range__new($1s, $1e), name, a);
     }
 
@@ -132,7 +132,7 @@ ruleref
 prefixOp <- [&!] { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_PREFIX_OP, range__new($0s, $0e)); }
 postfixOp <- [?*+] { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_POSTFIX_OP, range__new($0s, $0e)); }
 
-comment <- _* '#' [ \t]* <[^\n]*> {
+comment <- _* '#'+ [ \t]* <[^\n]*> {
     $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_COMMENT, range__new($1s, $1e));
 }
 _ <- [ \t\r\n]+

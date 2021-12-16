@@ -332,12 +332,13 @@ static void dump_ast_(system_t *obj, ast_node_t *node, int level) {
     case AST_NODE_TYPE_GRAMMAR:             type = "GRAMMAR";             break;
     case AST_NODE_TYPE_COMMENT:             type = "COMMENT";             break;
     case AST_NODE_TYPE_RULE:                type = "RULE";                break;
+    case AST_NODE_TYPE_RULE_NAME:           type = "RULE_NAME";           break;
     case AST_NODE_TYPE_DIRECTIVE:           type = "DIRECTIVE";           break;
     case AST_NODE_TYPE_DIRECTIVE_NAME:      type = "DIRECTIVE_NAME";      break;
     case AST_NODE_TYPE_CODE:                type = "CODE";                break;
     case AST_NODE_TYPE_SOURCE:              type = "SOURCE";              break;
     case AST_NODE_TYPE_PRIMARY:             type = "PRIMARY";             break;
-    case AST_NODE_TYPE_ALTERNATION:         type = "ALTERANTION";         break;
+    case AST_NODE_TYPE_ALTERNATION:         type = "ALTERNATION";         break;
     case AST_NODE_TYPE_SEQUENCE:            type = "SEQUENCE";            break;
     case AST_NODE_TYPE_PREFIX_OP:           type = "PREFIX_OP";           break;
     case AST_NODE_TYPE_POSTFIX_OP:          type = "POSTFIX_OP";          break;
