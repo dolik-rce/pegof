@@ -21,9 +21,8 @@
 #include <string.h>
 
 typedef enum command_tag {
-    CMD_AST,
-    CMD_FORMAT,
-    CMD_OPTIMIZE
+    CMD_AST = 1,
+    CMD_OPTIMIZE = 2
 } command_t;
 
 
@@ -35,9 +34,11 @@ const char *process_args(int argc, char **argv, command_t* cmd) {
         if (strcmp("--ast", argv[1]) == 0) {
             *cmd = CMD_AST;
         } else if (strcmp("--format", argv[1]) == 0) {
-            *cmd = CMD_FORMAT;
+            *cmd = 0;
         } else if (strcmp("--optimize", argv[1]) == 0) {
             *cmd = CMD_OPTIMIZE;
+        } else if (strcmp("--optimize-ast", argv[1]) == 0) {
+            *cmd = CMD_OPTIMIZE|CMD_AST;
         } else {
             fprintf(stderr, "ERROR: Unknown option '%s'!\n", argv[1]);
             return NULL;
@@ -71,17 +72,16 @@ int main(int argc, char **argv) {
                 /* <-- input text remaining due to incompleteness of the grammar */
         }
         else {
-            switch (cmd) {
-            case CMD_AST:
-                system__dump_ast(&system, ast);
-                break;
-            case CMD_FORMAT:
-                format__print_node(&system, ast);
-                break;
-            case CMD_OPTIMIZE:
-                fprintf(stderr, "Not implemented yet, sorry...\n");
-                break;
-            default: break;
+            ast_node_t *grammar;
+            if (cmd & CMD_OPTIMIZE) {
+                grammar = optimize__process(ast);
+            } else {
+                grammar = ast;
+            }
+            if (cmd & CMD_AST) {
+                system__dump_ast(&system, grammar);
+            } else {
+                format__print_node(&system, grammar);
             }
         }
     }
