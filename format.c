@@ -3,7 +3,7 @@
 #include <ctype.h>
 
 void format__print_terminal(system_t *obj, ast_node_t *node) {
-    printf("%.*s", (int)(node->range.max - node->range.min), obj->source.text.p + node->range.min);
+    printf("%.*s", node->len, node->text);
 }
 
 void format__print_grammar(system_t *obj, ast_node_t *node) {
@@ -27,18 +27,17 @@ size_t format__count_character(const char* text, range_t range, char ch) {
 void format__print_string(system_t *obj, ast_node_t *node) {
     // TODO: configurable quotes
     printf("\"");
-    const char *text = obj->source.text.p;
-    for(size_t i=node->range.min; i < node->range.max; ++i) {
-        switch (text[i]) {
+    for(size_t i=0; i < node->len; ++i) {
+        switch (node->text[i]) {
         case '\\':
-            const char next = text[++i];
+            const char next = node->text[++i];
             printf("%s%c", next == '\'' ? "" : "\\", next);
             break;
         case '"':
             printf("\\\"");
             break;
         default:
-            printf("%c", text[i]);
+            printf("%c", node->text[i]);
             break;
         }
     }
@@ -46,11 +45,11 @@ void format__print_string(system_t *obj, ast_node_t *node) {
 }
 
 void format__print_source(system_t *obj, ast_node_t *node) {
-    const char *text = obj->source.text.p;
+    const char *text = node->text;
 
-    size_t first_non_ws = node->range.min;
+    size_t first_non_ws = 0;
     while (isspace(text[first_non_ws])) ++first_non_ws;
-    size_t last_non_ws = node->range.max;
+    size_t last_non_ws = node->len;
     while (isspace(text[--last_non_ws])) {};
     range_t trimmed_range = range__new(first_non_ws, last_non_ws + 1);
 
@@ -135,25 +134,22 @@ void format__print_ruleref(system_t *obj, ast_node_t *node) {
         format__print_node(obj, node->child.first);
         printf(":");
     }
-    printf("%.*s", (int)(node->range.max - node->range.min), obj->source.text.p + node->range.min);
+    printf("%.*s", node->len, node->text);
 }
 
 void format__print_rule(system_t *obj, ast_node_t *node) {
     ast_node_t* name = node->child.first;
     ast_node_t* alternation = name->sibling.next;
 
-    printf("%.*s%s <- ",
-        (int)(name->range.max - name->range.min), obj->source.text.p + name->range.min,
-        alternation->arity == 1 ? "" : "\n   "
-    );
+    printf("%.*s%s <- ", name->len, name->text, alternation->arity == 1 ? "" : "\n   ");
     format__print_node(obj, alternation);
     printf("\n\n");
 }
 
 void *format__print_code(system_t *obj, ast_node_t *node) {
-    size_t last_non_ws = node->range.max;
-    while (isspace(obj->source.text.p[--last_non_ws])) {};
-    printf("%%%%\n%.*s\n", (int)(last_non_ws + 1 - node->range.min), obj->source.text.p + node->range.min);
+    size_t last_non_ws = node->len;
+    while (isspace(node->text[--last_non_ws])) {};
+    printf("%%%%\n%.*s\n", last_non_ws + 1, node->text);
 }
 
 ast_node_t *format__find_parent_by_type(ast_node_t *node, ast_node_type_t type) {
@@ -185,9 +181,9 @@ void *format__print_comment(system_t *obj, ast_node_t *node) {
         }
     }
 
-    size_t last_non_ws = node->range.max;
-    while (isspace(obj->source.text.p[--last_non_ws])) {};
-    printf("# %.*s%s", (int)(last_non_ws + 1 - node->range.min), obj->source.text.p + node->range.min, suffix);
+    size_t last_non_ws = node->len;
+    while (isspace(node->text[--last_non_ws])) {};
+    printf("# %.*s%s", last_non_ws + 1, node->text, suffix);
 }
 
 void format__print_node(system_t *obj, ast_node_t *node) {

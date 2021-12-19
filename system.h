@@ -39,7 +39,10 @@ typedef enum ast_node_type_tag {
 
 struct ast_node_tag {
     ast_node_type_t type; /* the AST node type */
-    range_t range; /* the byte range in the source text */
+    size_t len; /* length of text */
+    const char* text; /* text matching the node */
+    size_t line; /* line in source file */
+    size_t col; /* position on line in source file */
     size_t arity; /* the number of the child AST nodes */
     ast_node_t *parent; /* the parent AST node */
     struct ast_node_sibling_tag {
@@ -83,10 +86,9 @@ void system__close_source_file(system_t *obj);
 int system__read_source_file(system_t *obj);
 
 ast_node_t *system__create_ast_node_terminal(system_t *obj, ast_node_type_t type, range_t range);
-ast_node_t *system__create_ast_node_unary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1);
-ast_node_t *system__create_ast_node_binary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1, ast_node_t *node2);
-ast_node_t *system__create_ast_node_ternary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1, ast_node_t *node2, ast_node_t *node3);
-ast_node_t *system__create_ast_node_variadic(system_t *obj, ast_node_type_t type, range_t range);
+ast_node_t *system__create_ast_node_unary(system_t *obj, ast_node_type_t type,  ast_node_t *node1);
+ast_node_t *system__create_ast_node_binary(system_t *obj, ast_node_type_t type, ast_node_t *node1, ast_node_t *node2);
+ast_node_t *system__create_ast_node_variadic(system_t *obj, ast_node_type_t type);
 
 void system__destroy_all_ast_nodes(system_t *obj);
 

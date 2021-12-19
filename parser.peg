@@ -29,12 +29,11 @@ statement_list
    <- s:statement _ l:statement_list
     {
         $$ = l;
-        $$->range = range__new($0s, $0e);
         ast_node__prepend_child($$, s);
     }
     / s:statement
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_GRAMMAR, range__new($0s, $0e));
+        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_GRAMMAR);
         ast_node__prepend_child($$, s);
     }
 
@@ -46,19 +45,19 @@ statement
 rule <- <identifier> _ '<-' _ a:alternation
     {
         ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_RULE_NAME, range__new($1s, $1e));
-        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_RULE, range__new($1s, $1e), name, a);
+        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_RULE, name, a);
     }
 
 directive <-
     '%' <"value" / "auxil" / "prefix"> _ s:string
     {
         ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, range__new($1s, $1e));
-        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, range__new($0s, $0e), name, s);
+        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, name, s);
     }
     / '%' <"header" / "source" / "common" / "earlyheader" / "earlysource" / "earlycommon"> _ s:source
     {
         ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, range__new($2s, $2e));
-        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, range__new($0s, $0e), name, s);
+        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, name, s);
     }
 
 code <- '%%' [ \t\r\n]* <.*> { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_CODE, range__new($1s, $1e)); }
@@ -67,12 +66,11 @@ alternation
     <- s:sequence _* "/" _* a:alternation
     {
         $$ = a;
-        $$->range = range__new($0s, $0e);
         ast_node__prepend_child($$, s);
     }
     / s:sequence
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_ALTERNATION, range__new($0s, $0e));
+        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_ALTERNATION);
         ast_node__prepend_child($$, s);
     }
 
@@ -80,18 +78,17 @@ sequence
     <- p:primary _* s:sequence
     {
         $$ = s;
-        $$->range = range__new($0s, $0e);
         ast_node__prepend_child($$, p);
     }
     / p:primary
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_SEQUENCE, range__new($0s, $0e));
+        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_SEQUENCE);
         ast_node__prepend_child($$, p);
     }
 
 primary <- ( <pr:prefixOp?> l:literal <po:postfixOp?> (_* <s:source>)? )
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_PRIMARY, range__new($0s, $0e));
+        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_PRIMARY);
         if ($1s != $1e) ast_node__append_child($$, pr);
         ast_node__append_child($$, l);
         if ($2s != $2e) ast_node__append_child($$, po);
@@ -105,8 +102,8 @@ literal
     / c:comment { $$ = c; }
     / '.' { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DOT, range__new($0s, $0e)); }
     / '$' [1-9][0-9]* { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_BACKREF, range__new($0s, $0e)); }
-    / '<' _* a:alternation _* '>' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_CAPTURE, range__new($0s, $0e), a); }
-    / '(' _* a:alternation _* ')' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_GROUP, range__new($0s, $0e), a); }
+    / '<' _* a:alternation _* '>' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_CAPTURE, a); }
+    / '(' _* a:alternation _* ')' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_GROUP, a); }
 
 string
     <- '"' <("\\" . / [^"])*> '"'{ $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_STRING, range__new($1s, $1e)); }

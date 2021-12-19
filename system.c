@@ -6,6 +6,7 @@
 #include "system.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 static void append_text_character_(system_t *obj, char c) {
     const size_t n = obj->source.text.n;
@@ -145,7 +146,14 @@ int system__read_source_file(system_t *obj) {
 static ast_node_t *create_ast_node_(system_t *obj, ast_node_type_t type, range_t range) {
     ast_node_t *const node = (ast_node_t *)system__allocate_memory(obj, sizeof(ast_node_t));
     node->type = type;
-    node->range = range;
+    node->len = range.max - range.min;
+    node->text = strndup(obj->source.text.p + range.min, node->len);
+    if (range.min >= 0) {
+        compute_line_and_column_(obj, range.min, &node->line, &node->col);
+    } else {
+        node->line = -1;
+        node->col = -1;
+    }
     node->arity = 0;
     node->parent = NULL;
     node->sibling.prev = NULL;
@@ -177,41 +185,29 @@ ast_node_t *system__create_ast_node_terminal(system_t *obj, ast_node_type_t type
     return create_ast_node_(obj, type, range);
 }
 
-ast_node_t *system__create_ast_node_unary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1) {
+ast_node_t *system__create_ast_node_unary(system_t *obj, ast_node_type_t type, ast_node_t *node1) {
     if (node1 == NULL) {
         fprintf(stderr, "FATAL: Internal error\n");
         longjmp(obj->jmp, 1); /* never returns */
     }
-    ast_node_t *const node = create_ast_node_(obj, type, range);
+    ast_node_t *const node = create_ast_node_(obj, type, range__new(-1, -1));
     ast_node__append_child(node, node1);
     return node;
 }
 
-ast_node_t *system__create_ast_node_binary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1, ast_node_t *node2) {
+ast_node_t *system__create_ast_node_binary(system_t *obj, ast_node_type_t type, ast_node_t *node1, ast_node_t *node2) {
     if (node1 == NULL || node2 == NULL) {
         fprintf(stderr, "FATAL: Internal error\n");
         longjmp(obj->jmp, 1); /* never returns */
     }
-    ast_node_t *const node = create_ast_node_(obj, type, range);
+    ast_node_t *const node = create_ast_node_(obj, type, range__new(-1, -1));
     ast_node__append_child(node, node1);
     ast_node__append_child(node, node2);
     return node;
 }
 
-ast_node_t *system__create_ast_node_ternary(system_t *obj, ast_node_type_t type, range_t range, ast_node_t *node1, ast_node_t *node2, ast_node_t *node3) {
-    if (node1 == NULL || node2 == NULL || node3 == NULL) {
-        fprintf(stderr, "FATAL: Internal error\n");
-        longjmp(obj->jmp, 1); /* never returns */
-    }
-    ast_node_t *const node = create_ast_node_(obj, type, range);
-    ast_node__append_child(node, node1);
-    ast_node__append_child(node, node2);
-    ast_node__append_child(node, node3);
-    return node;
-}
-
-ast_node_t *system__create_ast_node_variadic(system_t *obj, ast_node_type_t type, range_t range) {
-    return create_ast_node_(obj, type, range);
+ast_node_t *system__create_ast_node_variadic(system_t *obj, ast_node_type_t type) {
+    return create_ast_node_(obj, type, range__new(-1, -1));
 }
 
 void system__destroy_all_ast_nodes(system_t *obj) {
@@ -323,6 +319,7 @@ void ast_node__destroy(ast_node_t *obj) {
             obj->system->managed.last = obj->managed.prev;
         }
     }
+    free((void *)obj->text);
     system__deallocate_memory(obj->system, obj);
 }
 
@@ -349,7 +346,7 @@ static void dump_ast_(system_t *obj, ast_node_t *node, int level) {
     case AST_NODE_TYPE_DOT:                 type = "DOT";                 break;
     case AST_NODE_TYPE_BACKREF:             type = "BACKREF";             break;
     case AST_NODE_TYPE_GROUP:               type = "GROUP";               break;
-    case AST_NODE_TYPE_CAPTURE:             type = "CPATURE";             break;
+    case AST_NODE_TYPE_CAPTURE:             type = "CAPTURE";             break;
     default: break;
     }
     if (node->arity > 0) {
@@ -359,12 +356,8 @@ static void dump_ast_(system_t *obj, ast_node_t *node, int level) {
         }
     }
     else {
-        size_t line, col;
-        compute_line_and_column_(obj, node->range.min, &line, &col);
-        printf(
-            "%*s%s: line = %zu, column = %zu, value = '%.*s'\n",
-            2 * level, "", type, line, col,
-            (int)(node->range.max - node->range.min), obj->source.text.p + node->range.min
+        printf("%*s%s: line = %zu, column = %zu, value = '%.*s'\n",
+            2 * level, "", type, node->line, node->col, node->len, node->text
         );
     }
 }
