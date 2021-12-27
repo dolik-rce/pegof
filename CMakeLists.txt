@@ -11,7 +11,6 @@ add_custom_command(
     VERBATIM
 )
 
-add_executable(pegof main.c format.c optimize.c parser.c system.c utility.c)
+add_executable(pegof main.cc ast.cc c_api.cc parser.c source.cc)
 
-target_compile_features(pegof PRIVATE c_std_99)
 target_include_directories(pegof BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})

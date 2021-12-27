@@ -1,10 +1,12 @@
 %prefix "parser"
 
-%value "ast_node_t *"
-%auxil "system_t *"
+%value "AstNodeC"
+%auxil "SourceC"
 
 %header {
-#include "system.h"
+#include "c_api.h"
+//~ #include "source.h"
+//~ #include "ast.h"
 /*
 static const char *dbg_str[] = { "Evaluating rule", "Matched rule", "Abandoning rule" };
 #define PCC_DEBUG(auxil, event, rule, level, pos, buffer, length) \
@@ -13,28 +15,25 @@ static const char *dbg_str[] = { "Evaluating rule", "Matched rule", "Abandoning 
 }
 
 %source {
-#define PCC_GETCHAR(auxil) system__read_source_file(auxil)
-#define PCC_MALLOC(auxil, size) system__allocate_memory(auxil, size)
-#define PCC_REALLOC(auxil, ptr, size) system__reallocate_memory(auxil, ptr, size)
-#define PCC_FREE(auxil, ptr) system__deallocate_memory(auxil, ptr)
+#define PCC_GETCHAR(auxil) source_read(auxil)
 }
 
-grammar <- _* l:statement_list _* c:code? EOF
+grammar <- _* l:statement_list _* <c:code?> EOF
     {
         $$ = l;
-        ast_node__append_child($$, c);
+        if ($1s != $1e) append_child($$, c);
     }
 
 statement_list
    <- s:statement _ l:statement_list
     {
         $$ = l;
-        ast_node__prepend_child($$, s);
+        prepend_child($$, s);
     }
     / s:statement
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_GRAMMAR);
-        ast_node__prepend_child($$, s);
+        $$ = create_ast_node(AST_NODE_TYPE_GRAMMAR);
+        prepend_child($$, s);
     }
 
 statement
@@ -44,55 +43,61 @@ statement
 
 rule <- <identifier> _ '<-' _ a:alternation
     {
-        ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_RULE_NAME, range__new($1s, $1e));
-        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_RULE, name, a);
+        AstNodeC name = create_ast_leaf(auxil, AST_NODE_TYPE_RULE_NAME, $1, $1s);
+        $$ = create_ast_node(AST_NODE_TYPE_RULE);
+        append_child($$, name);
+        append_child($$, a);
     }
 
 directive <-
     '%' <"value" / "auxil" / "prefix"> _ s:string
     {
-        ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, range__new($1s, $1e));
-        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, name, s);
+        AstNodeC name = create_ast_leaf(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, $1, $1s);
+        $$ = create_ast_node(AST_NODE_TYPE_DIRECTIVE);
+        append_child($$, name);
+        append_child($$, s);
     }
     / '%' <"header" / "source" / "common" / "earlyheader" / "earlysource" / "earlycommon"> _ s:source
     {
-        ast_node_t *name = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, range__new($2s, $2e));
-        $$ = system__create_ast_node_binary(auxil, AST_NODE_TYPE_DIRECTIVE, name, s);
+        AstNodeC name = create_ast_leaf(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, $2, $2s);
+        $$ = create_ast_node(AST_NODE_TYPE_DIRECTIVE);
+        append_child($$, name);
+        append_child($$, s);
     }
 
-code <- '%%' [ \t\r\n]* <.*> { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_CODE, range__new($1s, $1e)); }
+code <- '%%' [ \t\r\n]* <.*> { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_CODE, $1, $1s); }
 
 alternation
     <- s:sequence _* "/" _* a:alternation
     {
         $$ = a;
-        ast_node__prepend_child($$, s);
+        prepend_child($$, s);
     }
     / s:sequence
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_ALTERNATION);
-        ast_node__prepend_child($$, s);
+        $$ = create_ast_node(AST_NODE_TYPE_ALTERNATION);
+        prepend_child($$, s);
     }
 
 sequence
     <- p:primary _* s:sequence
     {
         $$ = s;
-        ast_node__prepend_child($$, p);
+        prepend_child($$, p);
     }
     / p:primary
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_SEQUENCE);
-        ast_node__prepend_child($$, p);
+        $$ = create_ast_node(AST_NODE_TYPE_SEQUENCE);
+        prepend_child($$, p);
     }
 
 primary <- ( <pr:prefixOp?> l:literal <po:postfixOp?> (_* <s:source>)? )
     {
-        $$ = system__create_ast_node_variadic(auxil, AST_NODE_TYPE_PRIMARY);
-        if ($1s != $1e) ast_node__append_child($$, pr);
-        ast_node__append_child($$, l);
-        if ($2s != $2e) ast_node__append_child($$, po);
-        if ($3s != $3e) ast_node__append_child($$, s);
+        $$ = create_ast_node(AST_NODE_TYPE_PRIMARY);
+        if ($1s != $1e) append_child($$, pr);
+        append_child($$, l);
+        if ($2s != $2e) append_child($$, po);
+        if ($3s != $3e) append_child($$, s);
     }
 
 literal
@@ -100,37 +105,37 @@ literal
     / s:string { $$ = s; }
     / cc:charClass { $$ = cc; }
     / c:comment { $$ = c; }
-    / '.' { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_DOT, range__new($0s, $0e)); }
-    / '$' [1-9][0-9]* { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_BACKREF, range__new($0s, $0e)); }
-    / '<' _* a:alternation _* '>' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_CAPTURE, a); }
-    / '(' _* a:alternation _* ')' { $$ = system__create_ast_node_unary(auxil, AST_NODE_TYPE_GROUP, a); }
+    / '.' { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_DOT, $0, $0s); }
+    / '$' [1-9][0-9]* { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_BACKREF, $0, $0s); }
+    / '<' _* a:alternation _* '>' { $$ = create_ast_node(AST_NODE_TYPE_CAPTURE); append_child($$, a); }
+    / '(' _* a:alternation _* ')' { $$ = create_ast_node(AST_NODE_TYPE_GROUP); append_child($$, a); }
 
 string
-    <- '"' <("\\" . / [^"])*> '"'{ $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_STRING, range__new($1s, $1e)); }
-    / "'" <("\\" . / [^'])*> "'" { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_STRING, range__new($2s, $2e)); }
+    <- '"' <("\\" . / [^"])*> '"' { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_STRING, $1, $1s); }
+    / "'" <("\\" . / [^'])*> "'" { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_STRING, $2, $2s); }
 
-source <- '{' <([^{}]* source?)*> '}' { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_SOURCE, range__new($1s, $1e)); }
+source <- '{' <([^{}]* source?)*> '}' { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_SOURCE, $1, $1s); }
 
 character <- "\\" . / [^\]]
-charClass <- "[" "^"? (character ("-" character)?)+ "]" { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_CHARCLASS, range__new($0s, $0e)); }
+charClass <- "[" "^"? (character ("-" character)?)+ "]" { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_CHARCLASS, $0, $0s); }
 
 identifier <- [_a-zA-Z][_a-zA-Z0-9]*
 ruleref
     <- <identifier> ':' <identifier> !( _* "<-")
     {
-        $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_RULEREF, range__new($2s, $2e));
-        ast_node__append_child($$, system__create_ast_node_terminal(auxil, AST_NODE_TYPE_VAR, range__new($1s, $1e)));
+        $$ = create_ast_leaf(auxil, AST_NODE_TYPE_RULEREF, $2, $2s);
+        append_child($$, create_ast_leaf(auxil, AST_NODE_TYPE_VAR, $1, $1s));
     }
     / <identifier> !( _* "<-")
     {
-        $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_RULEREF, range__new($3s, $3e));
+        $$ = create_ast_leaf(auxil, AST_NODE_TYPE_RULEREF, $3, $3s);
     }
 
-prefixOp <- [&!] { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_PREFIX_OP, range__new($0s, $0e)); }
-postfixOp <- [?*+] { $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_POSTFIX_OP, range__new($0s, $0e)); }
+prefixOp <- [&!] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_PREFIX_OP, $0, $0s); }
+postfixOp <- [?*+] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_POSTFIX_OP, $0, $0s); }
 
 comment <- _* '#'+ [ \t]* <[^\n]*> {
-    $$ = system__create_ast_node_terminal(auxil, AST_NODE_TYPE_COMMENT, range__new($1s, $1e));
+    $$ = create_ast_leaf(auxil, AST_NODE_TYPE_COMMENT, $1, $1s);
 }
 _ <- [ \t\r\n]+
 EOF <- !.
