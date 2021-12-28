@@ -1,5 +1,45 @@
 #include "ast.h"
 
+#include <sstream>
+#include <climits>
+
+enum TrimType {
+    TRIM_LEFT = 1,
+    TRIM_RIGHT = 2,
+    TRIM_BOTH = TRIM_LEFT | TRIM_RIGHT
+};
+
+static string trim(const string& str, TrimType type = TRIM_BOTH) {
+    size_t start = (type & TRIM_LEFT) ? str.find_first_not_of(" \t\r\n") : 0;
+    size_t end = (type & TRIM_RIGHT) ? str.find_last_not_of(" \t\r\n") + 1 : str.size();
+    if (start == string::npos) {
+        start = 0;
+    }
+    return string(str.c_str() + start, end - start);
+}
+
+static void reindent(const string& str, int baseindent) {
+    std::stringstream stream(str);
+    string line;
+    vector<string> lines;
+    int min_indent = INT_MAX;
+    while(std::getline(stream, line)){
+        if (trim(line).empty()) {
+            //FIXME: only skip empty lines for first or last lines
+            continue;
+        }
+        size_t indent = line.find_first_not_of(" \t");
+        if (indent < min_indent) {
+            min_indent = indent;
+        }
+        lines.push_back(line);
+    }
+    for(int i = 0; i < lines.size(); i++) {
+        int indent = std::max(min_indent - baseindent, 0);
+        printf("%*s%s\n", baseindent + indent, "", trim(lines[i].substr(std::min(size_t(min_indent), lines[i].size())), TRIM_RIGHT).c_str());
+    }
+}
+
 void AstNode::appendChild(AstNode* node) {
     children.push_back(node);
     node->parent = this;
@@ -89,35 +129,18 @@ void AstNode::format_string() {
 }
 
 void AstNode::format_source() {
-    size_t first_non_ws = 0;
-    while (isspace(text[first_non_ws])) ++first_non_ws;
-    size_t last_non_ws = text.size();
-    while (isspace(text[--last_non_ws])) {};
-    last_non_ws++;
+    string trimmed = trim(text);
 
-    bool hasNewlines = text.find_first_of('\n') != string::npos;
+    bool hasNewlines = text.find_first_of('\n') == string::npos;
 
     int is_directive = parent->type == AST_NODE_TYPE_DIRECTIVE;
 
     if (hasNewlines) {
-        printf(" {%s}", text.c_str());
+        printf(" { %s }", trimmed.c_str());
     } else {
-        size_t base_indent = 0; //TODO: check that no line has indent less than base_indent
-        while (text[first_non_ws - base_indent - 1] != '\n') ++base_indent;
         printf(" {\n");
-
-        printf(is_directive ? "    " : "        ");
-        size_t pos = first_non_ws;
-        while (pos < last_non_ws) {
-            if(text[pos] == '\n') {
-                printf("\n%s", is_directive ? "    " : "        ");
-                pos += base_indent;
-            } else {
-                printf("%c", text[pos]);
-            }
-            ++pos;
-        }
-        printf("\n%s}", is_directive ? "" : "    ");
+        reindent(text, is_directive ? 4 : 8);
+        printf("%s}", is_directive ? "" : "    ");
     }
 }
 
@@ -184,9 +207,7 @@ void AstNode::format_rule() {
 }
 
 void AstNode::format_code() {
-    size_t last_non_ws = text.size();
-    while (isspace(text[--last_non_ws])) {};
-    printf("%%%%\n%.*s\n", last_non_ws + 1, text.c_str());
+    printf("%%%%\n%s\n", trim(text).c_str());
 }
 
 void AstNode::format_comment() {
@@ -196,9 +217,11 @@ void AstNode::format_comment() {
     //   3) anywhere else -> add newline + indent
     const char* suffix = "\n        ";
     if (parent->type == AST_NODE_TYPE_GRAMMAR) {
+        // case 1)
         suffix = "\n";
     } else {
         AstNode* parent_alternation = find_parent(AST_NODE_TYPE_ALTERNATION);
+        printf("[DBG: %d && %d && %d]", !!parent_alternation, parent_alternation->parent->type == AST_NODE_TYPE_RULE, parent->parent->children.back() == parent);
         if (parent_alternation
             && parent_alternation->parent->type == AST_NODE_TYPE_RULE
             && parent->parent->children.back() == parent /* parent is last sibling*/)
@@ -207,9 +230,7 @@ void AstNode::format_comment() {
         }
     }
 
-    size_t last_non_ws = text.size();
-    while (isspace(text[--last_non_ws])) {};
-    printf("# %.*s%s", last_non_ws + 1, text, suffix);
+    printf("# %s%s", trim(text).c_str(), suffix);
 }
 
 AstNode* AstNode::find_parent(ast_node_type_t type) {
