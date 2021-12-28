@@ -39,7 +39,6 @@ int source_read(SourceC source);
 AstNodeC create_ast_leaf(SourceC obj, ast_node_type_t type, const char* text, size_t start);
 AstNodeC create_ast_node(ast_node_type_t type);
 void append_child(AstNodeC parent, AstNodeC child);
-void prepend_child(AstNodeC parent, AstNodeC child);
 
 #ifdef __cplusplus
 }

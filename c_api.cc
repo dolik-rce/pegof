@@ -34,11 +34,3 @@ void append_child(AstNodeC parent, AstNodeC child) {
     //~ printf("APPEND: %p to %p\n", c, p);
     p->appendChild(c);
 }
-
-void prepend_child(AstNodeC parent, AstNodeC child) {
-    AstNode *p = reinterpret_cast<AstNode*>(parent);
-    AstNode *c = reinterpret_cast<AstNode*>(child);
-    if (!c) return;
-    //~ printf("PREPPEND: %p to %p\n", c, p);
-    p->prependChild(c);
-}

@@ -45,11 +45,6 @@ void AstNode::appendChild(AstNode* node) {
     node->parent = this;
 }
 
-void AstNode::prependChild(AstNode* node) {
-    children.insert(children.begin(), node);
-    node->parent = this;
-}
-
 const char* AstNode::getTypeName() {
     switch (type) {
     case AST_NODE_TYPE_GRAMMAR:             return "GRAMMAR";
@@ -217,11 +212,9 @@ void AstNode::format_comment() {
     //   3) anywhere else -> add newline + indent
     const char* suffix = "\n        ";
     if (parent->type == AST_NODE_TYPE_GRAMMAR) {
-        // case 1)
         suffix = "\n";
     } else {
         AstNode* parent_alternation = find_parent(AST_NODE_TYPE_ALTERNATION);
-        printf("[DBG: %d && %d && %d]", !!parent_alternation, parent_alternation->parent->type == AST_NODE_TYPE_RULE, parent->parent->children.back() == parent);
         if (parent_alternation
             && parent_alternation->parent->type == AST_NODE_TYPE_RULE
             && parent->parent->children.back() == parent /* parent is last sibling*/)

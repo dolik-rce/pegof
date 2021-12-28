@@ -67,7 +67,6 @@ public:
     }
 
     void appendChild(AstNode* node);
-    void prependChild(AstNode* node);
     void print_ast(int level = 0);
     void format();
     int optimize();
