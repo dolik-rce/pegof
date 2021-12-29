@@ -208,7 +208,7 @@ void AstNode::format_code() {
 void AstNode::format_comment() {
     // We have to recognize three different comment positions:
     //   1) top-level comment (parent is GRAMMAR) -> add newline, no indent
-    //   2) at the end of sequence in top-lefel alternation -> no newline, no indent
+    //   2) at the end of sequence in top-level alternation -> no newline, no indent
     //   3) anywhere else -> add newline + indent
     const char* suffix = "\n        ";
     if (parent->type == AST_NODE_TYPE_GRAMMAR) {
@@ -217,7 +217,7 @@ void AstNode::format_comment() {
         AstNode* parent_alternation = find_parent(AST_NODE_TYPE_ALTERNATION);
         if (parent_alternation
             && parent_alternation->parent->type == AST_NODE_TYPE_RULE
-            && parent->parent->children.back() == parent /* parent is last sibling*/)
+            && parent->children.back() == this /* this comment is at the end of sequence */)
         {
             suffix = "";
         }

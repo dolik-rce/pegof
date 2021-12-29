@@ -23,7 +23,7 @@ grammar <- _* l:statement_list _* <c:code?> EOF
     }
 
 statement_list
-   <- l:statement_list _ s:statement
+   <- l:statement_list _* s:statement
     {
         $$ = l;
         append_child($$, s);
@@ -35,9 +35,10 @@ statement_list
     }
 
 statement
-    <- r:rule { $$ = r; }
-    / d:directive { $$ = d; }
-    / c:comment { $$ = c; }
+    <- d:directive { $$ = d; }
+    / r:rule { $$ = r; }
+    / c:line_comment { $$ = c; }
+    / c:suffix_comment { $$ = c; } # this is needed to parse comment on first line (not preceeded by newline)
 
 rule <- <identifier> _ '<-' _ asp:alternation_or_sequence_or_primary
     {
@@ -99,9 +100,9 @@ sequence
         append_child($$, p2);
     }
 
-primary <-
-     c:comment { $$ = c; } /
-     <pr:prefixOp?> l:literal <po:postfixOp?> (_* <s:source>)?
+primary
+    <- c:suffix_comment { $$ = c; }
+    / <pr:prefix_op?> _* l:literal _* <po:postfix_op?> (_* <s:source>)?
     {
         if ($1s == $1e && $2s == $2e && $3s == $3e) {
             $$ = l;
@@ -144,11 +145,14 @@ ruleref
         $$ = create_ast_leaf(auxil, AST_NODE_TYPE_RULEREF, $3, $3s);
     }
 
-prefixOp <- [&!] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_PREFIX_OP, $0, $0s); }
-postfixOp <- [?*+] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_POSTFIX_OP, $0, $0s); }
+prefix_op <- [&!] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_PREFIX_OP, $0, $0s); }
+postfix_op <- [?*+] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_POSTFIX_OP, $0, $0s); }
 
-comment <- _* '#'+ [ \t]* <[^\n]*> {
+line_comment <- '\n' [ \t]* '#' [ \t]* <[^\n]*> {
     $$ = create_ast_leaf(auxil, AST_NODE_TYPE_COMMENT, $1, $1s);
 }
-_ <- [ \t\r\n]+
+suffix_comment <- _* '#'+ [ \t]* <[^\n]*> {
+    $$ = create_ast_leaf(auxil, AST_NODE_TYPE_COMMENT, $1, $1s);
+}
+_ <- !('\n' [ \t]* '#') [ \t\r\n]+
 EOF <- !.
