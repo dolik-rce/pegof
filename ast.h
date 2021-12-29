@@ -3,11 +3,6 @@
 
 #include "c_api.h"
 
-//~ #ifdef __cplusplus
-//~ extern "C"
-//~ #endif
-//~ void print_stack();
-
 #include <string>
 #include <vector>
 #include <memory>
@@ -50,20 +45,17 @@ private:
 
     int optimize_single_child();
     int optimize_strings();
+    int optimize_strip_comment();
     int optimize_children();
 
 public:
     AstNode(ast_node_type_t type, string text = "", size_t line = -1, size_t column=-1):
-        text(text), type(type), line(line), column(column)
-    {
-        //~ printf("CREATE: %p %s:'%s'\n", this, getTypeName(), text.c_str());
-    }
+        text(text), type(type), line(line), column(column) {}
 
     ~AstNode() {
         for (size_t i = 0; i < children.size(); i++) {
             delete children[i];
         }
-        //~ printf("DELETE: %p %s:'%s'\n", this, getTypeName(), text.c_str());
     }
 
     void appendChild(AstNode* node);

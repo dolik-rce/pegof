@@ -23,7 +23,6 @@ public:
 
     Source(const char* filepath): path(filepath), pos(0) {
         open();
-        //~ printf("SOURCE: %s, %ld, %s\n", path.c_str(), filesize, text.data());
     }
 
     ~Source() {

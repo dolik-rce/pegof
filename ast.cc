@@ -1,7 +1,10 @@
 #include "ast.h"
 
 #include <sstream>
+#include <algorithm>
 #include <climits>
+
+extern int debug_mode;
 
 enum TrimType {
     TRIM_LEFT = 1,
@@ -77,16 +80,13 @@ void AstNode::print_ast(int level) {
 
     if (children.size() > 0) {
         printf("%*s%s:\n", 2*level, "", typeName);
-        //~ printf("%*sthis=%p, parent=%p, children=%ld\n", 2*level, "", this, parent, children.size());
         for (int i=0; i < children.size(); i++) {
             children[i]->print_ast(level + 1);
         }
     } else if (line >= 0) {
         printf("%*s%s: \"%s\" line=%ld, col=%ld\n", 2*level, "", typeName, text.c_str(), line, column);
-        //~ printf("%*sthis=%p, parent=%p, children=%ld\n", 2*level, "", this, parent, children.size());
     } else {
         printf("%*s%s: \"%s\" (optimized)\n", 2*level, "", typeName, text.c_str(), line, column);
-        //~ printf("%*sthis=%p, parent=%p, children=%ld\n", 2*level, "", this, parent, children.size());
     }
 }
 
@@ -272,6 +272,7 @@ int AstNode::optimize_strings() {
         AstNode* first = children[i-1];
         AstNode* second = children[i];
         if (first->type == AST_STRING && second->type == AST_STRING) {
+            debug_mode && fprintf(stderr, "  Concatenating adjacent strings '%s' and '%s'\n", first->text.c_str(), second->text.c_str());
             first->text += second->text;
             first->line = -2;
             first->column = -2;
@@ -288,11 +289,8 @@ int AstNode::optimize_single_child() {
     if (children.size() != 1) {
         return 0;
     }
+    debug_mode && fprintf(stderr, "  Removing unnecessary node of type %s\n", getTypeName());
     AstNode* child = children[0];
-    //~ printf("OPT[this]: this=%p, parent=%p %s:'%s'\n", this, parent, getTypeName(), text.c_str());
-    //~ for (size_t i=0;i<children.size();i++) printf("  child[%ld]=%p\n", i, children[i]);
-    //~ printf("OPT[child]: this=%p, parent=%p %s:'%s'\n", child, child->parent, child->getTypeName(), child->text.c_str());
-    //~ for (size_t i=0;i<child->children.size();i++) printf("  child[%ld]=%p\n", i, child->children[i]);
     text = child->text;
     type = child->type;
     line = child->line;
@@ -300,8 +298,6 @@ int AstNode::optimize_single_child() {
     children = child->children;
     child->children.clear(); // clear children to avoid their recursive deletion
     delete child;
-    //~ printf("OPT[final]: this=%p, parent=%p %s:'%s'\n", this, parent, getTypeName(), text.c_str());
-    //~ for (size_t i=0;i<children.size();i++) printf("  child[%ld]=%p\n", i, children[i]);
     return 1;
 }
 
@@ -313,15 +309,20 @@ int AstNode::optimize_children() {
     return optimized;
 }
 
+int AstNode::optimize_strip_comment() {
+    debug_mode && fprintf(stderr, "  Removing comment\n");
+    parent->children.erase(std::find(parent->children.begin(), parent->children.end(), this));
+    return 1;
+}
+
 int AstNode::optimize_grammar() {
     int total = 0;
-    int optimized;
-    int i = 0;
-    do {
+    for (int optimized = -1, i = 0; optimized != 0; i++) {
+        debug_mode && fprintf(stderr, "Optimization pass %d:\n", i);
         optimized = optimize_children();
         total += optimized;
-        printf("OPTIMIZING (pass %d): %d optimizations done (%d total)\n", ++i, optimized, total);
-    } while (optimized > 0);
+        debug_mode && fprintf(stderr, " => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);
+    };
     return total;
 }
 
@@ -343,9 +344,9 @@ int AstNode::optimize() {
     case AST_PRIMARY:           return optimize_primary();
     case AST_ALTERNATION:       return optimize_alternation();
     case AST_SEQUENCE:          return optimize_sequence();
+    case AST_COMMENT:           return optimize_strip_comment();
 
     // everything else just call optimize on children
-    case AST_COMMENT:
     case AST_RULE:
     case AST_DIRECTIVE:
     case AST_CODE:
@@ -366,23 +367,3 @@ int AstNode::optimize() {
     }
     throw "ERROR: unexpected AST node type!";
 }
-
-//~ #include <stdio.h>
-//~ #include <stdlib.h>
-//~ #include <sys/wait.h>
-//~ #include <unistd.h>
-//~ void print_stack() {
-    //~ char pid_buf[30];
-    //~ sprintf(pid_buf, "--pid=%d", getpid());
-    //~ char name_buf[512];
-    //~ name_buf[readlink("/proc/self/exe", name_buf, 511)]=0;
-    //~ int child_pid = fork();
-    //~ if (!child_pid) {
-        //~ dup2(2,1); // redirect output to stderr
-        //~ fprintf(stdout,"stack trace for %s pid=%s\n",name_buf,pid_buf);
-        //~ execlp("gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt", name_buf, pid_buf, NULL);
-        //~ abort(); /* If gdb failed to start */
-    //~ } else {
-        //~ waitpid(child_pid,NULL,0);
-    //~ }
-//~ }

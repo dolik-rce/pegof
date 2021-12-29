@@ -12,6 +12,7 @@ enum command_t {
     CMD_DEBUG = 4
 };
 
+bool debug_mode = false;
 
 const char *process_args(int argc, char **argv, command_t& cmd) {
     if (argc == 2) {
@@ -78,14 +79,16 @@ int main(int argc, char **argv) {
     AstNode* grammar = parser.parse();
 
     if (cmd & CMD_DEBUG) {
-        printf("### Original AST:\n");
+        debug_mode = true;
+        fprintf(stderr, "### Original AST:\n");
         grammar->print_ast();
-        printf("### Original formatted:\n");
+        fprintf(stderr, "### Original formatted:\n");
         grammar->format();
-        printf("### Optmizations made: %d\n", grammar->optimize());
-        printf("### Optimized AST:\n");
+        fprintf(stderr, "### Optimizing:\n");
+        grammar->optimize();
+        fprintf(stderr, "### Optimized AST:\n");
         grammar->print_ast();
-        printf("### Optimized formatted:\n");
+        fprintf(stderr, "### Optimized formatted:\n");
         grammar->format();
         return 0;
     }
