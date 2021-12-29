@@ -16,6 +16,7 @@ typedef enum ast_node_type_tag {
     AST_DIRECTIVE_NAME,
     AST_CODE,
     AST_SOURCE,
+    AST_ERROR,
     AST_PRIMARY,
     AST_ALTERNATION,
     AST_SEQUENCE,

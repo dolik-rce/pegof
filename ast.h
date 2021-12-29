@@ -32,6 +32,7 @@ private:
     void format_grammar();
     void format_string();
     void format_source();
+    void format_error();
     void format_directive();
     void format_alternation();
     void format_sequence();

@@ -58,6 +58,7 @@ const char* AstNode::getTypeName() {
     case AST_DIRECTIVE_NAME:    return "DIRECTIVE_NAME";
     case AST_CODE:              return "CODE";
     case AST_SOURCE:            return "SOURCE";
+    case AST_ERROR:             return "ERROR";
     case AST_PRIMARY:           return "PRIMARY";
     case AST_ALTERNATION:       return "ALTERNATION";
     case AST_SEQUENCE:          return "SEQUENCE";
@@ -126,17 +127,22 @@ void AstNode::format_string() {
 void AstNode::format_source() {
     string trimmed = trim(text);
 
-    bool hasNewlines = text.find_first_of('\n') == string::npos;
+    bool hasNewlines = text.find_first_of('\n') != string::npos;
 
     int is_directive = parent->type == AST_DIRECTIVE;
 
     if (hasNewlines) {
-        printf(" { %s }", trimmed.c_str());
-    } else {
         printf(" {\n");
         reindent(text, is_directive ? 4 : 8);
         printf("%s}", is_directive ? "" : "    ");
+    } else {
+        printf(" { %s }", trimmed.c_str());
     }
+}
+
+void AstNode::format_error() {
+    printf(" ~");
+    format_source();
 }
 
 void AstNode::format_directive() {
@@ -270,6 +276,7 @@ void AstNode::format() {
     case AST_GROUP:             format_group('(', ')'); break;
     case AST_CAPTURE:           format_group('<', '>'); break;
     case AST_SOURCE:            format_source(); break;
+    case AST_ERROR:             format_error(); break;
     case AST_STRING:            format_string(); break;
 
     // everything else just print verbatim:
@@ -413,6 +420,7 @@ int AstNode::optimize() {
     case AST_DIRECTIVE:
     case AST_CODE:
     case AST_SOURCE:
+    case AST_ERROR:
     case AST_STRING:
     case AST_RULEREF:
     case AST_GROUP:
