@@ -47,28 +47,28 @@ void AstNode::appendChild(AstNode* node) {
 
 const char* AstNode::getTypeName() {
     switch (type) {
-    case AST_NODE_TYPE_GRAMMAR:             return "GRAMMAR";
-    case AST_NODE_TYPE_COMMENT:             return "COMMENT";
-    case AST_NODE_TYPE_RULE:                return "RULE";
-    case AST_NODE_TYPE_RULE_NAME:           return "RULE_NAME";
-    case AST_NODE_TYPE_DIRECTIVE:           return "DIRECTIVE";
-    case AST_NODE_TYPE_DIRECTIVE_NAME:      return "DIRECTIVE_NAME";
-    case AST_NODE_TYPE_CODE:                return "CODE";
-    case AST_NODE_TYPE_SOURCE:              return "SOURCE";
-    case AST_NODE_TYPE_PRIMARY:             return "PRIMARY";
-    case AST_NODE_TYPE_ALTERNATION:         return "ALTERNATION";
-    case AST_NODE_TYPE_SEQUENCE:            return "SEQUENCE";
-    case AST_NODE_TYPE_PREFIX_OP:           return "PREFIX_OP";
-    case AST_NODE_TYPE_POSTFIX_OP:          return "POSTFIX_OP";
-    case AST_NODE_TYPE_RULEREF:             return "RULEREF";
-    case AST_NODE_TYPE_VAR:                 return "VAR";
-    case AST_NODE_TYPE_STRING:              return "STRING";
-    case AST_NODE_TYPE_CHARCLASS:           return "CHARCLASS";
-    case AST_NODE_TYPE_DOT:                 return "DOT";
-    case AST_NODE_TYPE_BACKREF:             return "BACKREF";
-    case AST_NODE_TYPE_GROUP:               return "GROUP";
-    case AST_NODE_TYPE_CAPTURE:             return "CAPTURE";
-    default:                                return "UNKNOWN";
+    case AST_GRAMMAR:           return "GRAMMAR";
+    case AST_COMMENT:           return "COMMENT";
+    case AST_RULE:              return "RULE";
+    case AST_RULE_NAME:         return "RULE_NAME";
+    case AST_DIRECTIVE:         return "DIRECTIVE";
+    case AST_DIRECTIVE_NAME:    return "DIRECTIVE_NAME";
+    case AST_CODE:              return "CODE";
+    case AST_SOURCE:            return "SOURCE";
+    case AST_PRIMARY:           return "PRIMARY";
+    case AST_ALTERNATION:       return "ALTERNATION";
+    case AST_SEQUENCE:          return "SEQUENCE";
+    case AST_PREFIX_OP:         return "PREFIX_OP";
+    case AST_POSTFIX_OP:        return "POSTFIX_OP";
+    case AST_RULEREF:           return "RULEREF";
+    case AST_VAR:               return "VAR";
+    case AST_STRING:            return "STRING";
+    case AST_CHARCLASS:         return "CHARCLASS";
+    case AST_DOT:               return "DOT";
+    case AST_BACKREF:           return "BACKREF";
+    case AST_GROUP:             return "GROUP";
+    case AST_CAPTURE:           return "CAPTURE";
+    default:                    return "UNKNOWN";
     }
 }
 
@@ -128,7 +128,7 @@ void AstNode::format_source() {
 
     bool hasNewlines = text.find_first_of('\n') == string::npos;
 
-    int is_directive = parent->type == AST_NODE_TYPE_DIRECTIVE;
+    int is_directive = parent->type == AST_DIRECTIVE;
 
     if (hasNewlines) {
         printf(" { %s }", trimmed.c_str());
@@ -144,7 +144,7 @@ void AstNode::format_directive() {
 
     printf("%%");
     children[0]->format();
-    if (content->type == AST_NODE_TYPE_STRING) {
+    if (content->type == AST_STRING) {
         printf(" ");
     }
     content->format();
@@ -153,7 +153,7 @@ void AstNode::format_directive() {
 
 void AstNode::format_alternation() {
     // TODO: configurable wrapping (higher children.size() treshold)
-    int multiline = children.size() > 1 && parent->type == AST_NODE_TYPE_RULE;
+    int multiline = children.size() > 1 && parent->type == AST_RULE;
     const char *delim = multiline ? "\n    / " : " / ";
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
@@ -195,7 +195,7 @@ void AstNode::format_ruleref() {
 
 void AstNode::format_rule() {
     AstNode* body = children[1];
-    bool hasAlternation = body->type == AST_NODE_TYPE_ALTERNATION && body->children.size() > 1;
+    bool hasAlternation = body->type == AST_ALTERNATION && body->children.size() > 1;
     printf("%s%s <- ", children[0]->text.c_str(), hasAlternation ? "\n   " : "");
     body->format();
     printf("\n\n");
@@ -211,12 +211,12 @@ void AstNode::format_comment() {
     //   2) at the end of sequence in top-level alternation -> no newline, no indent
     //   3) anywhere else -> add newline + indent
     const char* suffix = "\n        ";
-    if (parent->type == AST_NODE_TYPE_GRAMMAR) {
+    if (parent->type == AST_GRAMMAR) {
         suffix = "\n";
     } else {
-        AstNode* parent_alternation = find_parent(AST_NODE_TYPE_ALTERNATION);
+        AstNode* parent_alternation = find_parent(AST_ALTERNATION);
         if (parent_alternation
-            && parent_alternation->parent->type == AST_NODE_TYPE_RULE
+            && parent_alternation->parent->type == AST_RULE
             && parent->children.back() == this /* this comment is at the end of sequence */)
         {
             suffix = "";
@@ -238,29 +238,29 @@ AstNode* AstNode::find_parent(ast_node_type_t type) {
 
 void AstNode::format() {
     switch (type) {
-    case AST_NODE_TYPE_GRAMMAR:         format_grammar(); break;
-    case AST_NODE_TYPE_COMMENT:         format_comment(); break;
-    case AST_NODE_TYPE_RULE:            format_rule(); break;
-    case AST_NODE_TYPE_DIRECTIVE:       format_directive(); break;
-    case AST_NODE_TYPE_CODE:            format_code(); break;
-    case AST_NODE_TYPE_PRIMARY:         format_primary(); break;
-    case AST_NODE_TYPE_ALTERNATION:     format_alternation(); break;
-    case AST_NODE_TYPE_SEQUENCE:        format_sequence(); break;
-    case AST_NODE_TYPE_RULEREF:         format_ruleref(); break;
-    case AST_NODE_TYPE_GROUP:           format_group('(', ')'); break;
-    case AST_NODE_TYPE_CAPTURE:         format_group('<', '>'); break;
-    case AST_NODE_TYPE_SOURCE:          format_source(); break;
-    case AST_NODE_TYPE_STRING:          format_string(); break;
+    case AST_GRAMMAR:           format_grammar(); break;
+    case AST_COMMENT:           format_comment(); break;
+    case AST_RULE:              format_rule(); break;
+    case AST_DIRECTIVE:         format_directive(); break;
+    case AST_CODE:              format_code(); break;
+    case AST_PRIMARY:           format_primary(); break;
+    case AST_ALTERNATION:       format_alternation(); break;
+    case AST_SEQUENCE:          format_sequence(); break;
+    case AST_RULEREF:           format_ruleref(); break;
+    case AST_GROUP:             format_group('(', ')'); break;
+    case AST_CAPTURE:           format_group('<', '>'); break;
+    case AST_SOURCE:            format_source(); break;
+    case AST_STRING:            format_string(); break;
 
     // everything else just print verbatim:
-    case AST_NODE_TYPE_RULE_NAME:
-    case AST_NODE_TYPE_DIRECTIVE_NAME:
-    case AST_NODE_TYPE_VAR:
-    case AST_NODE_TYPE_PREFIX_OP:
-    case AST_NODE_TYPE_POSTFIX_OP:
-    case AST_NODE_TYPE_CHARCLASS:
-    case AST_NODE_TYPE_DOT:
-    case AST_NODE_TYPE_BACKREF:
+    case AST_RULE_NAME:
+    case AST_DIRECTIVE_NAME:
+    case AST_VAR:
+    case AST_PREFIX_OP:
+    case AST_POSTFIX_OP:
+    case AST_CHARCLASS:
+    case AST_DOT:
+    case AST_BACKREF:
         format_terminal();
         break;
     }
@@ -271,7 +271,7 @@ int AstNode::optimize_strings() {
     for (size_t i = 1; i < children.size(); i++) {
         AstNode* first = children[i-1];
         AstNode* second = children[i];
-        if (first->type == AST_NODE_TYPE_STRING && second->type == AST_NODE_TYPE_STRING) {
+        if (first->type == AST_STRING && second->type == AST_STRING) {
             first->text += second->text;
             first->line = -2;
             first->column = -2;
@@ -339,29 +339,29 @@ int AstNode::optimize_primary() {
 
 int AstNode::optimize() {
     switch (type) {
-    case AST_NODE_TYPE_GRAMMAR:         return optimize_grammar();
-    case AST_NODE_TYPE_PRIMARY:         return optimize_primary();
-    case AST_NODE_TYPE_ALTERNATION:     return optimize_alternation();
-    case AST_NODE_TYPE_SEQUENCE:        return optimize_sequence();
+    case AST_GRAMMAR:           return optimize_grammar();
+    case AST_PRIMARY:           return optimize_primary();
+    case AST_ALTERNATION:       return optimize_alternation();
+    case AST_SEQUENCE:          return optimize_sequence();
 
     // everything else just call optimize on children
-    case AST_NODE_TYPE_COMMENT:
-    case AST_NODE_TYPE_RULE:
-    case AST_NODE_TYPE_DIRECTIVE:
-    case AST_NODE_TYPE_CODE:
-    case AST_NODE_TYPE_SOURCE:
-    case AST_NODE_TYPE_STRING:
-    case AST_NODE_TYPE_RULEREF:
-    case AST_NODE_TYPE_GROUP:
-    case AST_NODE_TYPE_CAPTURE:
-    case AST_NODE_TYPE_RULE_NAME:
-    case AST_NODE_TYPE_DIRECTIVE_NAME:
-    case AST_NODE_TYPE_VAR:
-    case AST_NODE_TYPE_PREFIX_OP:
-    case AST_NODE_TYPE_POSTFIX_OP:
-    case AST_NODE_TYPE_CHARCLASS:
-    case AST_NODE_TYPE_DOT:
-    case AST_NODE_TYPE_BACKREF:
+    case AST_COMMENT:
+    case AST_RULE:
+    case AST_DIRECTIVE:
+    case AST_CODE:
+    case AST_SOURCE:
+    case AST_STRING:
+    case AST_RULEREF:
+    case AST_GROUP:
+    case AST_CAPTURE:
+    case AST_RULE_NAME:
+    case AST_DIRECTIVE_NAME:
+    case AST_VAR:
+    case AST_PREFIX_OP:
+    case AST_POSTFIX_OP:
+    case AST_CHARCLASS:
+    case AST_DOT:
+    case AST_BACKREF:
         return optimize_children();
     }
     throw "ERROR: unexpected AST node type!";

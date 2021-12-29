@@ -30,7 +30,7 @@ statement_list
     }
     / s:statement
     {
-        $$ = create_ast_node(AST_NODE_TYPE_GRAMMAR);
+        $$ = create_ast_node(AST_GRAMMAR);
         append_child($$, s);
     }
 
@@ -42,8 +42,8 @@ statement
 
 rule <- <identifier> _ '<-' _ asp:alternation_or_sequence_or_primary
     {
-        AstNodeC name = create_ast_leaf(auxil, AST_NODE_TYPE_RULE_NAME, $1, $1s);
-        $$ = create_ast_node(AST_NODE_TYPE_RULE);
+        AstNodeC name = create_ast_leaf(auxil, AST_RULE_NAME, $1, $1s);
+        $$ = create_ast_node(AST_RULE);
         append_child($$, name);
         append_child($$, asp);
     }
@@ -51,20 +51,20 @@ rule <- <identifier> _ '<-' _ asp:alternation_or_sequence_or_primary
 directive <-
     '%' <"value" / "auxil" / "prefix"> _ s:string
     {
-        AstNodeC name = create_ast_leaf(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, $1, $1s);
-        $$ = create_ast_node(AST_NODE_TYPE_DIRECTIVE);
+        AstNodeC name = create_ast_leaf(auxil, AST_DIRECTIVE_NAME, $1, $1s);
+        $$ = create_ast_node(AST_DIRECTIVE);
         append_child($$, name);
         append_child($$, s);
     }
     / '%' <"header" / "source" / "common" / "earlyheader" / "earlysource" / "earlycommon"> _ s:source
     {
-        AstNodeC name = create_ast_leaf(auxil, AST_NODE_TYPE_DIRECTIVE_NAME, $2, $2s);
-        $$ = create_ast_node(AST_NODE_TYPE_DIRECTIVE);
+        AstNodeC name = create_ast_leaf(auxil, AST_DIRECTIVE_NAME, $2, $2s);
+        $$ = create_ast_node(AST_DIRECTIVE);
         append_child($$, name);
         append_child($$, s);
     }
 
-code <- '%%' [ \t\r\n]* <.*> { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_CODE, $1, $1s); }
+code <- '%%' [ \t\r\n]* <.*> { $$ = create_ast_leaf(auxil, AST_CODE, $1, $1s); }
 
 alternation_or_sequence_or_primary
     <- a:alternation { $$ = a; }
@@ -82,7 +82,7 @@ alternation
     }
     / sp1:sequence_or_primary _* "/" _* sp2:sequence_or_primary
     {
-        $$ = create_ast_node(AST_NODE_TYPE_ALTERNATION);
+        $$ = create_ast_node(AST_ALTERNATION);
         append_child($$, sp1);
         append_child($$, sp2);
     }
@@ -95,7 +95,7 @@ sequence
     }
     / p1:primary _* p2:primary
     {
-        $$ = create_ast_node(AST_NODE_TYPE_SEQUENCE);
+        $$ = create_ast_node(AST_SEQUENCE);
         append_child($$, p1);
         append_child($$, p2);
     }
@@ -107,7 +107,7 @@ primary
         if ($1s == $1e && $2s == $2e && $3s == $3e) {
             $$ = l;
         } else {
-            $$ = create_ast_node(AST_NODE_TYPE_PRIMARY);
+            $$ = create_ast_node(AST_PRIMARY);
             if ($1s != $1e) append_child($$, pr);
             append_child($$, l);
             if ($2s != $2e) append_child($$, po);
@@ -119,40 +119,40 @@ literal
     <- r:ruleref { $$ = r; }
     / s:string { $$ = s; }
     / cc:charClass { $$ = cc; }
-    / '.' { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_DOT, $0, $0s); }
-    / '$' [1-9][0-9]* { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_BACKREF, $0, $0s); }
-    / '<' _* asp:alternation_or_sequence_or_primary _* '>' { $$ = create_ast_node(AST_NODE_TYPE_CAPTURE); append_child($$, asp); }
-    / '(' _* asp:alternation_or_sequence_or_primary _* ')' { $$ = create_ast_node(AST_NODE_TYPE_GROUP); append_child($$, asp); }
+    / '.' { $$ = create_ast_leaf(auxil, AST_DOT, $0, $0s); }
+    / '$' [1-9][0-9]* { $$ = create_ast_leaf(auxil, AST_BACKREF, $0, $0s); }
+    / '<' _* asp:alternation_or_sequence_or_primary _* '>' { $$ = create_ast_node(AST_CAPTURE); append_child($$, asp); }
+    / '(' _* asp:alternation_or_sequence_or_primary _* ')' { $$ = create_ast_node(AST_GROUP); append_child($$, asp); }
 
 string
-    <- '"' <("\\" . / [^"])*> '"' { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_STRING, $1, $1s); }
-    / "'" <("\\" . / [^'])*> "'" { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_STRING, $2, $2s); }
+    <- '"' <("\\" . / [^"])*> '"' { $$ = create_ast_leaf(auxil, AST_STRING, $1, $1s); }
+    / "'" <("\\" . / [^'])*> "'" { $$ = create_ast_leaf(auxil, AST_STRING, $2, $2s); }
 
-source <- '{' <([^{}]* source?)*> '}' { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_SOURCE, $1, $1s); }
+source <- '{' <([^{}]* source?)*> '}' { $$ = create_ast_leaf(auxil, AST_SOURCE, $1, $1s); }
 
 character <- "\\" . / [^\]]
-charClass <- "[" "^"? (character ("-" character)?)+ "]" { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_CHARCLASS, $0, $0s); }
+charClass <- "[" "^"? (character ("-" character)?)+ "]" { $$ = create_ast_leaf(auxil, AST_CHARCLASS, $0, $0s); }
 
 identifier <- [_a-zA-Z][_a-zA-Z0-9]*
 ruleref
     <- <identifier> ':' <identifier> !( _* "<-")
     {
-        $$ = create_ast_leaf(auxil, AST_NODE_TYPE_RULEREF, $2, $2s);
-        append_child($$, create_ast_leaf(auxil, AST_NODE_TYPE_VAR, $1, $1s));
+        $$ = create_ast_leaf(auxil, AST_RULEREF, $2, $2s);
+        append_child($$, create_ast_leaf(auxil, AST_VAR, $1, $1s));
     }
     / <identifier> !( _* "<-")
     {
-        $$ = create_ast_leaf(auxil, AST_NODE_TYPE_RULEREF, $3, $3s);
+        $$ = create_ast_leaf(auxil, AST_RULEREF, $3, $3s);
     }
 
-prefix_op <- [&!] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_PREFIX_OP, $0, $0s); }
-postfix_op <- [?*+] { $$ = create_ast_leaf(auxil, AST_NODE_TYPE_POSTFIX_OP, $0, $0s); }
+prefix_op <- [&!] { $$ = create_ast_leaf(auxil, AST_PREFIX_OP, $0, $0s); }
+postfix_op <- [?*+] { $$ = create_ast_leaf(auxil, AST_POSTFIX_OP, $0, $0s); }
 
 line_comment <- '\n' [ \t]* '#' [ \t]* <[^\n]*> {
-    $$ = create_ast_leaf(auxil, AST_NODE_TYPE_COMMENT, $1, $1s);
+    $$ = create_ast_leaf(auxil, AST_COMMENT, $1, $1s);
 }
 suffix_comment <- _* '#'+ [ \t]* <[^\n]*> {
-    $$ = create_ast_leaf(auxil, AST_NODE_TYPE_COMMENT, $1, $1s);
+    $$ = create_ast_leaf(auxil, AST_COMMENT, $1, $1s);
 }
 _ <- !('\n' [ \t]* '#') [ \t\r\n]+
 EOF <- !.
