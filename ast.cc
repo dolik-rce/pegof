@@ -236,6 +236,26 @@ AstNode* AstNode::find_parent(ast_node_type_t type) {
     }
 }
 
+vector<AstNode*> AstNode::find_all(const std::function <bool(const AstNode&)>& predicate, bool global) {
+    AstNode *node = global ? find_parent(AST_GRAMMAR) : this;
+    vector<AstNode*> result;
+    if (predicate(*node)) {
+        result.push_back(node);
+    }
+    for (int i = 0; i < node->children.size(); i++) {
+        vector<AstNode*> subresults = node->children[i]->find_all(predicate, false);
+        if (!subresults.empty()) {
+            result.insert(result.end(), subresults.begin(), subresults.end());
+        }
+    }
+    return result;
+}
+
+void AstNode::remove_child(AstNode* child) {
+    children.erase(std::find(children.begin(), children.end(), child));
+    delete child;
+}
+
 void AstNode::format() {
     switch (type) {
     case AST_GRAMMAR:           format_grammar(); break;
@@ -311,8 +331,46 @@ int AstNode::optimize_children() {
 
 int AstNode::optimize_strip_comment() {
     debug_mode && fprintf(stderr, "  Removing comment\n");
-    parent->children.erase(std::find(parent->children.begin(), parent->children.end(), this));
+    parent->remove_child(this);
     return 1;
+}
+
+int AstNode::optimize_inline_rule() {
+    // check that rule contents are inlinable
+    AstNode* rule = children[1];
+    vector<AstNode*> uninlinable = rule->find_all([](const AstNode& node) {
+        return node.type == AST_SOURCE
+            || node.type == AST_VAR
+            || node.type == AST_CAPTURE;
+    }, false);
+    if (!uninlinable.empty()) {
+        return 0;
+    }
+
+    std::string name = children[0]->text;
+    vector<AstNode*> refs = find_all([name](const AstNode& node) {
+        return node.type == AST_RULEREF && node.text == name;
+    });
+    // TODO: configurable limit how many references can be inlined
+    if (refs.empty() || refs.size() > 10){
+        return 0;
+    }
+    debug_mode && fprintf(stderr, "  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");
+
+    // copy data to each reference
+    for (int i = 0; i < refs.size(); i++) {
+        refs[i]->text = rule->text;
+        refs[i]->type = rule->type;
+        refs[i]->line = rule->line;
+        refs[i]->column = rule->column;
+        refs[i]->children.clear();
+        for (int j = 0; j < rule->children.size(); j++) {
+            refs[i]->children.push_back(new AstNode(*rule->children[j], refs[i]));
+        }
+    }
+    // delete the rule
+    parent->remove_child(this);
+    return refs.size();
 }
 
 int AstNode::optimize_grammar() {
@@ -327,15 +385,19 @@ int AstNode::optimize_grammar() {
 }
 
 int AstNode::optimize_sequence() {
-    return optimize_single_child() + optimize_strings() + optimize_children();
+    return optimize_children() + optimize_single_child() + optimize_strings();
 }
 
 int AstNode::optimize_alternation() {
-    return optimize_single_child() + optimize_children();
+    return optimize_children() + optimize_single_child();
 }
 
 int AstNode::optimize_primary() {
-    return optimize_single_child() + optimize_children();
+    return optimize_children() + optimize_single_child();
+}
+
+int AstNode::optimize_rule() {
+    return optimize_children() + optimize_inline_rule();
 }
 
 int AstNode::optimize() {
@@ -345,9 +407,9 @@ int AstNode::optimize() {
     case AST_ALTERNATION:       return optimize_alternation();
     case AST_SEQUENCE:          return optimize_sequence();
     case AST_COMMENT:           return optimize_strip_comment();
+    case AST_RULE:              return optimize_rule();
 
     // everything else just call optimize on children
-    case AST_RULE:
     case AST_DIRECTIVE:
     case AST_CODE:
     case AST_SOURCE:
