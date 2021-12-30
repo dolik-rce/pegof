@@ -56,32 +56,14 @@ private:
     int optimize_children();
 
 public:
-    AstNode(AstNodeType type, string text = "", size_t line = -1, size_t column=-1) :
-        text(text), type(type), line(line), column(column), parent(NULL)
-    {
-        //~ printf("CREATE %p (size=%ld, parent=%p, type=%s)\n", this, children.size(), parent, getTypeName());
-    }
-
-    AstNode(const AstNode& other, AstNode* parent) :
-        text(other.text), type(other.type), line(other.line), column(other.column), parent(parent)
-    {
-        for (int i = 0; i < other.children.size(); i++) {
-            children.push_back(new AstNode(*other.children[i], this));
-        }
-        //~ printf("COPY %p -> %p (size=%ld, parent=%p, type=%s)\n", this, &other, children.size(), parent, getTypeName());
-    }
-
-    ~AstNode() {
-        //~ printf("DELETE %p (size=%ld, parent=%p, type=%s)\n", this, children.size(), parent, getTypeName());
-        for (size_t i = 0; i < children.size(); i++) {
-            delete children[i];
-        }
-    }
-
     void append_child(AstNode* node);
     void print_ast(int level = 0) const;
     void format() const;
     int optimize();
+
+    AstNode(AstNodeType type, string text = "", size_t line = -1, size_t column=-1);
+    AstNode(const AstNode& other, AstNode* parent);
+    ~AstNode();
 };
 
 #endif /* INCLUDED_AST_H */

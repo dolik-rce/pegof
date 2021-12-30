@@ -21,13 +21,8 @@ public:
     int read();
     std::pair<size_t, size_t> compute_position(size_t start) const;
 
-    Source(const char* filepath) : path(filepath), pos(0) {
-        open();
-    }
-
-    ~Source() {
-        close();
-    }
+    Source(const char* filepath);
+    ~Source();
 };
 
 #endif

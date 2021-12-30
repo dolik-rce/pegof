@@ -437,3 +437,25 @@ int AstNode::optimize() {
     }
     throw "ERROR: unexpected AST node type!";
 }
+
+AstNode::AstNode(AstNodeType type, string text, size_t line, size_t column) :
+    text(text), type(type), line(line), column(column), parent(NULL)
+{
+    //~ printf("CREATE %p (size=%ld, parent=%p, type=%s)\n", this, children.size(), parent, getTypeName());
+}
+
+AstNode::AstNode(const AstNode& other, AstNode* parent) :
+    text(other.text), type(other.type), line(other.line), column(other.column), parent(parent)
+{
+    for (int i = 0; i < other.children.size(); i++) {
+        children.push_back(new AstNode(*other.children[i], this));
+    }
+    //~ printf("COPY %p -> %p (size=%ld, parent=%p, type=%s)\n", this, &other, children.size(), parent, getTypeName());
+}
+
+AstNode::~AstNode() {
+    //~ printf("DELETE %p (size=%ld, parent=%p, type=%s)\n", this, children.size(), parent, getTypeName());
+    for (size_t i = 0; i < children.size(); i++) {
+        delete children[i];
+    }
+}

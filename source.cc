@@ -33,3 +33,11 @@ std::pair<size_t, size_t> Source::compute_position(size_t start) const {
     size_t col = start - text.rfind('\n', start);
     return {line, col};
 }
+
+Source::Source(const char* filepath) : path(filepath), pos(0) {
+    open();
+}
+
+Source::~Source() {
+    close();
+}
