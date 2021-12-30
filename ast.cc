@@ -26,7 +26,7 @@ static void reindent(const string& str, int baseindent) {
     string line;
     vector<string> lines;
     int min_indent = INT_MAX;
-    while(std::getline(stream, line)){
+    while(std::getline(stream, line)) {
         if (trim(line).empty()) {
             //FIXME: only skip empty lines for first or last lines
             continue;
@@ -43,12 +43,12 @@ static void reindent(const string& str, int baseindent) {
     }
 }
 
-void AstNode::appendChild(AstNode* node) {
+void AstNode::append_child(AstNode* node) {
     children.push_back(node);
     node->parent = this;
 }
 
-const char* AstNode::getTypeName() {
+const char* AstNode::get_type_name() {
     switch (type) {
     case AST_GRAMMAR:           return "GRAMMAR";
     case AST_COMMENT:           return "COMMENT";
@@ -77,7 +77,7 @@ const char* AstNode::getTypeName() {
 }
 
 void AstNode::print_ast(int level) {
-    const char* typeName = getTypeName();
+    const char* typeName = get_type_name();
 
     if (children.size() > 0) {
         printf("%*s%s:\n", 2*level, "", typeName);
@@ -191,7 +191,7 @@ void AstNode::format_group(const char open, const char close) {
 }
 
 void AstNode::format_ruleref() {
-    if (children.size() > 0){
+    if (children.size() > 0) {
         // has variable
         children[0]->format();
         printf(":");
@@ -232,7 +232,7 @@ void AstNode::format_comment() {
     printf("# %s%s", trim(text).c_str(), suffix);
 }
 
-AstNode* AstNode::find_parent(ast_node_type_t type) {
+AstNode* AstNode::find_parent(AstNodeType type) {
     if (!parent) {
         return parent;
     } else if (parent->type == type) {
@@ -316,7 +316,7 @@ int AstNode::optimize_single_child() {
     if (children.size() != 1) {
         return 0;
     }
-    debug_mode && fprintf(stderr, "  Removing unnecessary node of type %s\n", getTypeName());
+    debug_mode && fprintf(stderr, "  Removing unnecessary node of type %s\n", get_type_name());
     AstNode* child = children[0];
     text = child->text;
     type = child->type;
@@ -347,8 +347,8 @@ int AstNode::optimize_inline_rule() {
     AstNode* rule = children[1];
     vector<AstNode*> uninlinable = rule->find_all([](const AstNode& node) {
         return node.type == AST_SOURCE
-            || node.type == AST_VAR
-            || node.type == AST_CAPTURE;
+               || node.type == AST_VAR
+               || node.type == AST_CAPTURE;
     }, false);
     if (!uninlinable.empty()) {
         return 0;
@@ -359,7 +359,7 @@ int AstNode::optimize_inline_rule() {
         return node.type == AST_RULEREF && node.text == name;
     });
     // TODO: configurable limit how many references can be inlined
-    if (refs.empty() || refs.size() > 10){
+    if (refs.empty() || refs.size() > 10) {
         return 0;
     }
     debug_mode && fprintf(stderr, "  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");

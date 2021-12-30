@@ -11,7 +11,7 @@ int source_read(SourceC source) {
     return s->read();
 }
 
-AstNodeC create_ast_leaf(SourceC source, ast_node_type_t type, const char* text, size_t start) {
+AstNodeC create_ast_leaf(SourceC source, AstNodeType type, const char* text, size_t start) {
     size_t line = -1;
     size_t col = -1;
     if (start >= 0) {
@@ -23,7 +23,7 @@ AstNodeC create_ast_leaf(SourceC source, ast_node_type_t type, const char* text,
     return new AstNode(type, std::string(text), line, col);
 }
 
-AstNodeC create_ast_node(ast_node_type_t type) {
+AstNodeC create_ast_node(AstNodeType type) {
     return new AstNode(type);
 }
 
@@ -31,5 +31,5 @@ void append_child(AstNodeC parent, AstNodeC child) {
     AstNode *p = reinterpret_cast<AstNode*>(parent);
     AstNode *c = reinterpret_cast<AstNode*>(child);
     if (!c) return;
-    p->appendChild(c);
+    p->append_child(c);
 }

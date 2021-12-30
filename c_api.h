@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-typedef enum ast_node_type_tag {
+typedef enum AstNodeTypeTag {
     AST_GRAMMAR,
     AST_COMMENT,
     AST_RULE,
@@ -30,15 +30,15 @@ typedef enum ast_node_type_tag {
     AST_BACKREF,
     AST_GROUP,
     AST_CAPTURE
-} ast_node_type_t;
+} AstNodeType;
 
 typedef void* AstNodeC;
 typedef void* SourceC;
 
 int source_read(SourceC source);
 
-AstNodeC create_ast_leaf(SourceC obj, ast_node_type_t type, const char* text, size_t start);
-AstNodeC create_ast_node(ast_node_type_t type);
+AstNodeC create_ast_leaf(SourceC obj, AstNodeType type, const char* text, size_t start);
+AstNodeC create_ast_node(AstNodeType type);
 void append_child(AstNodeC parent, AstNodeC child);
 
 #ifdef __cplusplus

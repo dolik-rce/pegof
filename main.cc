@@ -58,6 +58,7 @@ public:
     }
 
     Parser(Source& source) : parser(parser_create(&source)), grammar(NULL) {}
+
     ~Parser() {
         parser_destroy(parser);
         if (grammar) {

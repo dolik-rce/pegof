@@ -109,7 +109,7 @@ primary
 literal
     <- r:ruleref { $$ = r; }
     / s:string { $$ = s; }
-    / cc:charClass { $$ = cc; }
+    / cc:char_class { $$ = cc; }
     / "." { $$ = create_ast_leaf(auxil, AST_DOT, $0, $0s); }
     / "$" [1-9] [0-9]* { $$ = create_ast_leaf(auxil, AST_BACKREF, $0, $0s); }
     / "<" _* asp:alternation_or_sequence_or_primary _* ">" { $$ = create_ast_node(AST_CAPTURE); append_child($$, asp); }
@@ -130,7 +130,7 @@ character
     <- "\\" .
     / [^\]]
 
-charClass <- "[" "^"? (character ("-" character)?)+ "]" { $$ = create_ast_leaf(auxil, AST_CHARCLASS, $0, $0s); }
+char_class <- "[" "^"? (character ("-" character)?)+ "]" { $$ = create_ast_leaf(auxil, AST_CHARCLASS, $0, $0s); }
 
 identifier <- [_a-zA-Z] [_a-zA-Z0-9]*
 

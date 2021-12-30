@@ -9,7 +9,7 @@
 void Source::open() {
     int fd = ::open(path.c_str(), O_RDONLY);
     struct stat s;
-    int status = fstat (fd, & s);
+    int status = fstat (fd, &s);
     filesize = s.st_size;
     mapped = mmap (0, filesize, PROT_READ, MAP_PRIVATE, fd, 0);
     ::close(fd);
