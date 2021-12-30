@@ -1,5 +1,3 @@
-#include "source.h"
-#include "ast.h"
 #include "parser.h"
 
 #include <stdio.h>
@@ -40,34 +38,6 @@ const char *process_args(int argc, char **argv, command_t& cmd) {
     }
 }
 
-class Parser {
-    parser_context_t *parser;
-    AstNode* grammar;
-public:
-    AstNode* parse() {
-        const int res = parser_parse(parser, (AstNodeC*)&grammar);
-        if (res != 0) {
-            exit(10);
-            fprintf(stderr, "FATAL: Could not parse the grammar.\n");
-        }
-        if (!grammar) {
-            exit(11);
-            fprintf(stderr, "FATAL: Could not parse the grammar.\n");
-        }
-        return grammar;
-    }
-
-    Parser(Source& source) : parser(parser_create(&source)), grammar(NULL) {}
-
-    ~Parser() {
-        parser_destroy(parser);
-        if (grammar) {
-            delete grammar;
-        }
-    }
-};
-
-
 int main(int argc, char **argv) {
     command_t cmd;
     const char *path = process_args(argc, argv, cmd);
@@ -75,8 +45,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    Source source = Source(path);
-    Parser parser = Parser(source);
+    Parser parser = Parser(path);
     AstNode* grammar = parser.parse();
 
     if (cmd & CMD_DEBUG) {
