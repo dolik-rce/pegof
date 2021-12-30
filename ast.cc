@@ -204,7 +204,7 @@ void AstNode::format_rule() const {
     bool hasAlternation = body->type == AST_ALTERNATION && body->children.size() > 1;
     printf("%s%s <- ", children[0]->text.c_str(), hasAlternation ? "\n   " : "");
     body->format();
-    printf("\n\n");
+    printf(parent->children.back() == this ? "\n" : "\n\n");
 }
 
 void AstNode::format_code() const {
