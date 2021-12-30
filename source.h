@@ -19,7 +19,7 @@ class Source {
 
 public:
     int read();
-    std::pair<size_t, size_t> computePosition(size_t start);
+    std::pair<size_t, size_t> compute_position(size_t start) const;
 
     Source(const char* filepath) : path(filepath), pos(0) {
         open();

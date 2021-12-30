@@ -16,7 +16,7 @@ AstNodeC create_ast_leaf(SourceC source, AstNodeType type, const char* text, siz
     size_t col = -1;
     if (start >= 0) {
         Source* s = reinterpret_cast<Source*>(source);
-        std::pair<size_t, size_t> pos = s->computePosition(start);
+        std::pair<size_t, size_t> pos = s->compute_position(start);
         line = pos.first;
         col = pos.second;
     }

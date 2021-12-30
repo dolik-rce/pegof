@@ -28,7 +28,7 @@ int Source::read() {
     }
 }
 
-std::pair<size_t, size_t> Source::computePosition(size_t start) {
+std::pair<size_t, size_t> Source::compute_position(size_t start) const {
     size_t line = std::count(text.begin(), text.begin() + start, '\n') + 1;
     size_t col = start - text.rfind('\n', start);
     return {line, col};

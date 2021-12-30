@@ -48,7 +48,7 @@ void AstNode::append_child(AstNode* node) {
     node->parent = this;
 }
 
-const char* AstNode::get_type_name() {
+const char* AstNode::get_type_name() const {
     switch (type) {
     case AST_GRAMMAR:           return "GRAMMAR";
     case AST_COMMENT:           return "COMMENT";
@@ -76,7 +76,7 @@ const char* AstNode::get_type_name() {
     }
 }
 
-void AstNode::print_ast(int level) {
+void AstNode::print_ast(int level) const {
     const char* typeName = get_type_name();
 
     if (children.size() > 0) {
@@ -91,11 +91,11 @@ void AstNode::print_ast(int level) {
     }
 }
 
-void AstNode::format_terminal() {
+void AstNode::format_terminal() const {
     printf("%s", text.c_str());
 }
 
-void AstNode::format_grammar() {
+void AstNode::format_grammar() const {
     if (children.size() > 0) {
         for (size_t i = 0; i< children.size(); i++) {
             children[i]->format();
@@ -103,7 +103,7 @@ void AstNode::format_grammar() {
     }
 }
 
-void AstNode::format_string() {
+void AstNode::format_string() const {
     // TODO: configurable quotes
     printf("\"");
     char next = 0;
@@ -124,7 +124,7 @@ void AstNode::format_string() {
     printf("\"");
 }
 
-void AstNode::format_source() {
+void AstNode::format_source() const {
     string trimmed = trim(text);
 
     bool hasNewlines = text.find_first_of('\n') != string::npos;
@@ -140,12 +140,12 @@ void AstNode::format_source() {
     }
 }
 
-void AstNode::format_error() {
+void AstNode::format_error() const {
     printf(" ~");
     format_source();
 }
 
-void AstNode::format_directive() {
+void AstNode::format_directive() const {
     AstNode* content = children[1];
 
     printf("%%");
@@ -157,7 +157,7 @@ void AstNode::format_directive() {
     printf("\n\n");
 }
 
-void AstNode::format_alternation() {
+void AstNode::format_alternation() const {
     // TODO: configurable wrapping (higher children.size() treshold)
     int multiline = children.size() > 1 && parent->type == AST_RULE;
     const char *delim = multiline ? "\n    / " : " / ";
@@ -169,7 +169,7 @@ void AstNode::format_alternation() {
     }
 }
 
-void AstNode::format_sequence() {
+void AstNode::format_sequence() const {
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
             printf(" ");
@@ -178,19 +178,19 @@ void AstNode::format_sequence() {
     }
 }
 
-void AstNode::format_primary() {
+void AstNode::format_primary() const {
     for (size_t i = 0; i < children.size(); i++) {
         children[i]->format();
     }
 }
 
-void AstNode::format_group(const char open, const char close) {
+void AstNode::format_group(const char open, const char close) const {
     printf("%c", open);
     children[0]->format();
     printf("%c", close);
 }
 
-void AstNode::format_ruleref() {
+void AstNode::format_ruleref() const {
     if (children.size() > 0) {
         // has variable
         children[0]->format();
@@ -199,7 +199,7 @@ void AstNode::format_ruleref() {
     printf("%s", text.c_str());
 }
 
-void AstNode::format_rule() {
+void AstNode::format_rule() const {
     AstNode* body = children[1];
     bool hasAlternation = body->type == AST_ALTERNATION && body->children.size() > 1;
     printf("%s%s <- ", children[0]->text.c_str(), hasAlternation ? "\n   " : "");
@@ -207,11 +207,11 @@ void AstNode::format_rule() {
     printf("\n\n");
 }
 
-void AstNode::format_code() {
+void AstNode::format_code() const {
     printf("%%%%\n%s\n", trim(text).c_str());
 }
 
-void AstNode::format_comment() {
+void AstNode::format_comment() const {
     // We have to recognize three different comment positions:
     //   1) top-level comment (parent is GRAMMAR) -> add newline, no indent
     //   2) at the end of sequence in top-level alternation -> no newline, no indent
@@ -232,7 +232,7 @@ void AstNode::format_comment() {
     printf("# %s%s", trim(text).c_str(), suffix);
 }
 
-AstNode* AstNode::find_parent(AstNodeType type) {
+AstNode* AstNode::find_parent(AstNodeType type) const {
     if (!parent) {
         return parent;
     } else if (parent->type == type) {
@@ -242,8 +242,8 @@ AstNode* AstNode::find_parent(AstNodeType type) {
     }
 }
 
-vector<AstNode*> AstNode::find_all(const std::function <bool(const AstNode&)>& predicate, bool global) {
-    AstNode *node = global ? find_parent(AST_GRAMMAR) : this;
+vector<AstNode*> AstNode::find_all(const std::function <bool(const AstNode&)>& predicate, const bool global) const {
+    AstNode *node = global ? find_parent(AST_GRAMMAR) : const_cast<AstNode*>(this);
     vector<AstNode*> result;
     if (predicate(*node)) {
         result.push_back(node);
@@ -262,7 +262,7 @@ void AstNode::remove_child(AstNode* child) {
     delete child;
 }
 
-void AstNode::format() {
+void AstNode::format() const {
     switch (type) {
     case AST_GRAMMAR:           format_grammar(); break;
     case AST_COMMENT:           format_comment(); break;

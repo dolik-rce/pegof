@@ -21,27 +21,27 @@ private:
     vector<AstNode*> children;
     AstNode* parent;
 
-    AstNode* find_parent(AstNodeType type);
-    vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, bool global = true);
+    AstNode* find_parent(AstNodeType type) const;
+    vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, const bool global = true) const;
 
-    const char* get_type_name();
+    const char* get_type_name() const;
 
     void remove_child(AstNode* child);
 
-    void format_terminal();
-    void format_grammar();
-    void format_string();
-    void format_source();
-    void format_error();
-    void format_directive();
-    void format_alternation();
-    void format_sequence();
-    void format_primary();
-    void format_ruleref();
-    void format_rule();
-    void format_code();
-    void format_comment();
-    void format_group(const char open, const char close);
+    void format_terminal() const;
+    void format_grammar() const;
+    void format_string() const;
+    void format_source() const;
+    void format_error() const;
+    void format_directive() const;
+    void format_alternation() const;
+    void format_sequence() const;
+    void format_primary() const;
+    void format_ruleref() const;
+    void format_rule() const;
+    void format_code() const;
+    void format_comment() const;
+    void format_group(const char open, const char close) const;
 
     int optimize_grammar();
     int optimize_sequence();
@@ -79,8 +79,8 @@ public:
     }
 
     void append_child(AstNode* node);
-    void print_ast(int level = 0);
-    void format();
+    void print_ast(int level = 0) const;
+    void format() const;
     int optimize();
 };
 
