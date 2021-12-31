@@ -6,7 +6,7 @@ set(PACKCC packcc CACHE FILEPATH "Specify file path of packcc command.")
 
 add_custom_command(
     OUTPUT peg.c peg.h
-    COMMAND ${PACKCC} ARGS -o peg ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
+    COMMAND ${PACKCC} ARGS -l -o peg ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
     VERBATIM
 )

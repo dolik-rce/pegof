@@ -127,7 +127,7 @@ void AstNode::format_string() const {
 void AstNode::format_source() const {
     string trimmed = trim(text);
 
-    bool hasNewlines = text.find_first_of('\n') != string::npos;
+    bool hasNewlines = trim(text).find_first_of('\n') != string::npos;
 
     int is_directive = parent->type == AST_DIRECTIVE;
 
@@ -154,7 +154,7 @@ void AstNode::format_directive() const {
         printf(" ");
     }
     content->format();
-    printf("\n\n");
+    printf(parent->children.back() == this ? "\n" : "\n\n");
 }
 
 void AstNode::format_alternation() const {

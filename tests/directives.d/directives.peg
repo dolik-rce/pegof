@@ -1,0 +1,16 @@
+%prefix "prefix"
+%value "value"
+%auxil "auxil"
+
+%header { header }
+%source {source}
+%common {    common   }
+
+%earlyheader {
+    earlyheader
+}
+%earlysource {
+earlysource
+}
+%earlycommon {
+earlycommon}

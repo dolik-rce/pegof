@@ -4,7 +4,7 @@ generate_test() {
     if [ -f "$1" ]; then
         echo
         echo "@test \"$2 of $INPUT\" {"
-        echo "    run_test" "$3" "$INPUT" "$1"
+        echo "    run_test \"$3\" \"$INPUT\" \"$1\""
         echo "}"
     fi
 }
@@ -18,7 +18,7 @@ EOF
         [[ $INPUT =~ _(formatted|optimized).peg ]] && continue
         generate_test "${INPUT/.peg/_formatted.peg}" Formatting --format
         generate_test "${INPUT/.peg/.ast}" AST --ast
-        generate_test "${INPUT/.peg/_optimized.ast}" "Optimized AST" --optimize-ast
+        generate_test "${INPUT/.peg/_optimized.ast}" "Optimized AST" "--optimize --ast"
         generate_test "${INPUT/.peg/_optimized.peg}" Optimization --optimize
     done
 }

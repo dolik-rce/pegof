@@ -13,9 +13,7 @@
     //*/
 }
 
-%source {
-    #define PCC_GETCHAR(auxil) source_read(auxil)
-}
+%source { #define PCC_GETCHAR(auxil) source_read(auxil) }
 
 grammar <- _* l:statement_list _* <c:code?> EOF {
         $$ = l;
@@ -119,7 +117,6 @@ string
     <- "\"" <("\\" . / [^"])*> "\"" { $$ = create_ast_leaf(auxil, AST_STRING, $1, $1s); }
     / "'" <("\\" . / [^'])*> "'" { $$ = create_ast_leaf(auxil, AST_STRING, $2, $2s); }
 
-
 error <- "~" _* "{" <source_code> "}" { $$ = create_ast_leaf(auxil, AST_ERROR, $1, $1s); }
 
 source <- "{" <source_code> "}" { $$ = create_ast_leaf(auxil, AST_SOURCE, $1, $1s); }
@@ -139,21 +136,15 @@ ruleref
         $$ = create_ast_leaf(auxil, AST_RULEREF, $2, $2s);
         append_child($$, create_ast_leaf(auxil, AST_VAR, $1, $1s));
     }
-    / <identifier> !(_* "<-") {
-        $$ = create_ast_leaf(auxil, AST_RULEREF, $3, $3s);
-    }
+    / <identifier> !(_* "<-") { $$ = create_ast_leaf(auxil, AST_RULEREF, $3, $3s); }
 
 prefix_op <- [&!] { $$ = create_ast_leaf(auxil, AST_PREFIX_OP, $0, $0s); }
 
 postfix_op <- [?*+] { $$ = create_ast_leaf(auxil, AST_POSTFIX_OP, $0, $0s); }
 
-line_comment <- "\n" [ \t]* "#" [ \t]* <[^\n]*> {
-        $$ = create_ast_leaf(auxil, AST_COMMENT, $1, $1s);
-    }
+line_comment <- "\n" [ \t]* "#" [ \t]* <[^\n]*> { $$ = create_ast_leaf(auxil, AST_COMMENT, $1, $1s); }
 
-suffix_comment <- _* "#"+ [ \t]* <[^\n]*> {
-        $$ = create_ast_leaf(auxil, AST_COMMENT, $1, $1s);
-    }
+suffix_comment <- _* "#"+ [ \t]* <[^\n]*> { $$ = create_ast_leaf(auxil, AST_COMMENT, $1, $1s); }
 
 _ <- !("\n" [ \t]* "#") [ \t\r\n]+
 
