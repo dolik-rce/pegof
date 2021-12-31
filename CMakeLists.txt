@@ -11,7 +11,7 @@ add_custom_command(
     VERBATIM
 )
 
-add_executable(pegof main.cc ast.cc c_api.cc peg.c parser.cc source.cc)
+add_executable(pegof main.cc ast.cc c_api.cc config.cc peg.c parser.cc source.cc)
 
 add_custom_target(test ./test.sh DEPENDS pegof WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
