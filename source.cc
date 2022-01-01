@@ -6,18 +6,24 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
-void Source::open() {
+void Source::open(const string& path) {
+    close();
     int fd = ::open(path.c_str(), O_RDONLY);
     struct stat s;
     int status = fstat (fd, &s);
     filesize = s.st_size;
     mapped = mmap (0, filesize, PROT_READ, MAP_PRIVATE, fd, 0);
+    pos = 0;
+    is_open = true;
     ::close(fd);
     text = string_view(reinterpret_cast<const char*>(mapped));
 }
 
 void Source::close() {
-    munmap(mapped, filesize);
+    if (is_open) {
+        munmap(mapped, filesize);
+        is_open = false;
+    }
 }
 
 int Source::read() {
@@ -34,10 +40,10 @@ std::pair<size_t, size_t> Source::compute_position(size_t start) const {
     return {line, col};
 }
 
-Source::Source(const char* filepath) : path(filepath), pos(0) {
-    open();
-}
+Source::Source() : is_open(false) {}
 
 Source::~Source() {
-    close();
+    if (is_open) {
+        close();
+    }
 }

@@ -13,15 +13,16 @@ class Source {
     void *mapped;
     string_view text;
     size_t pos;
+    bool is_open;
 
-    void open();
     void close();
 
 public:
+    void open(const string& path);
     int read();
     std::pair<size_t, size_t> compute_position(size_t start) const;
 
-    Source(const char* filepath);
+    Source();
     ~Source();
 };
 

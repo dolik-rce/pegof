@@ -1,3 +1,6 @@
+#ifndef INCLUDED_CONFIG_H
+#define INCLUDED_CONFIG_H
+
 #include <map>
 #include <string>
 #include <vector>
@@ -35,3 +38,5 @@ private:
 public:
     Config(int argc, char **argv);
 };
+
+#endif /* INCLUDED_CONFIG_H */

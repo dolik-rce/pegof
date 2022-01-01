@@ -13,11 +13,41 @@ AstNode* Parser::parse() {
     return grammar;
 }
 
-Parser::Parser(const char* path) : source(path), parser(peg_create(&source)), grammar(NULL) {}
+int Parser::parse_all() {
+    for (int i = 0; i < conf.inputs.size(); i++) {
+        source.open(conf.inputs[i]);
+        AstNode* grammar = parse();
+
+        switch (conf.output_type) {
+        case Config::OT_DEBUG:
+            fprintf(stderr, "### Original AST:\n");
+            grammar->print_ast();
+            fprintf(stderr, "### Original formatted:\n");
+            grammar->format();
+            fprintf(stderr, "### Optimizing:\n");
+            grammar->optimize();
+            fprintf(stderr, "### Optimized AST:\n");
+            grammar->print_ast();
+            fprintf(stderr, "### Optimized formatted:\n");
+            grammar->format();
+            break;
+        case Config::OT_AST:
+            conf.optimize && grammar->optimize();
+            grammar->print_ast();
+            break;
+        case Config::OT_FORMAT:
+            conf.optimize && grammar->optimize();
+            grammar->format();
+        }
+        if (grammar) {
+            delete grammar;
+        }
+    }
+    return 0;
+}
+
+Parser::Parser(const Config& conf) : conf(conf), parser(peg_create(&source)), grammar(NULL) {}
 
 Parser::~Parser() {
     peg_destroy(parser);
-    if (grammar) {
-        delete grammar;
-    }
 }
