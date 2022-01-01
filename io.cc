@@ -24,7 +24,7 @@ void Io::open(const std::string& input_path, const std::string& output_path) {
 }
 
 void Io::close() {
-    if (output != stdin) {
+    if (output != stdout) {
         fclose(output);
         output = NULL;
     }

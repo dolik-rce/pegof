@@ -3,7 +3,7 @@
 generate_test() {
     if [ -f "$1" ]; then
         echo
-        echo "@test \"$2 of $INPUT\" {"
+        echo "@test \"$(basename "$INPUT") - $2\" {"
         echo "    run_test \"$3\" \"$INPUT\" \"$1\""
         echo "}"
     fi
@@ -25,7 +25,7 @@ EOF
 
 
 clean() {
-    rm -f *.d/test.bats *.d/*.out
+    rm -f *.d/test.bats *.d/*.out *.d/*.tmp
 }
 
 main() {
