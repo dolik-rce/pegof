@@ -1,20 +1,31 @@
 # PegOF
 
-Peg grammar optimizer and formatter. Supports any grammar supported by [PackCC](https://github.com/arithy/packcc)
-parser generator.
+[PEG](https://en.wikipedia.org/wiki/Parsing_expression_grammar) grammar optimizer and formatter.
+Supports any grammar supported by [PackCC](https://github.com/arithy/packcc) parser generator.
 
 ## Usage:
 
 ```
-pegof [command] <file>
+    pegof [-h|--help|--usage]    pegof [-O|--optimize] [-f|-a|--format|--ast|-d|--debug] \
+          [-i|--inplace|[-o|--output <output_file>]*] \
+          [--] [<input_file> ...]
+```
 
-Available commands:
+## Arguments:
 
-    --format (default)      Formats the input file and prints to stdout.
-    --ast                   Prints abstract syntax tree of input file.
-    --optimize              Optimizes the input and prints it to stdout.
-    --optimize-ast          Optimizes the input and prints its abstract syntax tree.
-    --debug                 Performs all of the above and adds verbose messages about the processing.
+```
+    -h, --help      Print this text
+    -O, --optimize  Try to optimize the input grammar
+    -f, --format    Output formatted grammar (default)
+    -a, --ast       Output abstract syntax tree representation
+    -d, --debug     Output debug info (includes AST and formatted output)
+    -i, --inplace   Modify the input files (only when formatting)
+    -o, --output    Output to file (should be repeated if there is more inputs)
+                    Value "-" can be used to specify standard output
+                    Must not be used together with --inplace
+    <input_file>    Path to file with PEG grammar, multiple paths can be given
+                    If no file is given, read standard input
+                    Value "-" can also be used to read from standard input.
 ```
 
 ## How it works

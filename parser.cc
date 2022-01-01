@@ -15,7 +15,7 @@ AstNode* Parser::parse() {
 
 int Parser::parse_all() {
     for (int i = 0; i < conf.inputs.size(); i++) {
-        Io::open(conf.inputs[i]);
+        Io::open(conf.inputs[i], conf.outputs[i]);
         AstNode* grammar = parse();
 
         switch (conf.output_type) {
@@ -42,6 +42,7 @@ int Parser::parse_all() {
         if (grammar) {
             delete grammar;
         }
+        Io:: close();
     }
     return 0;
 }

@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "io.h"
 
 #include <sstream>
 #include <algorithm>
@@ -39,7 +40,7 @@ static void reindent(const string& str, int baseindent) {
     }
     for(int i = 0; i < lines.size(); i++) {
         int indent = std::max(min_indent - baseindent, 0);
-        printf("%*s%s\n", baseindent + indent, "", trim(lines[i].substr(std::min(size_t(min_indent), lines[i].size())), TRIM_RIGHT).c_str());
+        Io::print("%*s%s\n", baseindent + indent, "", trim(lines[i].substr(std::min(size_t(min_indent), lines[i].size())), TRIM_RIGHT).c_str());
     }
 }
 
@@ -80,19 +81,19 @@ void AstNode::print_ast(int level) const {
     const char* typeName = get_type_name();
 
     if (children.size() > 0) {
-        printf("%*s%s:\n", 2*level, "", typeName);
+        Io::print("%*s%s:\n", 2*level, "", typeName);
         for (int i=0; i < children.size(); i++) {
             children[i]->print_ast(level + 1);
         }
     } else if (line >= 0) {
-        printf("%*s%s: \"%s\" line=%ld, col=%ld\n", 2*level, "", typeName, text.c_str(), line, column);
+        Io::print("%*s%s: \"%s\" line=%ld, col=%ld\n", 2*level, "", typeName, text.c_str(), line, column);
     } else {
-        printf("%*s%s: \"%s\" (optimized)\n", 2*level, "", typeName, text.c_str(), line, column);
+        Io::print("%*s%s: \"%s\" (optimized)\n", 2*level, "", typeName, text.c_str(), line, column);
     }
 }
 
 void AstNode::format_terminal() const {
-    printf("%s", text.c_str());
+    Io::print("%s", text.c_str());
 }
 
 void AstNode::format_grammar() const {
@@ -105,23 +106,23 @@ void AstNode::format_grammar() const {
 
 void AstNode::format_string() const {
     // TODO: configurable quotes
-    printf("\"");
+    Io::print("\"");
     char next = 0;
     for(size_t i = 0; i < text.size(); i++) {
         switch (text[i]) {
         case '\\':
             next = text[++i];
-            printf("%s%c", next == '\'' ? "" : "\\", next);
+            Io::print("%s%c", next == '\'' ? "" : "\\", next);
             break;
         case '"':
-            printf("\\\"");
+            Io::print("\\\"");
             break;
         default:
-            printf("%c", text[i]);
+            Io::print("%c", text[i]);
             break;
         }
     }
-    printf("\"");
+    Io::print("\"");
 }
 
 void AstNode::format_source() const {
@@ -132,29 +133,29 @@ void AstNode::format_source() const {
     int is_directive = parent->type == AST_DIRECTIVE;
 
     if (hasNewlines) {
-        printf(" {\n");
+        Io::print(" {\n");
         reindent(text, is_directive ? 4 : 8);
-        printf("%s}", is_directive ? "" : "    ");
+        Io::print("%s}", is_directive ? "" : "    ");
     } else {
-        printf(" { %s }", trimmed.c_str());
+        Io::print(" { %s }", trimmed.c_str());
     }
 }
 
 void AstNode::format_error() const {
-    printf(" ~");
+    Io::print(" ~");
     format_source();
 }
 
 void AstNode::format_directive() const {
     AstNode* content = children[1];
 
-    printf("%%");
+    Io::print("%%");
     children[0]->format();
     if (content->type == AST_STRING) {
-        printf(" ");
+        Io::print(" ");
     }
     content->format();
-    printf(parent->children.back() == this ? "\n" : "\n\n");
+    Io::print(parent->children.back() == this ? "\n" : "\n\n");
 }
 
 void AstNode::format_alternation() const {
@@ -163,7 +164,7 @@ void AstNode::format_alternation() const {
     const char *delim = multiline ? "\n    / " : " / ";
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
-            printf("%s", delim);
+            Io::print("%s", delim);
         }
         children[i]->format();
     }
@@ -172,7 +173,7 @@ void AstNode::format_alternation() const {
 void AstNode::format_sequence() const {
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
-            printf(" ");
+            Io::print(" ");
         }
         children[i]->format();
     }
@@ -185,30 +186,30 @@ void AstNode::format_primary() const {
 }
 
 void AstNode::format_group(const char open, const char close) const {
-    printf("%c", open);
+    Io::print("%c", open);
     children[0]->format();
-    printf("%c", close);
+    Io::print("%c", close);
 }
 
 void AstNode::format_ruleref() const {
     if (children.size() > 0) {
         // has variable
         children[0]->format();
-        printf(":");
+        Io::print(":");
     }
-    printf("%s", text.c_str());
+    Io::print("%s", text.c_str());
 }
 
 void AstNode::format_rule() const {
     AstNode* body = children[1];
     bool hasAlternation = body->type == AST_ALTERNATION && body->children.size() > 1;
-    printf("%s%s <- ", children[0]->text.c_str(), hasAlternation ? "\n   " : "");
+    Io::print("%s%s <- ", children[0]->text.c_str(), hasAlternation ? "\n   " : "");
     body->format();
-    printf(parent->children.back() == this ? "\n" : "\n\n");
+    Io::print(parent->children.back() == this ? "\n" : "\n\n");
 }
 
 void AstNode::format_code() const {
-    printf("%%%%\n%s\n", trim(text).c_str());
+    Io::print("%%%%\n%s\n", trim(text).c_str());
 }
 
 void AstNode::format_comment() const {
@@ -229,7 +230,7 @@ void AstNode::format_comment() const {
         }
     }
 
-    printf("# %s%s", trim(text).c_str(), suffix);
+    Io::print("# %s%s", trim(text).c_str(), suffix);
 }
 
 AstNode* AstNode::find_parent(AstNodeType type) const {

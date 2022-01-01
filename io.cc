@@ -2,19 +2,32 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 std::string Io::text;
 size_t Io::pos = 0;
+FILE *Io::output = stdin;
 
-void Io::open(const std::string& path) {
-    std::ifstream input;
-    input.open(path);
+void Io::open(const std::string& input_path, const std::string& output_path) {
     std::stringstream stream;
-    stream << input.rdbuf();
+    if (input_path.empty()) {
+        stream << std::cin.rdbuf();
+    } else {
+        std::ifstream input(input_path);
+        stream << input.rdbuf();
+    }
 
     text = stream.str();
     pos = 0;
+    output = output_path.empty() ? stdout : fopen(output_path.c_str(), "w");
+}
+
+void Io::close() {
+    if (output != stdin) {
+        fclose(output);
+        output = NULL;
+    }
 }
 
 int Io::read() {

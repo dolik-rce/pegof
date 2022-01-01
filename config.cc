@@ -1,5 +1,7 @@
 #include "config.h"
 
+#include <algorithm>
+
 extern bool debug_mode;
 
 void Config::usage(const std::string& error) {
@@ -8,8 +10,8 @@ void Config::usage(const std::string& error) {
     printf("Usage:\n");
     printf("    pegof [-h|--help|--usage]");
     printf("    pegof [-O|--optimize] [-f|-a|--format|--ast|-d|--debug] \\\n");
-    printf("          [[-o|--output <output_file>]*|-i|--inplace] \\\n");
-    printf("          [--] <input_file> ...\n");
+    printf("          [-i|--inplace|[-o|--output <output_file>]*] \\\n");
+    printf("          [--] [<input_file> ...]\n");
     printf("\n");
     printf("Arguments:\n");
     printf("    -h, --help      Print this text\n");
@@ -17,45 +19,57 @@ void Config::usage(const std::string& error) {
     printf("    -f, --format    Output formatted grammar (default)\n");
     printf("    -a, --ast       Output abstract syntax tree representation\n");
     printf("    -d, --debug     Output debug info (includes AST and formatted output)\n");
-    printf("    -o, --output    Output to file (should be repeated if there is more inputs)\n");
     printf("    -i, --inplace   Modify the input files (only when formatting)\n");
+    printf("    -o, --output    Output to file (should be repeated if there is more inputs)\n");
+    printf("                    Value \"-\" can be used to specify standard output\n");
+    printf("                    Must not be used together with --inplace\n");
+    printf("    <input_file>    Path to file with PEG grammar, multiple paths can be given\n");
+    printf("                    If no file is given, read standard input\n");
+    printf("                    Value \"-\" can also be used to read from standard input.\n");
     if (!error.empty()) {
         printf("\nERROR: %s\n", error.c_str());
     }
 }
 
-void Config::help() {
+int Config::help() {
     usage("");
     exit(0);
+    return 0;
 }
 
-void Config::set_optimize() {
+int Config::set_optimize() {
     optimize = true;
+    return 0;
 }
 
-void Config::set_inplace() {
+int Config::set_inplace() {
     inplace = true;
+    return 0;
 }
 
-void Config::set_format() {
+int Config::set_format() {
     output_type = OT_FORMAT;
+    return 0;
 }
 
-void Config::set_ast() {
+int Config::set_ast() {
     output_type = OT_AST;
+    return 0;
 }
 
-void Config::set_debug() {
+int Config::set_debug() {
     debug_mode = true;
     output_type = OT_DEBUG;
+    return 0;
 }
 
-void Config::set_output() {
+int Config::set_output() {
     if (next.empty()) {
         usage("-o/--output requires an argument");
         exit(1);
     }
     outputs.push_back(next);
+    return 1;
 }
 
 void Config::process_args(int argc, char **argv) {
@@ -80,7 +94,37 @@ void Config::process_args(int argc, char **argv) {
             }
         }
         next = i+1 == argc ? "" : argv[i+1];
-        (this->*args[arg])();
+        i += (this->*args[arg])();
+    }
+}
+
+void Config::post_process() {
+    if (inputs.empty()) {
+        // if no file was given, read stdin
+        inputs.push_back("");
+    }
+
+    if (inplace) {
+        if (output_type != OT_FORMAT) {
+            usage("Inplace editing is only allowed when formatting code");
+            exit(1);
+        }
+        if (!outputs.empty()) {
+            usage("Combining --inplace and --output parameters is not allowed");
+            exit(1);
+        }
+        outputs = inputs;
+    } else if (outputs.empty()) {
+        // if no outputs were given, assume stdout
+        outputs.resize(inputs.size(), "");
+    }
+
+    std::replace(inputs.begin(), inputs.end(), std::string("-"), std::string());
+    std::replace(outputs.begin(), outputs.end(), std::string("-"), std::string());
+
+    if (inputs.size() != outputs.size()) {
+        usage("Number of inputs does not match number of outputs");
+        exit(1);
     }
 }
 
@@ -96,10 +140,11 @@ Config::Config(int argc, char **argv) : optimize(false), inplace(false), output_
     args["--ast"] = &Config::set_ast;
     args["-d"] = &Config::set_debug;
     args["--debug"] = &Config::set_debug;
-    args["-i"] = &Config::set_debug;
+    args["-i"] = &Config::set_inplace;
     args["--inplace"] = &Config::set_inplace;
     args["-o"] = &Config::set_output;
     args["--output"] = &Config::set_output;
 
     process_args(argc, argv);
+    post_process();
 }

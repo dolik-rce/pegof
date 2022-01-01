@@ -21,19 +21,20 @@ struct Config {
 private:
     std::string next;
 
-    typedef void (Config::*MemberFn)();
+    typedef int (Config::*MemberFn)();
     std::map<std::string, MemberFn> args;
 
-    void process_args(int argc, char **argv);
-
     void usage(const std::string& error);
-    void help();
-    void set_optimize();
-    void set_inplace();
-    void set_format();
-    void set_ast();
-    void set_debug();
-    void set_output();
+    void process_args(int argc, char **argv);
+    void post_process();
+
+    int help();
+    int set_optimize();
+    int set_inplace();
+    int set_format();
+    int set_ast();
+    int set_debug();
+    int set_output();
 
 public:
     Config(int argc, char **argv);
