@@ -3,12 +3,12 @@
 
 #include "ast.h"
 #include "peg.h"
-#include "source.h"
+#include "io.h"
 #include "config.h"
 
 class Parser {
     const Config& conf;
-    Source source;
+    Io io;
     peg_context_t *parser;
     AstNode* grammar;
 

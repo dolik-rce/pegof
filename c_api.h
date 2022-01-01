@@ -33,11 +33,11 @@ typedef enum AstNodeTypeTag {
 } AstNodeType;
 
 typedef void* AstNodeC;
-typedef void* SourceC;
+typedef void* IoC;
 
-int source_read(SourceC source);
+int source_read(IoC io);
 
-AstNodeC create_ast_leaf(SourceC obj, AstNodeType type, const char* text, size_t start);
+AstNodeC create_ast_leaf(IoC io, AstNodeType type, const char* text, size_t start);
 AstNodeC create_ast_node(AstNodeType type);
 void append_child(AstNodeC parent, AstNodeC child);
 

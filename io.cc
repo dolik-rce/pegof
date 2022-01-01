@@ -1,4 +1,4 @@
-#include "source.h"
+#include "io.h"
 
 #include <algorithm>
 #include <fcntl.h>
@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
-void Source::open(const string& path) {
+void Io::open(const string& path) {
     close();
     int fd = ::open(path.c_str(), O_RDONLY);
     struct stat s;
@@ -19,14 +19,14 @@ void Source::open(const string& path) {
     text = string_view(reinterpret_cast<const char*>(mapped));
 }
 
-void Source::close() {
+void Io::close() {
     if (is_open) {
         munmap(mapped, filesize);
         is_open = false;
     }
 }
 
-int Source::read() {
+int Io::read() {
     if (pos < text.size()) {
         return text[pos++];
     } else {
@@ -34,15 +34,15 @@ int Source::read() {
     }
 }
 
-std::pair<size_t, size_t> Source::compute_position(size_t start) const {
+std::pair<size_t, size_t> Io::compute_position(size_t start) const {
     size_t line = std::count(text.begin(), text.begin() + start, '\n') + 1;
     size_t col = start - text.rfind('\n', start);
     return {line, col};
 }
 
-Source::Source() : is_open(false) {}
+Io::Io() : is_open(false) {}
 
-Source::~Source() {
+Io::~Io() {
     if (is_open) {
         close();
     }

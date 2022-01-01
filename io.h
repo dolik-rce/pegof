@@ -7,7 +7,7 @@
 using std::string;
 using std::string_view;
 
-class Source {
+class Io {
     string path;
     size_t filesize;
     void *mapped;
@@ -22,8 +22,8 @@ public:
     int read();
     std::pair<size_t, size_t> compute_position(size_t start) const;
 
-    Source();
-    ~Source();
+    Io();
+    ~Io();
 };
 
 #endif

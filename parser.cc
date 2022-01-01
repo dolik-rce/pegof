@@ -15,7 +15,7 @@ AstNode* Parser::parse() {
 
 int Parser::parse_all() {
     for (int i = 0; i < conf.inputs.size(); i++) {
-        source.open(conf.inputs[i]);
+        io.open(conf.inputs[i]);
         AstNode* grammar = parse();
 
         switch (conf.output_type) {
@@ -46,7 +46,7 @@ int Parser::parse_all() {
     return 0;
 }
 
-Parser::Parser(const Config& conf) : conf(conf), parser(peg_create(&source)), grammar(NULL) {}
+Parser::Parser(const Config& conf) : conf(conf), parser(peg_create(&io)), grammar(NULL) {}
 
 Parser::~Parser() {
     peg_destroy(parser);

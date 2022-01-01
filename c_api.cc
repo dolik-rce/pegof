@@ -1,9 +1,9 @@
 #include "c_api.h"
 #include "ast.h"
-#include "source.h"
+#include "io.h"
 
-int source_read(SourceC source) {
-    Source* s = reinterpret_cast<Source*>(source);
+int source_read(IoC io) {
+    Io* s = reinterpret_cast<Io*>(io);
     if (!s) {
         fprintf(stderr, "FATAL: Internal error.\n");
         exit(12);
@@ -11,11 +11,11 @@ int source_read(SourceC source) {
     return s->read();
 }
 
-AstNodeC create_ast_leaf(SourceC source, AstNodeType type, const char* text, size_t start) {
+AstNodeC create_ast_leaf(IoC io, AstNodeType type, const char* text, size_t start) {
     size_t line = -1;
     size_t col = -1;
     if (start >= 0) {
-        Source* s = reinterpret_cast<Source*>(source);
+        Io* s = reinterpret_cast<Io*>(io);
         std::pair<size_t, size_t> pos = s->compute_position(start);
         line = pos.first;
         col = pos.second;
