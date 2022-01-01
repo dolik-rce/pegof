@@ -8,7 +8,6 @@
 
 class Parser {
     const Config& conf;
-    Io io;
     peg_context_t *parser;
     AstNode* grammar;
 
