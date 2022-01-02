@@ -5,25 +5,25 @@
 #include <fstream>
 #include <iterator>
 
+const Config* Config::instance = NULL;
+
 void Config::usage(const std::string& error) {
     printf("PEG Formatter and Optimizer\n");
     printf("\n");
     printf("Usage:\n");
-    printf("    pegof [-h|--help|--usage]");
-    printf("    pegof [-c|--conf <config_file>] [-O|--optimize] \\\n");
-    printf("          [-f|-a|--format|--ast|-d|--debug] \\\n");
-    printf("          [-i|--inplace|[-o|--output <output_file>]*] \\\n");
-    printf("          [--] [<input_file> ...]\n");
+    printf("    pegof [-h|--help|--usage]\n");
+    printf("    pegof [<options>] [--] [<input_file> ...]\n");
     printf("\n");
-    printf("Arguments:\n");
+    printf("Basic options:\n");
     printf("    -h, --help      Print this text\n");
     printf("    -c, --conf      Use given configuration file\n");
-    printf("    -O, --optimize  Try to optimize the input grammar\n");
+    printf("\n");
+    printf("Input/output options:\n");
     printf("    -f, --format    Output formatted grammar (default)\n");
     printf("    -a, --ast       Output abstract syntax tree representation\n");
     printf("    -d, --debug     Output debug info (includes AST and formatted output)\n");
     printf("    -I, --inplace   Modify the input files (only when formatting)\n");
-    printf("    -i, --input     Path to file with PEG grammar, multiple paths can be given.\n");
+    printf("    -i, --input     Path to file with PEG grammar, multiple paths can be given\n");
     printf("                    Value \"-\" can be used to specify standard input\n");
     printf("                    Mainly useful for config file\n");
     printf("    -o, --output    Output to file (should be repeated if there is more inputs)\n");
@@ -31,6 +31,17 @@ void Config::usage(const std::string& error) {
     printf("                    Must not be used together with --inplace\n");
     printf("    <input_file>    Any non-arguments will be treated if passed to --input\n");
     printf("                    If no file or --input is given, read standard input\n");
+    printf("\n");
+    printf("Formating options:\n");
+    printf("    --double-quotes Use double quoted strings (default)\n");
+    printf("    --single-quotes Use single quoted strings\n");
+    printf("    --wrap-limit N  Wrap alternations with more than N sequences (default 1)\n");
+    printf("\n");
+    printf("Optimization options:\n");
+    printf("    -O, --optimize      Apply optimizations\n");
+    printf("    --inline-limit N    Maximum number of references rule can have\n");
+    printf("                        and still be inlined (default 10)\n");
+
     if (!error.empty()) {
         printf("\nERROR: %s\n", error.c_str());
     }
@@ -66,6 +77,34 @@ int Config::set_debug() {
     Io::set_debug_mode(true);
     output_type = OT_DEBUG;
     return 0;
+}
+
+int Config::set_single_quotes() {
+    use_double_quotes = false;
+    return 0;
+}
+
+int Config::set_double_quotes() {
+    use_double_quotes = true;
+    return 0;
+}
+
+int Config::set_inline_limit() {
+    if (next.empty()) {
+        usage("--inline-limit requires an argument");
+        exit(1);
+    }
+    inline_limit = atoi(next.c_str());
+    return 1;
+}
+
+int Config::set_wrap_limit() {
+    if (next.empty()) {
+        usage("--wrap-limit requires an argument");
+        exit(1);
+    }
+    wrap_limit = atoi(next.c_str());
+    return 1;
 }
 
 int Config::set_input() {
@@ -119,7 +158,7 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
                 usage("Unknown " + std::string(config_file ? "config file option" : "argument") + ": '" + arg + "'\n");
                 exit(1);
             }
-            next = i+1 == arguments.size() ? "" : arguments[i+1];
+            next = i+1 == arguments.size() || arguments[i+1][0] == '-' ? "" : arguments[i+1];
             i += (this->*args[arg_name])();
             continue;
         }
@@ -158,7 +197,17 @@ void Config::post_process() {
     }
 }
 
-Config::Config(int argc, char **argv) : optimize(false), inplace(false), output_type(OT_FORMAT) {
+const Config& Config::get() {
+    return *instance;
+}
+
+Config::Config(int argc, char **argv) :
+    optimize(false), inplace(false), use_double_quotes(true), inline_limit(10), wrap_limit(1), output_type(OT_FORMAT)
+{
+    if (instance) {
+        fprintf(stderr, "Internal error, Config instance already exists!\n");
+    }
+
     args["h"] = &Config::help;
     args["help"] = &Config::help;
     args["usage"] = &Config::help;
@@ -175,6 +224,10 @@ Config::Config(int argc, char **argv) : optimize(false), inplace(false), output_
     args["I"] = &Config::set_inplace;
     args["inplace"] = &Config::set_inplace;
     args["i"] = &Config::set_input;
+    args["double-quotes"] = &Config::set_double_quotes;
+    args["single-quotes"] = &Config::set_single_quotes;
+    args["inline-limit"] = &Config::set_inline_limit;
+    args["wrap-limit"] = &Config::set_wrap_limit;
     args["input"] = &Config::set_input;
     args["o"] = &Config::set_output;
     args["output"] = &Config::set_output;
@@ -182,4 +235,5 @@ Config::Config(int argc, char **argv) : optimize(false), inplace(false), output_
     std::vector<std::string> arguments(argv + 1, argv + argc);
     process_args(arguments, false);
     post_process();
+    instance = this;
 }

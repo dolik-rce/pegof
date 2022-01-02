@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "config.h"
 #include "io.h"
 
 #include <sstream>
@@ -103,24 +104,26 @@ void AstNode::format_grammar() const {
 }
 
 void AstNode::format_string() const {
-    // TODO: configurable quotes
-    Io::print("\"");
+    char quote = Config::get().use_double_quotes ? '\"' : '\'';
+    char other = quote == '\"' ? '\'' : '\"';
+    Io::print("%c", quote);
     char next = 0;
     for(size_t i = 0; i < text.size(); i++) {
         switch (text[i]) {
         case '\\':
             next = text[++i];
-            Io::print("%s%c", next == '\'' ? "" : "\\", next);
+            Io::print("%s%c", next == other ? "" : "\\", next);
             break;
         case '"':
-            Io::print("\\\"");
+        case '\'':
+            Io::print("%s%c", text[i] == quote ? "\\" : "", text[i]);
             break;
         default:
             Io::print("%c", text[i]);
             break;
         }
     }
-    Io::print("\"");
+    Io::print("%c", quote);
 }
 
 void AstNode::format_source() const {
@@ -157,8 +160,7 @@ void AstNode::format_directive() const {
 }
 
 void AstNode::format_alternation() const {
-    // TODO: configurable wrapping (higher children.size() treshold)
-    int multiline = children.size() > 1 && parent->type == AST_RULE;
+    int multiline = children.size() > Config::get().wrap_limit && parent->type == AST_RULE;
     const char *delim = multiline ? "\n    / " : " / ";
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
@@ -357,8 +359,7 @@ int AstNode::optimize_inline_rule() {
     vector<AstNode*> refs = find_all([name](const AstNode& node) {
         return node.type == AST_RULEREF && node.text == name;
     });
-    // TODO: configurable limit how many references can be inlined
-    if (refs.empty() || refs.size() > 10) {
+    if (refs.empty() || refs.size() > Config::get().inline_limit) {
         return 0;
     }
     Io::debug("  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");

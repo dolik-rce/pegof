@@ -14,11 +14,15 @@ struct Config {
 
     bool optimize;
     bool inplace;
+    bool use_double_quotes;
+    int inline_limit;
+    int wrap_limit;
     OutputType output_type;
     std::vector<std::string> inputs;
     std::vector<std::string> outputs;
 
 private:
+    static const Config* instance;
     std::string next;
 
     typedef int (Config::*MemberFn)();
@@ -34,11 +38,17 @@ private:
     int set_format();
     int set_ast();
     int set_debug();
+    int set_double_quotes();
+    int set_single_quotes();
+    int set_inline_limit();
+    int set_wrap_limit();
     int set_input();
     int set_output();
     int load_config();
 
 public:
+    static const Config& get();
+
     Config(int argc, char **argv);
 };
 

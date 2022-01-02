@@ -18,24 +18,21 @@ Currently implemented optimizations:
 
 ## Usage:
 
-```
-    pegof [-h|--help|--usage]    pegof [-c|--conf <config_file>] [-O|--optimize] \
-          [-f|-a|--format|--ast|-d|--debug] \
-          [-i|--inplace|[-o|--output <output_file>]*] \
-          [--] [<input_file> ...]
-```
+    pegof [-h|--help|--usage]
+    pegof [<options>] [--] [<input_file> ...]
 
-## Arguments:
+### Basic options:
 
-```
     -h, --help      Print this text
     -c, --conf      Use given configuration file
-    -O, --optimize  Try to optimize the input grammar
+
+### Input/output options:
+
     -f, --format    Output formatted grammar (default)
     -a, --ast       Output abstract syntax tree representation
     -d, --debug     Output debug info (includes AST and formatted output)
     -I, --inplace   Modify the input files (only when formatting)
-    -i, --input     Path to file with PEG grammar, multiple paths can be given.
+    -i, --input     Path to file with PEG grammar, multiple paths can be given
                     Value "-" can be used to specify standard input
                     Mainly useful for config file
     -o, --output    Output to file (should be repeated if there is more inputs)
@@ -43,7 +40,18 @@ Currently implemented optimizations:
                     Must not be used together with --inplace
     <input_file>    Any non-arguments will be treated if passed to --input
                     If no file or --input is given, read standard input
-```
+
+### Formating options:
+
+    --double-quotes Use double quoted strings (default)
+    --single-quotes Use single quoted strings
+    --wrap-limit N  Wrap alternations with more than N sequences (default 1)
+
+### Optimization options:
+
+    -O, --optimize      Apply optimizations
+    --inline-limit N    Maximum number of references rule can have
+                        and still be inlined (default 10)
 
 ## Configuration file
 
@@ -52,11 +60,14 @@ on command line, only without the leading dashes. Short version are supported as
 because config file should be easy to read. It is encouraged to keep one option per line, but any whitespace
 character can be used as separator.
 
-Example config file:
+Following config file would result in the same behavior as if pegof was called without any arguments:
 ```
-optimize
 format
-inplace
+input -
+output -
+double-quotes
+inline-limit 10
+wrap-limit 1
 ```
 
 ## Known issues
@@ -66,13 +77,6 @@ inplace
 This application was written with readability and maintainability in mind. Speed of execution is not a focus.
 Some of very big grammars (e.g. for [Kotlin language](https://github.com/universal-ctags/ctags/blob/master/peg/kotlin.peg))
 can take up to 1s to process.
-
-### Configurability
-
-There is currently no way to configure the formatting and optimization behavior. For example strings are always printed
-with double-quotes, indentation uses spaces and inlining is always limited to rules with 10 references or less.
-This might change in future. Let the author know in issue, if you use this tool and if you would benefit
-from configuration support.
 
 ### Error recovery
 
