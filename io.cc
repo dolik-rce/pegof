@@ -8,12 +8,20 @@
 std::string Io::text;
 size_t Io::pos = 0;
 FILE *Io::output = stdin;
+bool Io::debug_mode = false;
+
+void Io::set_debug_mode(const bool enabled) {
+    debug_mode = enabled;
+}
+
 
 void Io::open(const std::string& input_path, const std::string& output_path) {
     std::stringstream stream;
     if (input_path.empty()) {
+        Io::debug("Reading grammar from stdin\n");
         stream << std::cin.rdbuf();
     } else {
+        Io::debug("Reading grammar from %s\n", input_path.c_str());
         std::ifstream input(input_path);
         stream << input.rdbuf();
     }
@@ -21,6 +29,7 @@ void Io::open(const std::string& input_path, const std::string& output_path) {
     text = stream.str();
     pos = 0;
     output = output_path.empty() ? stdout : fopen(output_path.c_str(), "w");
+    Io::debug("Output will be written to %s\n", output_path.empty() ? "stdout" : output_path.c_str());
 }
 
 void Io::close() {

@@ -20,15 +20,15 @@ int Parser::parse_all() {
 
         switch (conf.output_type) {
         case Config::OT_DEBUG:
-            fprintf(stderr, "### Original AST:\n");
+            Io::debug("### Original AST:\n");
             grammar->print_ast();
-            fprintf(stderr, "### Original formatted:\n");
+            Io::debug("### Original formatted:\n");
             grammar->format();
-            fprintf(stderr, "### Optimizing:\n");
+            Io::debug("### Optimizing:\n");
             grammar->optimize();
-            fprintf(stderr, "### Optimized AST:\n");
+            Io::debug("### Optimized AST:\n");
             grammar->print_ast();
-            fprintf(stderr, "### Optimized formatted:\n");
+            Io::debug("### Optimized formatted:\n");
             grammar->format();
             break;
         case Config::OT_AST:

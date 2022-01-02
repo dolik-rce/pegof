@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <climits>
 
-extern int debug_mode;
-
 enum TrimType {
     TRIM_LEFT = 1,
     TRIM_RIGHT = 2,
@@ -300,7 +298,7 @@ int AstNode::optimize_strings() {
         AstNode* first = children[i-1];
         AstNode* second = children[i];
         if (first->type == AST_STRING && second->type == AST_STRING) {
-            debug_mode && fprintf(stderr, "  Concatenating adjacent strings '%s' and '%s'\n", first->text.c_str(), second->text.c_str());
+            Io::debug("  Concatenating adjacent strings '%s' and '%s'\n", first->text.c_str(), second->text.c_str());
             first->text += second->text;
             first->line = -2;
             first->column = -2;
@@ -317,7 +315,7 @@ int AstNode::optimize_single_child() {
     if (children.size() != 1) {
         return 0;
     }
-    debug_mode && fprintf(stderr, "  Removing unnecessary node of type %s\n", get_type_name());
+    Io::debug("  Removing unnecessary node of type %s\n", get_type_name());
     AstNode* child = children[0];
     text = child->text;
     type = child->type;
@@ -338,7 +336,7 @@ int AstNode::optimize_children() {
 }
 
 int AstNode::optimize_strip_comment() {
-    debug_mode && fprintf(stderr, "  Removing comment\n");
+    Io::debug("  Removing comment\n");
     parent->remove_child(this);
     return 1;
 }
@@ -363,7 +361,7 @@ int AstNode::optimize_inline_rule() {
     if (refs.empty() || refs.size() > 10) {
         return 0;
     }
-    debug_mode && fprintf(stderr, "  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");
+    Io::debug("  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");
 
     // copy data to each reference
     for (int i = 0; i < refs.size(); i++) {
@@ -384,10 +382,10 @@ int AstNode::optimize_inline_rule() {
 int AstNode::optimize_grammar() {
     int total = 0;
     for (int optimized = -1, i = 0; optimized != 0; i++) {
-        debug_mode && fprintf(stderr, "Optimization pass %d:\n", i);
+        Io::debug("Optimization pass %d:\n", i);
         optimized = optimize_children();
         total += optimized;
-        debug_mode && fprintf(stderr, " => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);
+        Io::debug(" => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);
     };
     return total;
 }

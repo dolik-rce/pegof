@@ -9,7 +9,9 @@ class Io {
     static std::string text;
     static size_t pos;
     static FILE *output;
+    static bool debug_mode;
 public:
+    static void set_debug_mode(const bool enabled);
     static void open(const std::string& input_path, const std::string& output_path);
     static void close();
     static int read();
@@ -18,6 +20,13 @@ public:
     template <typename... T>
     static void print(const char* format, T... args) {
         fprintf(output, format, args...);
+    }
+
+    template <typename... T>
+    static void debug(const char* format, T... args) {
+        if (debug_mode) {
+            fprintf(stderr, format, args...);
+        }
     }
 };
 

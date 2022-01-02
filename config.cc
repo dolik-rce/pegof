@@ -1,8 +1,7 @@
 #include "config.h"
+#include "io.h"
 
 #include <algorithm>
-
-extern bool debug_mode;
 
 void Config::usage(const std::string& error) {
     printf("PEG Formatter and Optimizer\n");
@@ -58,7 +57,7 @@ int Config::set_ast() {
 }
 
 int Config::set_debug() {
-    debug_mode = true;
+    Io::set_debug_mode(true);
     output_type = OT_DEBUG;
     return 0;
 }
