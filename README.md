@@ -94,6 +94,7 @@ mkdir build
 cd build
 cmake -DPACKCC=/path/to/packcc ..
 make
+make test # optional, but recommended
 ```
 
 Building on non-linux platforms has not been tested and might require some modifications to the process.

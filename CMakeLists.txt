@@ -13,6 +13,6 @@ add_custom_command(
 
 add_executable(pegof main.cc ast.cc c_api.cc config.cc io.cc peg.c parser.cc)
 
-add_custom_target(test ./test.sh DEPENDS pegof WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_custom_target(test tests/run.sh DEPENDS pegof WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(pegof BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})

@@ -36,8 +36,8 @@ main() {
         exit 0
     fi
 
-    export ROOTDIR="$(cd "$(dirname "$0")" && pwd)"
-    export TESTDIR="$ROOTDIR/tests"
+    export TESTDIR="$(cd "$(dirname "$0")" && pwd)"
+    export ROOTDIR="$TESTDIR/.."
     export PEGOF="$ROOTDIR/build/pegof"
     cd "$TESTDIR"
 
