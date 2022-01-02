@@ -25,7 +25,7 @@ private:
     std::map<std::string, MemberFn> args;
 
     void usage(const std::string& error);
-    void process_args(int argc, char **argv);
+    void process_args(const std::vector<std::string>& arguments, const bool config_file);
     void post_process();
 
     int help();
@@ -34,7 +34,9 @@ private:
     int set_format();
     int set_ast();
     int set_debug();
+    int set_input();
     int set_output();
+    int load_config();
 
 public:
     Config(int argc, char **argv);

@@ -49,7 +49,7 @@ check_error() {
 
 @test "CLI - inplace formatting" {
     create_peg
-    run "$PEGOF" -i "$PEGFILE"
+    run "$PEGOF" -I "$PEGFILE"
     check_file
 }
 
@@ -74,7 +74,7 @@ check_error() {
     A="$PEGFILE"
     create_peg B
     B="$PEGFILE"
-    run "$PEGOF" -i "$A" "$B"
+    run "$PEGOF" -I "$A" "$B"
     check_file "$A" A
     check_file "$B" B
 }
@@ -100,18 +100,18 @@ check_error() {
 
 @test "CLI - inplace formatting with --output fails" {
     create_peg
-    run "$PEGOF" -i -o - "$PEGFILE"
+    run "$PEGOF" -I -o - "$PEGFILE"
     check_error
 }
 
 @test "CLI - inplace formatting with --ast fails" {
     create_peg
-    run "$PEGOF" -i --ast "$PEGFILE"
+    run "$PEGOF" -I --ast "$PEGFILE"
     check_error
 }
 
 @test "CLI - inplace formatting with --debug fails" {
     create_peg
-    run "$PEGOF" -i --debug "$PEGFILE"
+    run "$PEGOF" -I --debug "$PEGFILE"
     check_error
 }

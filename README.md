@@ -3,31 +3,6 @@
 [PEG](https://en.wikipedia.org/wiki/Parsing_expression_grammar) grammar optimizer and formatter.
 Supports any grammar supported by [PackCC](https://github.com/arithy/packcc) parser generator.
 
-## Usage:
-
-```
-    pegof [-h|--help|--usage]    pegof [-O|--optimize] [-f|-a|--format|--ast|-d|--debug] \
-          [-i|--inplace|[-o|--output <output_file>]*] \
-          [--] [<input_file> ...]
-```
-
-## Arguments:
-
-```
-    -h, --help      Print this text
-    -O, --optimize  Try to optimize the input grammar
-    -f, --format    Output formatted grammar (default)
-    -a, --ast       Output abstract syntax tree representation
-    -d, --debug     Output debug info (includes AST and formatted output)
-    -i, --inplace   Modify the input files (only when formatting)
-    -o, --output    Output to file (should be repeated if there is more inputs)
-                    Value "-" can be used to specify standard output
-                    Must not be used together with --inplace
-    <input_file>    Path to file with PEG grammar, multiple paths can be given
-                    If no file is given, read standard input
-                    Value "-" can also be used to read from standard input.
-```
-
 ## How it works
 
 Pegof parses peg grammar from input file (using PackCC generated parser) and extracts it's AST.
@@ -40,6 +15,49 @@ Currently implemented optimizations:
  - **String concatenation:** Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
  - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
  - **Removing comments:** This makes it simpler to implement the other optimizations. Also, most of the comments would not make much sense in the reorganized grammar.
+
+## Usage:
+
+```
+    pegof [-h|--help|--usage]    pegof [-c|--conf <config_file>] [-O|--optimize] \
+          [-f|-a|--format|--ast|-d|--debug] \
+          [-i|--inplace|[-o|--output <output_file>]*] \
+          [--] [<input_file> ...]
+```
+
+## Arguments:
+
+```
+    -h, --help      Print this text
+    -c, --conf      Use given configuration file
+    -O, --optimize  Try to optimize the input grammar
+    -f, --format    Output formatted grammar (default)
+    -a, --ast       Output abstract syntax tree representation
+    -d, --debug     Output debug info (includes AST and formatted output)
+    -I, --inplace   Modify the input files (only when formatting)
+    -i, --input     Path to file with PEG grammar, multiple paths can be given.
+                    Value "-" can be used to specify standard input
+                    Mainly useful for config file
+    -o, --output    Output to file (should be repeated if there is more inputs)
+                    Value "-" can be used to specify standard output
+                    Must not be used together with --inplace
+    <input_file>    Any non-arguments will be treated if passed to --input
+                    If no file or --input is given, read standard input
+```
+
+## Configuration file
+
+Configuration file can be specified on command line. This file can contain the same options as can be given
+on command line, only without the leading dashes. Short version are supported as well, but not recommended,
+because config file should be easy to read. It is encouraged to keep one option per line, but any whitespace
+character can be used as separator.
+
+Example config file:
+```
+optimize
+format
+inplace
+```
 
 ## Known issues
 
@@ -74,7 +92,7 @@ cmake -DPACKCC=/path/to/packcc ..
 make
 ```
 
-Building on non-linux platforms has not been tested and might require modifications to the process.
+Building on non-linux platforms has not been tested and might require some modifications to the process.
 
 ## Acknowledgment
 
