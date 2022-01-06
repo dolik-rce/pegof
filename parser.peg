@@ -11,7 +11,9 @@
     //*/
 }
 
-%source { #define PCC_GETCHAR(auxil) source_read(auxil) }
+%source {
+    #define PCC_GETCHAR(auxil) source_read(auxil)
+}
 
 grammar <- _* l:statement_list _* <c:code?> EOF {
         $$ = l;

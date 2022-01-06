@@ -129,11 +129,12 @@ void AstNode::format_string() const {
 void AstNode::format_source() const {
     string trimmed = trim(text);
 
-    bool hasNewlines = trim(text).find_first_of('\n') != string::npos;
+    bool has_newlines = trimmed.find_first_of('\n') != string::npos;
+    bool is_c_directive = trimmed[0] == '#'; // PackCC doesn't currently support single line C directives like %header { #include "x.h" }
 
     int is_directive = parent->type == AST_DIRECTIVE;
 
-    if (hasNewlines) {
+    if (has_newlines || is_c_directive) {
         Io::print(" {\n");
         reindent(text, is_directive ? 4 : 8);
         Io::print("%s}", is_directive ? "" : "    ");
