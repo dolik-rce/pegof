@@ -22,6 +22,7 @@ test_code_style() {
 }
 
 test_grammar_style() {
+    echo "# RUNNING: $PEGOF --format $1" > /dev/stderr
     run "$PEGOF" --format "$1"
     [ "$status" -eq 0 ]
     diff --strip-trailing-cr -uN "$1" --label "$1" <(echo "$output") --label "formatted"

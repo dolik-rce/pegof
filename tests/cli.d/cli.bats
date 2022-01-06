@@ -37,24 +37,28 @@ check_error() {
 
 @test "CLI - reading from stdin, writing to stdout" {
     create_peg
+    echo "# RUNNING: $PEGOF < $PEGFILE" > /dev/stderr
     run "$PEGOF" < "$PEGFILE"
     check_output
 }
 
 @test "CLI - write to file" {
     create_peg
+    echo "RUNNING: $PEGOF --output $PEGFILE.out $PEGFILE" > /dev/stderr
     run "$PEGOF" --output "$PEGFILE.out" "$PEGFILE"
     check_file "$PEGFILE.out"
 }
 
 @test "CLI - inplace formatting" {
     create_peg
+    echo "RUNNING: $PEGOF -I $PEGFILE" > /dev/stderr
     run "$PEGOF" -I "$PEGFILE"
     check_file
 }
 
 @test "CLI - optimize" {
     create_peg
+    echo "RUNNING: $PEGOF --optimize $PEGFILE" > /dev/stderr
     run "$PEGOF" --optimize "$PEGFILE"
     check_output_by_files "${PEGFILE/.tmp/.optimized.tmp}"
 }
@@ -64,7 +68,7 @@ check_error() {
     A="$PEGFILE"
     create_peg B
     B="$PEGFILE"
-    echo "$PEGOF" "$A" "$B" >/dev/stderr
+    echo "RUNNING: $PEGOF $A $B" >/dev/stderr
     run "$PEGOF" "$A" "$B"
     check_output_by_files "${A/.tmp/.formatted.tmp}" "${B/.tmp/.formatted.tmp}"
 }
@@ -74,6 +78,7 @@ check_error() {
     A="$PEGFILE"
     create_peg B
     B="$PEGFILE"
+    echo "RUNNING: $PEGOF -I $A $B" > /dev/stderr
     run "$PEGOF" -I "$A" "$B"
     check_file "$A" A
     check_file "$B" B
@@ -84,6 +89,7 @@ check_error() {
     A="$PEGFILE"
     create_peg B
     B="$PEGFILE"
+    echo "RUNNING: $PEGOF -o a.out -o b.out -- $A $B" > /dev/stderr
     run "$PEGOF" -o a.out -o b.out -- "$A" "$B"
     check_file "a.out" A
     check_file "b.out" B
@@ -94,24 +100,28 @@ check_error() {
     A="$PEGFILE"
     create_peg B
     B="$PEGFILE"
+    echo "RUNNING: $PEGOF -o a.out $A $B" > /dev/stderr
     run "$PEGOF" -o a.out "$A" "$B"
     check_error
 }
 
 @test "CLI - inplace formatting with --output fails" {
     create_peg
+    echo "RUNNING: $PEGOF -I -o - $PEGFILE" > /dev/stderr
     run "$PEGOF" -I -o - "$PEGFILE"
     check_error
 }
 
 @test "CLI - inplace formatting with --ast fails" {
     create_peg
+    echo "RUNNING: $PEGOF -I --ast $PEGFILE" > /dev/stderr
     run "$PEGOF" -I --ast "$PEGFILE"
     check_error
 }
 
 @test "CLI - inplace formatting with --debug fails" {
     create_peg
+    echo "RUNNING: $PEGOF -I --debug $PEGFILE" > /dev/stderr
     run "$PEGOF" -I --debug "$PEGFILE"
     check_error
 }
