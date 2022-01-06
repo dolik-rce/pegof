@@ -133,10 +133,11 @@ identifier <- [_a-zA-Z] [_a-zA-Z0-9]*
 
 ruleref
     <- <identifier> ":" <identifier> !(_* "<-") {
-        $$ = create_ast_leaf(AST_RULEREF, $2, $2s);
+        $$ = create_ast_node(AST_RULEREF);
         append_child($$, create_ast_leaf(AST_VAR, $1, $1s));
+        append_child($$, create_ast_leaf(AST_REFNAME, $2, $2s));
     }
-    / <identifier> !(_* "<-") { $$ = create_ast_leaf(AST_RULEREF, $3, $3s); }
+    / <identifier> !(_* "<-") { $$ = create_ast_leaf(AST_REFNAME, $3, $3s); }
 
 prefix_op <- [&!] { $$ = create_ast_leaf(AST_PREFIX_OP, $0, $0s); }
 

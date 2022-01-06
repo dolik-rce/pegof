@@ -23,6 +23,7 @@ typedef enum AstNodeTypeTag {
     AST_PREFIX_OP,
     AST_POSTFIX_OP,
     AST_RULEREF,
+    AST_REFNAME,
     AST_VAR,
     AST_STRING,
     AST_CHARCLASS,

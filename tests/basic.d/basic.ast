@@ -3,9 +3,9 @@ GRAMMAR:
     RULE_NAME: "main" line=1, col=1
     ALTERNATION:
       SEQUENCE:
-        RULEREF: "A" line=1, col=9
-        RULEREF: "B" line=1, col=11
-      RULEREF: "C" line=1, col=15
+        REFNAME: "A" line=1, col=9
+        REFNAME: "B" line=1, col=11
+      REFNAME: "C" line=1, col=15
   RULE:
     RULE_NAME: "A" line=2, col=1
     STRING: "A" line=2, col=7

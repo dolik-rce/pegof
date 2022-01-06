@@ -2,9 +2,10 @@
 #include "config.h"
 #include "io.h"
 
-#include <sstream>
 #include <algorithm>
 #include <climits>
+#include <regex>
+#include <sstream>
 
 enum TrimType {
     TRIM_LEFT = 1,
@@ -65,6 +66,7 @@ const char* AstNode::get_type_name() const {
     case AST_PREFIX_OP:         return "PREFIX_OP";
     case AST_POSTFIX_OP:        return "POSTFIX_OP";
     case AST_RULEREF:           return "RULEREF";
+    case AST_REFNAME:           return "REFNAME";
     case AST_VAR:               return "VAR";
     case AST_STRING:            return "STRING";
     case AST_CHARCLASS:         return "CHARCLASS";
@@ -72,7 +74,9 @@ const char* AstNode::get_type_name() const {
     case AST_BACKREF:           return "BACKREF";
     case AST_GROUP:             return "GROUP";
     case AST_CAPTURE:           return "CAPTURE";
-    default:                    return "UNKNOWN";
+    default:
+        Io::debug("ERROR: unexpected AST node type!\n");
+        exit(2);
     }
 }
 
@@ -193,12 +197,12 @@ void AstNode::format_group(const char open, const char close) const {
 }
 
 void AstNode::format_ruleref() const {
-    if (children.size() > 0) {
+    children[0]->format();
+    if (children.size() == 2) {
         // has variable
-        children[0]->format();
         Io::print(":");
+        children[1]->format();
     }
-    Io::print("%s", text.c_str());
 }
 
 void AstNode::format_rule() const {
@@ -285,6 +289,7 @@ void AstNode::format() const {
     case AST_RULE_NAME:
     case AST_DIRECTIVE_NAME:
     case AST_VAR:
+    case AST_REFNAME:
     case AST_PREFIX_OP:
     case AST_POSTFIX_OP:
     case AST_CHARCLASS:
@@ -292,6 +297,9 @@ void AstNode::format() const {
     case AST_BACKREF:
         format_terminal();
         break;
+    default:
+        Io::debug("ERROR: unexpected AST node type!\n");
+        exit(2);
     }
 }
 
@@ -344,6 +352,20 @@ int AstNode::optimize_strip_comment() {
     return 1;
 }
 
+int AstNode::optimize_unused_variable() {
+    AstNode* rule = find_parent(AST_RULE);
+    std::regex re(".*\\b" + text + "\\b.*");
+    std::vector<AstNode*> sources = rule->find_all([re](const AstNode& node) {
+        return node.type == AST_SOURCE && std::regex_match(node.text, re);
+    }, false);
+    if (!sources.empty()) {
+        return 0;
+    }
+    Io::debug("  Removing unused variable reference '%s' in rule '%s'\n", text.c_str(), rule->children[0]->text.c_str());
+    parent->remove_child(this);
+    return 1;
+}
+
 int AstNode::optimize_inline_rule() {
     // check that rule contents are inlinable
     AstNode* rule = children[1];
@@ -358,7 +380,7 @@ int AstNode::optimize_inline_rule() {
 
     std::string name = children[0]->text;
     vector<AstNode*> refs = find_all([name](const AstNode& node) {
-        return node.type == AST_RULEREF && node.text == name;
+        return node.type == AST_REFNAME && node.text == name;
     });
     if (refs.empty() || refs.size() > Config::get().inline_limit) {
         return 0;
@@ -392,30 +414,16 @@ int AstNode::optimize_grammar() {
     return total;
 }
 
-int AstNode::optimize_sequence() {
-    return optimize_children() + optimize_single_child() + optimize_strings();
-}
-
-int AstNode::optimize_alternation() {
-    return optimize_children() + optimize_single_child();
-}
-
-int AstNode::optimize_primary() {
-    return optimize_children() + optimize_single_child();
-}
-
-int AstNode::optimize_rule() {
-    return optimize_children() + optimize_inline_rule();
-}
-
 int AstNode::optimize() {
     switch (type) {
     case AST_GRAMMAR:           return optimize_grammar();
-    case AST_PRIMARY:           return optimize_primary();
-    case AST_ALTERNATION:       return optimize_alternation();
-    case AST_SEQUENCE:          return optimize_sequence();
+    case AST_RULE:              return optimize_children() + optimize_inline_rule();
+    case AST_ALTERNATION:       return optimize_children() + optimize_single_child();
+    case AST_PRIMARY:           return optimize_children() + optimize_single_child();
+    case AST_RULEREF:           return optimize_children() + optimize_single_child();
+    case AST_SEQUENCE:          return optimize_children() + optimize_single_child() + optimize_strings();
     case AST_COMMENT:           return optimize_strip_comment();
-    case AST_RULE:              return optimize_rule();
+    case AST_VAR:               return optimize_unused_variable();
 
     // everything else just call optimize on children
     case AST_DIRECTIVE:
@@ -423,12 +431,11 @@ int AstNode::optimize() {
     case AST_SOURCE:
     case AST_ERROR:
     case AST_STRING:
-    case AST_RULEREF:
+    case AST_REFNAME:
     case AST_GROUP:
     case AST_CAPTURE:
     case AST_RULE_NAME:
     case AST_DIRECTIVE_NAME:
-    case AST_VAR:
     case AST_PREFIX_OP:
     case AST_POSTFIX_OP:
     case AST_CHARCLASS:
@@ -436,7 +443,8 @@ int AstNode::optimize() {
     case AST_BACKREF:
         return optimize_children();
     }
-    throw "ERROR: unexpected AST node type!";
+    Io::debug("ERROR: unexpected AST node type!\n");
+    exit(2);
 }
 
 AstNode::AstNode(AstNodeType type, string text, size_t line, size_t column) :

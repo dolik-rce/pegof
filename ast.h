@@ -44,15 +44,11 @@ private:
     void format_group(const char open, const char close) const;
 
     int optimize_grammar();
-    int optimize_sequence();
-    int optimize_alternation();
-    int optimize_primary();
-    int optimize_rule();
-
     int optimize_single_child();
     int optimize_strings();
     int optimize_strip_comment();
     int optimize_inline_rule();
+    int optimize_unused_variable();
     int optimize_children();
 
 public:

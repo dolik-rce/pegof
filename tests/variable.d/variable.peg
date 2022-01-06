@@ -1,0 +1,5 @@
+%value "char"
+
+X <- a:A B { printf("%c\n", a); }
+A <- .* { $$ = 'a'; }
+B <- "B" a:A { $$ = 'blah'; }
