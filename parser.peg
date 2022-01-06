@@ -17,7 +17,7 @@
 
 grammar <- _* l:statement_list _* <c:code?> EOF {
         $$ = l;
-        if ($1s != $1e) append_child($$, c);
+        if (c) append_child($$, c);
     }
 
 statement_list
@@ -91,16 +91,16 @@ sequence
 
 primary
     <- c:suffix_comment { $$ = c; }
-    / <pr:prefix_op?> _* l:literal _* <po:postfix_op?> (_* <s:source> / _* <e:error>)? {
-        if ($1s == $1e && $2s == $2e && $3s == $3e && $4s == $4e) {
+    / (pr:prefix_op? _* l:literal _* po:postfix_op? (_* <s:source> / _* <e:error>)?) {
+        if (!(pr || po || s || e )) {
             $$ = l;
         } else {
             $$ = create_ast_node(AST_PRIMARY);
-            if ($1s != $1e) append_child($$, pr);
+            if (pr) append_child($$, pr);
             append_child($$, l);
-            if ($2s != $2e) append_child($$, po);
-            if ($3s != $3e) append_child($$, s);
-            if ($4s != $4e) append_child($$, e);
+            if (po) append_child($$, po);
+            if (s) append_child($$, s);
+            if (e) append_child($$, e);
         }
     }
 
