@@ -249,13 +249,15 @@ AstNode* AstNode::find_parent(AstNodeType type) const {
 }
 
 vector<AstNode*> AstNode::find_all(const std::function <bool(const AstNode&)>& predicate, const bool global) const {
-    AstNode *node = global ? find_parent(AST_GRAMMAR) : const_cast<AstNode*>(this);
-    vector<AstNode*> result;
-    if (predicate(*node)) {
-        result.push_back(node);
+    if (global) {
+        return find_parent(AST_GRAMMAR)->find_all(predicate);
     }
-    for (int i = 0; i < node->children.size(); i++) {
-        vector<AstNode*> subresults = node->children[i]->find_all(predicate, false);
+    vector<AstNode*> result;
+    if (predicate(*this)) {
+        result.push_back(const_cast<AstNode *>(this));
+    }
+    for (int i = 0; i < children.size(); i++) {
+        vector<AstNode*> subresults = children[i]->find_all(predicate);
         if (!subresults.empty()) {
             result.insert(result.end(), subresults.begin(), subresults.end());
         }
@@ -352,12 +354,67 @@ int AstNode::optimize_strip_comment() {
     return 1;
 }
 
+int AstNode::optimize_unused_captures() {
+    std::vector<AstNode *> captures = find_all([](const AstNode& node) {
+        return node.type == AST_CAPTURE;
+    });
+    if (captures.empty()) {
+        return 0;
+    }
+    std::vector<AstNode*> sources = find_all([](const AstNode& node) {
+        return node.type == AST_SOURCE;
+    });
+    std::vector<AstNode*> backrefs = find_all([](const AstNode& node) {
+        return node.type == AST_BACKREF;
+    });
+
+    for (int i = 0; i < captures.size(); i++) {
+        std::string ref("$" + std::to_string(i+1));
+        std::regex re(".*\\" + ref + "\\b.*");
+        bool used_in_source = std::any_of(sources.begin(), sources.end(), [re](const AstNode *node){
+            return std::regex_match(node->text, re);
+        });
+        bool used_in_backref = std::any_of(backrefs.begin(), backrefs.end(), [ref](const AstNode *node){
+            return ref == node->text;
+        });
+        if (used_in_source || used_in_backref) {
+            continue;
+        }
+        Io::debug("  Removing unused capture $%d in rule '%s'\n", i+1, children[0]->text.c_str());
+
+        // move following captures one index back
+        for (int j = i + 1; j < captures.size(); j++) {
+            std::regex re_capture("\\$" + std::to_string(j+1) + "\\b");
+            std::string replace = "$$" + std::to_string(j);
+            for (int s = 0; s < sources.size(); s++) {
+                sources[s]->text = std::regex_replace(sources[s]->text, re_capture, replace);
+            }
+            for (int b = 0; b < backrefs.size(); b++) {
+                if (backrefs[b]->text == "$" + std::to_string(j+1)) {
+                    backrefs[b]->text = "$" + std::to_string(j);
+                }
+            }
+        }
+        // remove capture from AST
+        AstNode* child = captures[i]->children[0];
+        captures[i]->text = child->text;
+        captures[i]->type = child->type;
+        captures[i]->line = child->line;
+        captures[i]->column = child->column;
+        captures[i]->children = child->children;
+        child->children.clear(); // clear children to avoid their recursive deletion
+        delete child;
+        return 1;
+    }
+    return 0;
+}
+
 int AstNode::optimize_unused_variable() {
     AstNode* rule = find_parent(AST_RULE);
     std::regex re(".*\\b" + text + "\\b.*");
     std::vector<AstNode*> sources = rule->find_all([re](const AstNode& node) {
         return node.type == AST_SOURCE && std::regex_match(node.text, re);
-    }, false);
+    });
     if (!sources.empty()) {
         return 0;
     }
@@ -373,7 +430,7 @@ int AstNode::optimize_inline_rule() {
         return node.type == AST_SOURCE
                || node.type == AST_VAR
                || node.type == AST_CAPTURE;
-    }, false);
+    });
     if (!uninlinable.empty()) {
         return 0;
     }
@@ -381,7 +438,7 @@ int AstNode::optimize_inline_rule() {
     std::string name = children[0]->text;
     vector<AstNode*> refs = find_all([name](const AstNode& node) {
         return node.type == AST_REFNAME && node.text == name;
-    });
+    }, true);
     if (refs.empty() || refs.size() > Config::get().inline_limit) {
         return 0;
     }
@@ -417,7 +474,7 @@ int AstNode::optimize_grammar() {
 int AstNode::optimize() {
     switch (type) {
     case AST_GRAMMAR:           return optimize_grammar();
-    case AST_RULE:              return optimize_children() + optimize_inline_rule();
+    case AST_RULE:              return optimize_children() + optimize_unused_captures() + optimize_inline_rule();
     case AST_ALTERNATION:       return optimize_children() + optimize_single_child();
     case AST_PRIMARY:           return optimize_children() + optimize_single_child();
     case AST_RULEREF:           return optimize_children() + optimize_single_child();

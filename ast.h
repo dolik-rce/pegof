@@ -22,7 +22,7 @@ private:
     AstNode* parent;
 
     AstNode* find_parent(AstNodeType type) const;
-    vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, const bool global = true) const;
+    vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, const bool global = false) const;
 
     const char* get_type_name() const;
 
@@ -49,6 +49,7 @@ private:
     int optimize_strip_comment();
     int optimize_inline_rule();
     int optimize_unused_variable();
+    int optimize_unused_captures();
     int optimize_children();
 
 public:
