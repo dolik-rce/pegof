@@ -13,19 +13,19 @@ enum TrimType {
     TRIM_BOTH = TRIM_LEFT | TRIM_RIGHT
 };
 
-static string trim(const string& str, TrimType type = TRIM_BOTH) {
+static std::string trim(const std::string& str, TrimType type = TRIM_BOTH) {
     size_t start = (type & TRIM_LEFT) ? str.find_first_not_of(" \t\r\n") : 0;
     size_t end = (type & TRIM_RIGHT) ? str.find_last_not_of(" \t\r\n") + 1 : str.size();
-    if (start == string::npos) {
+    if (start == std::string::npos) {
         start = 0;
     }
-    return string(str.c_str() + start, end - start);
+    return std::string(str.c_str() + start, end - start);
 }
 
-static void reindent(const string& str, int baseindent) {
+static void reindent(const std::string& str, int baseindent) {
     std::stringstream stream(str);
-    string line;
-    vector<string> lines;
+    std::string line;
+    std::vector<std::string> lines;
     int min_indent = INT_MAX;
     while(std::getline(stream, line)) {
         if (trim(line).empty()) {
@@ -131,9 +131,9 @@ void AstNode::format_string() const {
 }
 
 void AstNode::format_source() const {
-    string trimmed = trim(text);
+    std::string trimmed = trim(text);
 
-    bool has_newlines = trimmed.find_first_of('\n') != string::npos;
+    bool has_newlines = trimmed.find_first_of('\n') != std::string::npos;
     bool is_c_directive = trimmed[0] == '#'; // PackCC doesn't currently support single line C directives like %header { #include "x.h" }
 
     int is_directive = parent->type == AST_DIRECTIVE;
@@ -248,16 +248,16 @@ AstNode* AstNode::find_parent(AstNodeType type) const {
     }
 }
 
-vector<AstNode*> AstNode::find_all(const std::function <bool(const AstNode&)>& predicate, const bool global) const {
+std::vector<AstNode*> AstNode::find_all(const std::function <bool(const AstNode&)>& predicate, const bool global) const {
     if (global) {
         return find_parent(AST_GRAMMAR)->find_all(predicate);
     }
-    vector<AstNode*> result;
+    std::vector<AstNode*> result;
     if (predicate(*this)) {
         result.push_back(const_cast<AstNode *>(this));
     }
     for (int i = 0; i < children.size(); i++) {
-        vector<AstNode*> subresults = children[i]->find_all(predicate);
+        std::vector<AstNode*> subresults = children[i]->find_all(predicate);
         if (!subresults.empty()) {
             result.insert(result.end(), subresults.begin(), subresults.end());
         }
@@ -426,7 +426,7 @@ int AstNode::optimize_unused_variable() {
 int AstNode::optimize_inline_rule() {
     // check that rule contents are inlinable
     AstNode* rule = children[1];
-    vector<AstNode*> uninlinable = rule->find_all([](const AstNode& node) {
+    std::vector<AstNode*> uninlinable = rule->find_all([](const AstNode& node) {
         return node.type == AST_SOURCE
                || node.type == AST_VAR
                || node.type == AST_CAPTURE;
@@ -436,7 +436,7 @@ int AstNode::optimize_inline_rule() {
     }
 
     std::string name = children[0]->text;
-    vector<AstNode*> refs = find_all([name](const AstNode& node) {
+    std::vector<AstNode*> refs = find_all([name](const AstNode& node) {
         return node.type == AST_REFNAME && node.text == name;
     }, true);
     if (refs.empty() || refs.size() > Config::get().inline_limit) {
@@ -504,7 +504,7 @@ int AstNode::optimize() {
     exit(2);
 }
 
-AstNode::AstNode(AstNodeType type, string text, size_t line, size_t column) :
+AstNode::AstNode(AstNodeType type, std::string text, size_t line, size_t column) :
     text(text), type(type), line(line), column(column), parent(NULL)
 {
     //~ printf("CREATE %p (size=%ld, parent=%p, type=%s)\n", this, children.size(), parent, getTypeName());

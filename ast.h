@@ -8,21 +8,18 @@
 #include <memory>
 #include <functional>
 
-using std::string;
-using std::vector;
-
 struct AstNode {
 private:
-    string text;
+    std::string text;
     AstNodeType type;
     int line;
     int column;
 
-    vector<AstNode*> children;
+    std::vector<AstNode*> children;
     AstNode* parent;
 
     AstNode* find_parent(AstNodeType type) const;
-    vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, const bool global = false) const;
+    std::vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, const bool global = false) const;
 
     const char* get_type_name() const;
 
@@ -58,7 +55,7 @@ public:
     void format() const;
     int optimize();
 
-    AstNode(AstNodeType type, string text = "", size_t line = -1, size_t column=-1);
+    AstNode(AstNodeType type, std::string text = "", size_t line = -1, size_t column=-1);
     AstNode(const AstNode& other, AstNode* parent);
     ~AstNode();
 };
