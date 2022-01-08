@@ -462,11 +462,15 @@ int AstNode::optimize_inline_rule() {
 
 int AstNode::optimize_grammar() {
     int total = 0;
-    for (int optimized = -1, i = 0; optimized != 0; i++) {
+    for (int optimized = -1, i = 1; optimized != 0; i++) {
         Io::debug("Optimization pass %d:\n", i);
         optimized = optimize_children();
-        total += optimized;
-        Io::debug(" => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);
+        if (optimized) {
+            total += optimized;
+            Io::debug(" => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);
+        } else {
+            Io::debug(" => No more optimizations found, ending now (total %d optimizations) \n", optimized, optimized == 1 ? "" : "s", i, total);
+        }
     };
     return total;
 }
@@ -502,6 +506,18 @@ int AstNode::optimize() {
     }
     Io::debug("ERROR: unexpected AST node type!\n");
     exit(2);
+}
+
+void AstNode::debug() {
+    Io::print("### Original AST:\n");
+    print_ast();
+    Io::print("### Original formatted:\n");
+    format();
+    optimize();
+    Io::print("### Optimized AST:\n");
+    print_ast();
+    Io::print("### Optimized formatted:\n");
+    format();
 }
 
 AstNode::AstNode(AstNodeType type, std::string text, size_t line, size_t column) :

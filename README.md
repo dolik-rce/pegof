@@ -25,6 +25,7 @@ Currently implemented optimizations:
 
     -h, --help      Print this text
     -c, --conf      Use given configuration file
+    -v, --verbose   Verbose logging to stderr
 
 ### Input/output options:
 

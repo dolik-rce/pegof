@@ -17,6 +17,7 @@ void Config::usage(const std::string& error) {
     printf("Basic options:\n");
     printf("    -h, --help      Print this text\n");
     printf("    -c, --conf      Use given configuration file\n");
+    printf("    -v, --verbose   Verbose logging to stderr\n");
     printf("\n");
     printf("Input/output options:\n");
     printf("    -f, --format    Output formatted grammar (default)\n");
@@ -74,8 +75,12 @@ int Config::set_ast() {
 }
 
 int Config::set_debug() {
-    Io::set_debug_mode(true);
     output_type = OT_DEBUG;
+    return 0;
+}
+
+int Config::set_verbose() {
+    Io::set_verbose(true);
     return 0;
 }
 
@@ -213,6 +218,8 @@ Config::Config(int argc, char **argv) :
     args["usage"] = &Config::help;
     args["c"] = &Config::load_config;
     args["conf"] = &Config::load_config;
+    args["v"] = &Config::set_verbose;
+    args["verbose"] = &Config::set_verbose;
     args["O"] = &Config::set_optimize;
     args["optimize"] = &Config::set_optimize;
     args["f"] = &Config::set_format;

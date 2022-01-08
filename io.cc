@@ -8,10 +8,10 @@
 std::string Io::text;
 size_t Io::pos = 0;
 FILE *Io::output = stdin;
-bool Io::debug_mode = false;
+bool Io::verbose = false;
 
-void Io::set_debug_mode(const bool enabled) {
-    debug_mode = enabled;
+void Io::set_verbose(const bool enabled) {
+    verbose = enabled;
 }
 
 

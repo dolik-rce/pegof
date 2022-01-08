@@ -38,6 +38,7 @@ private:
     int set_format();
     int set_ast();
     int set_debug();
+    int set_verbose();
     int set_double_quotes();
     int set_single_quotes();
     int set_inline_limit();

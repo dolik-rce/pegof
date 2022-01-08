@@ -20,16 +20,7 @@ int Parser::parse_all() {
 
         switch (conf.output_type) {
         case Config::OT_DEBUG:
-            Io::debug("### Original AST:\n");
-            grammar->print_ast();
-            Io::debug("### Original formatted:\n");
-            grammar->format();
-            Io::debug("### Optimizing:\n");
-            grammar->optimize();
-            Io::debug("### Optimized AST:\n");
-            grammar->print_ast();
-            Io::debug("### Optimized formatted:\n");
-            grammar->format();
+            grammar->debug();
             break;
         case Config::OT_AST:
             conf.optimize && grammar->optimize();
