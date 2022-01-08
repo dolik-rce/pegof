@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-generate_test() {
-    if [ -f "$1" ]; then
-        echo
-        echo "@test \"$(basename "$INPUT") - $2\" {"
-        echo "    run_test \"$3\" \"$INPUT\" \"$1\""
-        echo "}"
+get_inputs() {
+    sed -n '/^input/s/input\s\+//p;' "$1"
+}
+
+get_outputs() {
+    if grep inplace "$1"; then
+        get_inputs "$1"
+    else
+        sed -n '/^output/s/output\s\+//p;' "$1"
     fi
 }
 
@@ -14,18 +17,27 @@ generate_bats() {
 #!/usr/bin/env bats
 load $TESTDIR/utils.sh
 EOF
-    for INPUT in "$1"/*.peg; do
-        [[ $INPUT =~ _(formatted|optimized).peg ]] && continue
-        generate_test "${INPUT/.peg/_formatted.peg}" Formatting --format
-        generate_test "${INPUT/.peg/.ast}" AST --ast
-        generate_test "${INPUT/.peg/_optimized.ast}" "Optimized AST" "--optimize --ast"
-        generate_test "${INPUT/.peg/_optimized.peg}" Optimization --optimize
+    for CONF in "$1"/*.conf; do
+        [ -e "$CONF" ] || continue
+        echo
+        echo "@test \"$(dirname "$CONF") - $(basename "$CONF" .conf)\" {"
+        INPUT=""
+        [ -e "${CONF//.conf/.in}" ] && INPUT=" < ${CONF//.conf/.in}"
+        echo "    run_test \"$CONF\" \"$(get_inputs "$CONF")\"$INPUT"
+        echo "    check_status ${CONF//.conf/}.status"
+        [ -e "${CONF//.conf/.out}" ] && echo "    check_stdout \"${CONF//.conf/.out}\""
+        mapfile -t OUTPUTS <<<"$(get_outputs "$CONF")"
+        for OUTPUT in "${OUTPUTS[@]}"; do
+            [ -e "${OUTPUT//.tmp/.expected}" ] || continue
+            echo "    check_file \"$OUTPUT\" \"${OUTPUT//.tmp/.expected}\""
+        done
+        echo "}"
     done
 }
 
 
 clean() {
-    rm -f *.d/test.bats *.d/*.out *.d/*.tmp
+    rm -f *.d/test.bats *.d/*.tmp
 }
 
 main() {
@@ -46,7 +58,7 @@ main() {
     for DIR in *.d; do
         # Do not generate test file if the directory already contains some
         ls "$DIR"/*.bats &> /dev/null && continue
-        generate_bats "$DIR" > "$DIR/test.bats"
+        generate_bats "$DIR" > "$DIR/generated.bats"
     done
 
     echo "Running tests:"
