@@ -355,6 +355,9 @@ int AstNode::optimize_strip_comment() {
 }
 
 int AstNode::optimize_unused_captures() {
+    if (Config::get().keep_unused_captures) {
+        return 0;
+    }
     std::vector<AstNode *> captures = find_all([](const AstNode& node) {
         return node.type == AST_CAPTURE;
     });
@@ -410,6 +413,9 @@ int AstNode::optimize_unused_captures() {
 }
 
 int AstNode::optimize_unused_variable() {
+    if (Config::get().keep_unused_variables) {
+        return 0;
+    }
     AstNode* rule = find_parent(AST_RULE);
     std::regex re(".*\\b" + text + "\\b.*");
     std::vector<AstNode*> sources = rule->find_all([re](const AstNode& node) {

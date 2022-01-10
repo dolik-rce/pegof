@@ -52,9 +52,11 @@ Currently implemented optimizations:
 
 ### Optimization options:
 
-    -O, --optimize      Apply optimizations
-    --inline-limit N    Maximum number of references rule can have
-                        and still be inlined (default 10)
+    -O, --optimize          Apply optimizations
+    --keep-unused-captures  Do not discard unused captures\
+    --keep-unused-variables Do not discard unused variables
+    --inline-limit N        Maximum number of references rule can have
+                            and still be inlined (default 10)
 
 ## Configuration file
 

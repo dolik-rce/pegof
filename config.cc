@@ -39,9 +39,11 @@ void Config::usage(const std::string& error) {
     printf("    --wrap-limit N  Wrap alternations with more than N sequences (default 1)\n");
     printf("\n");
     printf("Optimization options:\n");
-    printf("    -O, --optimize      Apply optimizations\n");
-    printf("    --inline-limit N    Maximum number of references rule can have\n");
-    printf("                        and still be inlined (default 10)\n");
+    printf("    -O, --optimize          Apply optimizations\n");
+    printf("    --keep-unused-captures  Do not discard unused captures\n");
+    printf("    --keep-unused-variables Do not discard unused variables\n");
+    printf("    --inline-limit N        Maximum number of references rule can have\n");
+    printf("                            and still be inlined (default 10)\n");
 
     if (!error.empty()) {
         printf("\nERROR: %s\n", error.c_str());
@@ -91,6 +93,16 @@ int Config::set_single_quotes() {
 
 int Config::set_double_quotes() {
     use_double_quotes = true;
+    return 0;
+}
+
+int Config::set_keep_unused_captures() {
+    keep_unused_captures = true;
+    return 0;
+}
+
+int Config::set_keep_unused_variables() {
+    keep_unused_variables = true;
     return 0;
 }
 
@@ -207,7 +219,8 @@ const Config& Config::get() {
 }
 
 Config::Config(int argc, char **argv) :
-    optimize(false), inplace(false), use_double_quotes(true), inline_limit(10), wrap_limit(1), output_type(OT_FORMAT)
+    optimize(false), inplace(false), use_double_quotes(true), keep_unused_captures(false), keep_unused_variables(false),
+    inline_limit(10), wrap_limit(1), output_type(OT_FORMAT)
 {
     if (instance) {
         fprintf(stderr, "Internal error, Config instance already exists!\n");
@@ -232,6 +245,8 @@ Config::Config(int argc, char **argv) :
     args["inplace"] = &Config::set_inplace;
     args["i"] = &Config::set_input;
     args["double-quotes"] = &Config::set_double_quotes;
+    args["keep-unused-captures"] = &Config::set_keep_unused_captures;
+    args["keep-unused-variables"] = &Config::set_keep_unused_variables;
     args["single-quotes"] = &Config::set_single_quotes;
     args["inline-limit"] = &Config::set_inline_limit;
     args["wrap-limit"] = &Config::set_wrap_limit;

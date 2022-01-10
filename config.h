@@ -15,6 +15,8 @@ struct Config {
     bool optimize;
     bool inplace;
     bool use_double_quotes;
+    bool keep_unused_captures;
+    bool keep_unused_variables;
     int inline_limit;
     int wrap_limit;
     OutputType output_type;
@@ -40,6 +42,8 @@ private:
     int set_debug();
     int set_verbose();
     int set_double_quotes();
+    int set_keep_unused_captures();
+    int set_keep_unused_variables();
     int set_single_quotes();
     int set_inline_limit();
     int set_wrap_limit();
