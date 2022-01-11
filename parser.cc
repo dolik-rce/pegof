@@ -23,11 +23,11 @@ int Parser::parse_all() {
             grammar->debug();
             break;
         case Config::OT_AST:
-            conf.optimize && grammar->optimize();
+            Config::get<bool>("optimize") && grammar->optimize();
             grammar->print_ast();
             break;
         case Config::OT_FORMAT:
-            conf.optimize && grammar->optimize();
+            Config::get<bool>("optimize") && grammar->optimize();
             grammar->format();
         }
         if (grammar) {

@@ -13,50 +13,58 @@ as much as possible.
 Currently implemented optimizations:
  - **Rule inlining:** Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser.
  - **String concatenation:** Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
- - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
  - **Removing unused captures:** Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
+ - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
  - **Removing comments:** This makes it simpler to implement the other optimizations. Also, most of the comments would not make much sense in the reorganized grammar.
 
 ## Usage:
 
-    pegof [-h|--help|--usage]
     pegof [<options>] [--] [<input_file> ...]
 
 ### Basic options:
-
-    -h, --help      Print this text
-    -c, --conf      Use given configuration file
-    -v, --verbose   Verbose logging to stderr
+    -h/--help
+        Show help (this text)
+    -c/--conf FILE
+        Use given configuration file
+    -v/--verbose
+        Verbose logging to stderr
 
 ### Input/output options:
+    -f/--format
+        Output formatted grammar (default)
+    -a/--ast
+        Output abstract syntax tree representation
+    -d/--debug
+        Output debug info (includes AST and formatted output)
+    -I/--inplace
+        Modify the input files (only when formatting)
+    -i/--input FILE
+        Path to file with PEG grammar, multiple paths can be given
+        Value "-" can be used to specify standard input
+        Mainly useful for config file
+        If no file or --input is given, read standard input.
+    -o/--output FILE
+        Output to file (should be repeated if there is more inputs)
+        Value "-" can be used to specify standard output
+        Must not be used together with --inplace.
 
-    -f, --format    Output formatted grammar (default)
-    -a, --ast       Output abstract syntax tree representation
-    -d, --debug     Output debug info (includes AST and formatted output)
-    -I, --inplace   Modify the input files (only when formatting)
-    -i, --input     Path to file with PEG grammar, multiple paths can be given
-                    Value "-" can be used to specify standard input
-                    Mainly useful for config file
-    -o, --output    Output to file (should be repeated if there is more inputs)
-                    Value "-" can be used to specify standard output
-                    Must not be used together with --inplace
-    <input_file>    Any non-arguments will be treated if passed to --input
-                    If no file or --input is given, read standard input
-
-### Formating options:
-
-    --double-quotes Use double quoted strings (default)
-    --single-quotes Use single quoted strings
-    --wrap-limit N  Wrap alternations with more than N sequences (default 1)
+### Formatting options:
+    -q/--quotes single/double
+        Switch between double and single quoted strings (defaults to double)
+    -w/--wrap-limit N
+        Wrap alternations with more than N sequences (default 1)
 
 ### Optimization options:
-
-    -O, --optimize          Apply optimizations
-    --keep-unused-captures  Do not discard unused captures\
-    --keep-unused-variables Do not discard unused variables
-    --inline-limit N        Maximum number of references rule can have
-                            and still be inlined (default 10)
+    -O/--optimize
+        Apply optimizations
+    -C/--keep-captures
+        Do not discard unused captures
+    -V/--keep-variables
+        Do not discard unused variables
+    -l/--inline-limit N
+        Maximum number of references rule can have and still
+        be inlined (default 10)
 
 ## Configuration file
 

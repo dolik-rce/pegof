@@ -8,12 +8,6 @@
 std::string Io::text;
 size_t Io::pos = 0;
 FILE *Io::output = stdin;
-bool Io::verbose = false;
-
-void Io::set_verbose(const bool enabled) {
-    verbose = enabled;
-}
-
 
 void Io::open(const std::string& input_path, const std::string& output_path) {
     std::stringstream stream;

@@ -108,7 +108,7 @@ void AstNode::format_grammar() const {
 }
 
 void AstNode::format_string() const {
-    char quote = Config::get().use_double_quotes ? '\"' : '\'';
+    char quote = Config::get<Config::QuoteType>("quotes") == Config::QT_SINGLE ? '\'' : '\"';
     char other = quote == '\"' ? '\'' : '\"';
     Io::print("%c", quote);
     char next = 0;
@@ -165,7 +165,7 @@ void AstNode::format_directive() const {
 }
 
 void AstNode::format_alternation() const {
-    int multiline = children.size() > Config::get().wrap_limit && parent->type == AST_RULE;
+    int multiline = children.size() > Config::get<int>("wrap-limit") && parent->type == AST_RULE;
     const char *delim = multiline ? "\n    / " : " / ";
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
@@ -355,7 +355,7 @@ int AstNode::optimize_strip_comment() {
 }
 
 int AstNode::optimize_unused_captures() {
-    if (Config::get().keep_unused_captures) {
+    if (Config::get<bool>("keep-captures")) {
         return 0;
     }
     std::vector<AstNode *> captures = find_all([](const AstNode& node) {
@@ -413,7 +413,7 @@ int AstNode::optimize_unused_captures() {
 }
 
 int AstNode::optimize_unused_variable() {
-    if (Config::get().keep_unused_variables) {
+    if (Config::get<bool>("keep-variables")) {
         return 0;
     }
     AstNode* rule = find_parent(AST_RULE);
@@ -445,7 +445,7 @@ int AstNode::optimize_inline_rule() {
     std::vector<AstNode*> refs = find_all([name](const AstNode& node) {
         return node.type == AST_REFNAME && node.text == name;
     }, true);
-    if (refs.empty() || refs.size() > Config::get().inline_limit) {
+    if (refs.empty() || refs.size() > Config::get<int>("inline-limit")) {
         return 0;
     }
     Io::debug("  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");
@@ -475,7 +475,7 @@ int AstNode::optimize_grammar() {
             total += optimized;
             Io::debug(" => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);
         } else {
-            Io::debug(" => No more optimizations found, ending now (total %d optimizations) \n", optimized, optimized == 1 ? "" : "s", i, total);
+            Io::debug(" => No more optimizations found, ending now (total %d optimizations) \n", total);
         }
     };
     return total;

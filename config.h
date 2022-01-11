@@ -1,6 +1,7 @@
 #ifndef INCLUDED_CONFIG_H
 #define INCLUDED_CONFIG_H
 
+#include <any>
 #include <map>
 #include <string>
 #include <vector>
@@ -12,47 +13,66 @@ struct Config {
         OT_DEBUG
     };
 
-    bool optimize;
-    bool inplace;
-    bool use_double_quotes;
-    bool keep_unused_captures;
-    bool keep_unused_variables;
-    int inline_limit;
-    int wrap_limit;
+    enum QuoteType {
+        QT_DOUBLE,
+        QT_SINGLE
+    };
+
     OutputType output_type;
     std::vector<std::string> inputs;
     std::vector<std::string> outputs;
 
-private:
-    static const Config* instance;
-    std::string next;
-
     typedef int (Config::*MemberFn)();
-    std::map<std::string, MemberFn> args;
+    typedef int (Config::*MemberFn1)(const std::string&);
+
+    enum OptionGroup {
+        OG_BASIC,
+        OG_IO,
+        OG_FORMAT,
+        OG_OPT
+    };
+
+    struct Option {
+        OptionGroup group;
+        std::string shortName;
+        std::string longName;
+        std::any value;
+        std::string description;
+        std::string param;
+
+        template<typename T>
+        Option(
+            OptionGroup group,
+            const std::string& shortName,
+            const std::string& longName,
+            T defaultValue,
+            const std::string& description,
+            const std::string& param = ""
+        ) : group(group), shortName(shortName), longName(longName), value(defaultValue), description(description), param(param)
+        {}
+    };
+
+private:
+    static Config* instance;
+
+    std::vector<Option> args;
 
     void usage(const std::string& error);
     void process_args(const std::vector<std::string>& arguments, const bool config_file);
     void post_process();
 
     int help();
-    int set_optimize();
-    int set_inplace();
-    int set_format();
-    int set_ast();
-    int set_debug();
-    int set_verbose();
-    int set_double_quotes();
-    int set_keep_unused_captures();
-    int set_keep_unused_variables();
-    int set_single_quotes();
-    int set_inline_limit();
-    int set_wrap_limit();
-    int set_input();
-    int set_output();
-    int load_config();
+    int set_input(const std::string& next);
+    int set_output(const std::string& next);
+    int load_config(const std::string& next);
+
+    Option& find_option(const std::string& optionName);
 
 public:
-    static const Config& get();
+    template<typename T>
+    static const T get(std::string optionName) {
+        return std::any_cast<T>(instance->find_option(optionName).value);
+    }
 
     Config(int argc, char **argv);
 };
