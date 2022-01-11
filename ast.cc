@@ -306,6 +306,9 @@ void AstNode::format() const {
 }
 
 int AstNode::optimize_strings() {
+    if (Config::get<bool>("no-concat")) {
+        return 0;
+    }
     int optimized = 0;
     for (size_t i = 1; i < children.size(); i++) {
         AstNode* first = children[i-1];
