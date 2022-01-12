@@ -19,7 +19,6 @@ Currently implemented optimizations:
  - **Removing comments:** This makes it simpler to implement the other optimizations. Also, most of the comments would not make much sense in the reorganized grammar.
 
 ## Usage:
-
     pegof [<options>] [--] [<input_file> ...]
 
 ### Basic options:
@@ -62,6 +61,8 @@ Currently implemented optimizations:
         Do not discard unused captures
     -V/--keep-variables
         Do not discard unused variables
+    -n/--no-concat
+        Do not concatenate adjacent string
     -l/--inline-limit N
         Maximum number of references rule can have and still
         be inlined (default 10)
