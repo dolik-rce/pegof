@@ -28,6 +28,7 @@ private:
     void format_terminal() const;
     void format_grammar() const;
     void format_string() const;
+    void format_character_class() const;
     void format_source() const;
     void format_error() const;
     void format_directive() const;
@@ -43,6 +44,7 @@ private:
     int optimize_grammar();
     int optimize_single_child();
     int optimize_strings();
+    int optimize_character_class();
     int optimize_strip_comment();
     int optimize_inline_rule();
     int optimize_unused_variable();

@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "char_class.h"
 #include "config.h"
 #include "io.h"
 
@@ -128,6 +129,10 @@ void AstNode::format_string() const {
         }
     }
     Io::print("%c", quote);
+}
+
+void AstNode::format_character_class() const {
+    Io::print("[%s]", text.c_str());
 }
 
 void AstNode::format_source() const {
@@ -283,6 +288,7 @@ void AstNode::format() const {
     case AST_RULEREF:           format_ruleref(); break;
     case AST_GROUP:             format_group('(', ')'); break;
     case AST_CAPTURE:           format_group('<', '>'); break;
+    case AST_CHARCLASS:         format_character_class(); break;
     case AST_SOURCE:            format_source(); break;
     case AST_ERROR:             format_error(); break;
     case AST_STRING:            format_string(); break;
@@ -294,7 +300,6 @@ void AstNode::format() const {
     case AST_REFNAME:
     case AST_PREFIX_OP:
     case AST_POSTFIX_OP:
-    case AST_CHARCLASS:
     case AST_DOT:
     case AST_BACKREF:
         format_terminal();
@@ -325,6 +330,18 @@ int AstNode::optimize_strings() {
         }
     }
     return optimized;
+}
+
+int AstNode::optimize_character_class() {
+    if (Config::get<bool>("no-char-class")) {
+        return 0;
+    }
+    std::string normalized = CharacterClass::normalize(text);
+    if (normalized == text) {
+        return 0;
+    }
+    text = normalized;
+    return 1;
 }
 
 int AstNode::optimize_single_child() {
@@ -494,6 +511,7 @@ int AstNode::optimize() {
     case AST_SEQUENCE:          return optimize_children() + optimize_single_child() + optimize_strings();
     case AST_COMMENT:           return optimize_strip_comment();
     case AST_VAR:               return optimize_unused_variable();
+    case AST_CHARCLASS:         return optimize_character_class();
 
     // everything else just call optimize on children
     case AST_DIRECTIVE:
@@ -508,7 +526,6 @@ int AstNode::optimize() {
     case AST_DIRECTIVE_NAME:
     case AST_PREFIX_OP:
     case AST_POSTFIX_OP:
-    case AST_CHARCLASS:
     case AST_DOT:
     case AST_BACKREF:
         return optimize_children();

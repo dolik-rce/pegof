@@ -13,6 +13,7 @@ as much as possible.
 Currently implemented optimizations:
  - **Rule inlining:** Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser.
  - **String concatenation:** Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
+ - **Character class optimization:** Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`.
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
  - **Removing unused captures:** Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
  - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
@@ -63,6 +64,8 @@ Currently implemented optimizations:
         Do not discard unused variables
     -n/--no-concat
         Do not concatenate adjacent string
+    -N/--no-char-class
+        Do not optimize character classes
     -l/--inline-limit N
         Maximum number of references rule can have and still
         be inlined (default 10)
@@ -98,6 +101,10 @@ If the input file contains invalid grammar, pegof only prints `Syntax error`, wi
 Workaround is to run the file through PackCC directly, this will produce much more informative message stating what
 happened and also on which line and column in the input file to look. If the PackCC processes the file without error
 then you've found an error in pegof and bug report would be appreciated.
+
+## Unicode support
+
+This tool is currently lacking proper unicode support in many places. It is planned to be added later.
 
 ## Building
 

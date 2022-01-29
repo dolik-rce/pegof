@@ -127,7 +127,7 @@ character
     <- "\\" .
     / [^\]]
 
-char_class <- "[" "^"? (character ("-" character)?)+ "]" { $$ = create_ast_leaf(AST_CHARCLASS, $0, $0s); }
+char_class <- "[" <"^"? (character ("-" character)?)+> "]" { $$ = create_ast_leaf(AST_CHARCLASS, $1, $1s); }
 
 identifier <- [_a-zA-Z] [_a-zA-Z0-9]*
 

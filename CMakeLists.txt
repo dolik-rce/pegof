@@ -11,7 +11,7 @@ add_custom_command(
     VERBATIM
 )
 
-add_executable(pegof main.cc ast.cc c_api.cc config.cc io.cc peg.c parser.cc)
+add_executable(pegof main.cc ast.cc c_api.cc char_class.cc config.cc io.cc peg.c parser.cc)
 
 add_custom_command(
     TARGET pegof POST_BUILD
