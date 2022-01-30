@@ -6,6 +6,28 @@ void AstNode::append_child(AstNode* node) {
     node->parent = this;
 }
 
+bool AstNode::operator!=(const AstNode& x) const {
+    return !(*this == x);
+}
+
+bool AstNode::operator==(const AstNode& x) const {
+    if (type != x.type) {
+        return false;
+    }
+    if (text != x.text) {
+        return false;
+    }
+    if (children.size() != x.children.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < children.size(); i++) {
+        if (*children[i] != *x.children[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 const char* AstNode::get_type_name() const {
     switch (type) {
     case AST_GRAMMAR:           return "GRAMMAR";
@@ -52,9 +74,31 @@ void AstNode::print_ast(int level) const {
     }
 }
 
+AstNode* AstNode::find_prev_sibling() const {
+    if (!parent) {
+        return NULL;
+    }
+    const std::vector<AstNode*>::iterator self = std::find(parent->children.begin(), parent->children.end(), this);
+    if (self == parent->children.end() || self == parent->children.begin()) {
+        return NULL;
+    }
+    return *(self - 1);
+}
+
+AstNode* AstNode::find_next_sibling() const {
+    if (!parent) {
+        return NULL;
+    }
+    const std::vector<AstNode*>::iterator self = std::find(parent->children.begin(), parent->children.end(), this);
+    if (self == parent->children.end() || self + 1 == parent->children.end()) {
+        return NULL;
+    }
+    return *(self + 1);
+}
+
 AstNode* AstNode::find_parent(AstNodeType type) const {
     if (!parent) {
-        return parent;
+        return NULL;
     } else if (parent->type == type) {
         return parent;
     } else {

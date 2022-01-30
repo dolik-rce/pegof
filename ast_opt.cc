@@ -40,6 +40,86 @@ int AstNode::optimize_character_class() {
     return 1;
 }
 
+int AstNode::optimize_repeats() {
+    if (Config::get<bool>("keep-repeats")) {
+        return 0;
+    }
+
+    if (children.size() != 2 || children[1]->type != AST_POSTFIX_OP) {
+        return 0;
+    }
+
+    AstNode *first(NULL), *second(NULL);
+    char first_op, second_op;
+
+    AstNode* sibling = find_prev_sibling();
+    if (sibling) {
+        AstNode* content;
+        if (sibling->type == AST_PRIMARY
+            && sibling->children.size() == 2
+            && sibling->children[1]->type == AST_POSTFIX_OP
+        ) {
+            content = sibling->children[0];
+            first_op = sibling->children[1]->text[0];
+        } else {
+            content = sibling;
+            first_op = ' ';
+        }
+        if (*content == *children[0]) {
+            first = sibling;
+            second = this;
+            second_op = children[1]->text[0];
+        }
+    }
+
+    if (!first) {
+        sibling = find_next_sibling();
+        if (sibling) {
+            AstNode* content;
+            if (sibling->type == AST_PRIMARY
+                && sibling->children.size() == 2
+                && sibling->children[1]->type == AST_POSTFIX_OP
+            ) {
+                content = sibling->children[0];
+                second_op = sibling->children[1]->text[0];
+            } else {
+                content = sibling;
+                second_op = ' ';
+            }
+            if (*content == *children[0]) {
+                first = this;
+                first_op = children[1]->text[0];
+                second = sibling;
+            }
+        }
+    }
+
+    if (!first) {
+        return 0;
+    }
+
+    if (first_op == '*' && second_op == '*') {
+        Io::debug("  Removing unnecessary repeated node (X* X* -> X*)\n");
+        second->parent->remove_child(second);
+    } else if (first_op == '*' || second_op == '*') {
+        Io::debug("  Removing unnecessary repeated node (X%c X%c -> X+)\n", first_op, second_op);
+        if (first->type == AST_PRIMARY) {
+            first->children[1]->text[0] = '+';
+            first->column = -1;
+            first->line = -1;
+            second->parent->remove_child(second);
+        } else {
+            second->children[1]->text[0] = '+';
+            second->column = -1;
+            second->line = -1;
+            first->parent->remove_child(first);
+        }
+    } else {
+        return 0;
+    }
+    return 1;
+}
+
 int AstNode::optimize_single_child() {
     if (children.size() != 1) {
         return 0;
@@ -202,7 +282,7 @@ int AstNode::optimize() {
     case AST_GRAMMAR:           return optimize_grammar();
     case AST_RULE:              return optimize_children() + optimize_unused_captures() + optimize_inline_rule();
     case AST_ALTERNATION:       return optimize_children() + optimize_single_child();
-    case AST_PRIMARY:           return optimize_children() + optimize_single_child();
+    case AST_PRIMARY:           return optimize_children() + optimize_single_child() + optimize_repeats();
     case AST_RULEREF:           return optimize_children() + optimize_single_child();
     case AST_SEQUENCE:          return optimize_children() + optimize_single_child() + optimize_strings();
     case AST_COMMENT:           return optimize_strip_comment();

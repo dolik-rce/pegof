@@ -18,12 +18,17 @@ private:
     std::vector<AstNode*> children;
     AstNode* parent;
 
+    AstNode* find_prev_sibling() const;
+    AstNode* find_next_sibling() const;
     AstNode* find_parent(AstNodeType type) const;
     std::vector<AstNode*> find_all(const std::function <bool(const AstNode&)>& predicate, const bool global = false) const;
 
     const char* get_type_name() const;
 
     void remove_child(AstNode* child);
+
+    bool operator==(const AstNode& x) const;
+    bool operator!=(const AstNode& x) const;
 
     void format_terminal() const;
     void format_grammar() const;
@@ -45,6 +50,7 @@ private:
     int optimize_single_child();
     int optimize_strings();
     int optimize_character_class();
+    int optimize_repeats();
     int optimize_strip_comment();
     int optimize_inline_rule();
     int optimize_unused_variable();

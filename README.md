@@ -14,6 +14,7 @@ Currently implemented optimizations:
  - **Rule inlining:** Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser.
  - **String concatenation:** Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
  - **Character class optimization:** Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`.
+ - **Remove unnecessary repeats:** Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
  - **Removing unused captures:** Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
  - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
@@ -62,6 +63,8 @@ Currently implemented optimizations:
         Do not discard unused captures
     -V/--keep-variables
         Do not discard unused variables
+    -r/--keep-repeats
+        Do not optimize repeated tokens
     -n/--no-concat
         Do not concatenate adjacent string
     -N/--no-char-class
