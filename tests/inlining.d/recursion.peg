@@ -1,0 +1,8 @@
+X <- A / B
+
+# direct recursion must not be inlined
+A <- "x" A*
+
+# indirect recursion can be partially inlined
+B <- "y" C*
+C <- "z" B*

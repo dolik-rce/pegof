@@ -228,10 +228,11 @@ int AstNode::optimize_unused_variable() {
 int AstNode::optimize_inline_rule() {
     // check that rule contents are inlinable
     AstNode* rule = children[1];
-    std::vector<AstNode*> uninlinable = rule->find_all([](const AstNode& node) {
+    std::vector<AstNode*> uninlinable = rule->find_all([this](const AstNode& node) {
         return node.type == AST_SOURCE
                || node.type == AST_VAR
-               || node.type == AST_CAPTURE;
+               || node.type == AST_CAPTURE
+               || (node.type == AST_REFNAME && node.text == children[0]->text); // contains direct recursion
     });
     if (!uninlinable.empty()) {
         return 0;

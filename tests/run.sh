@@ -37,7 +37,7 @@ EOF
 
 
 clean() {
-    rm -f *.d/test.bats *.d/*.tmp
+    rm -f *.d/generated.bats *.d/*.tmp
 }
 
 main() {
