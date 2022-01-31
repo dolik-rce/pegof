@@ -128,6 +128,15 @@ void AstNode::remove_child(AstNode* child) {
     delete child;
 }
 
+void AstNode::replace_child(AstNode* removed, AstNode* added, bool do_delete) {
+    std::vector<AstNode*>::iterator pos = std::find(children.begin(), children.end(), removed);
+    *pos = added;
+    added->parent = this;
+    if (do_delete) {
+        delete removed;
+    }
+}
+
 void AstNode::debug() {
     Io::print("### Original AST:\n");
     print_ast();

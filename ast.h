@@ -26,6 +26,7 @@ private:
     const char* get_type_name() const;
 
     void remove_child(AstNode* child);
+    void replace_child(AstNode* removed, AstNode* added, bool do_delete = true);
 
     bool operator==(const AstNode& x) const;
     bool operator!=(const AstNode& x) const;

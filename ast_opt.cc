@@ -256,6 +256,12 @@ int AstNode::optimize_inline_rule() {
         for (int j = 0; j < rule->children.size(); j++) {
             refs[i]->children.push_back(new AstNode(*rule->children[j], refs[i]));
         }
+        if (refs[i]->parent->type == AST_PRIMARY) {
+            // references with prefix/postfix need to be wrapped in parentheses, e.g. (A B)*
+            AstNode* group = new AstNode(AST_GROUP);
+            group->children.push_back(refs[i]);
+            refs[i]->parent->replace_child(refs[i], group, false);
+        }
     }
     // delete the rule
     parent->remove_child(this);
