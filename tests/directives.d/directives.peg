@@ -2,7 +2,7 @@
 %value "value"
 %auxil "auxil"
 
-%header { header }
+%header { #define TEST 1 }
 %source {source}
 %common {    common   }
 

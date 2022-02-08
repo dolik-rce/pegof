@@ -120,7 +120,7 @@ void AstNode::format_source() const {
     std::string trimmed = trim(text);
 
     bool has_newlines = trimmed.find_first_of('\n') != std::string::npos;
-    bool is_c_directive = trimmed[0] == '#'; // PackCC doesn't currently support single line C directives like %header { #include "x.h" }
+    bool is_c_directive = trimmed[0] == '#'; // PackCC doesn't support single line C directives e.g.: %header { #include "x.h" }
 
     int is_directive = parent->type == AST_DIRECTIVE;
 
