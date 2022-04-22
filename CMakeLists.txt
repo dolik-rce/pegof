@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.2)
 project(pegof)
 
 set(PACKCC packcc CACHE FILEPATH "Specify file path of packcc command.")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_custom_command(
     OUTPUT peg.c peg.h
@@ -22,3 +25,4 @@ add_custom_command(
 add_custom_target(test tests/run.sh DEPENDS pegof WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(pegof BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_features(pegof PUBLIC cxx_std_17)
