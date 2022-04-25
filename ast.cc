@@ -54,7 +54,7 @@ const char* AstNode::get_type_name() const {
     case AST_GROUP:             return "GROUP";
     case AST_CAPTURE:           return "CAPTURE";
     default:
-        Io::debug("ERROR: unexpected AST node type!\n");
+        Io::debug("%s\n", "ERROR: unexpected AST node type!");
         exit(2);
     }
 }
@@ -138,14 +138,14 @@ void AstNode::replace_child(AstNode* removed, AstNode* added, bool do_delete) {
 }
 
 void AstNode::debug() {
-    Io::print("### Original AST:\n");
+    Io::print("%s\n", "### Original AST:");
     print_ast();
-    Io::print("### Original formatted:\n");
+    Io::print("%s\n", "### Original formatted:");
     format();
     optimize();
-    Io::print("### Optimized AST:\n");
+    Io::print("%s\n", "### Optimized AST:");
     print_ast();
-    Io::print("### Optimized formatted:\n");
+    Io::print("%s\n", "### Optimized formatted:");
     format();
 }
 

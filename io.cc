@@ -12,7 +12,7 @@ FILE *Io::output = stdin;
 void Io::open(const std::string& input_path, const std::string& output_path) {
     std::stringstream stream;
     if (input_path.empty()) {
-        Io::debug("Reading grammar from stdin\n");
+        Io::debug("%s\n", "Reading grammar from stdin");
         stream << std::cin.rdbuf();
     } else {
         Io::debug("Reading grammar from %s\n", input_path.c_str());

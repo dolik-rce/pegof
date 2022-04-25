@@ -72,7 +72,7 @@ void AstNode::format() const {
         format_terminal();
         break;
     default:
-        Io::debug("ERROR: unexpected AST node type!\n");
+        Io::debug("%s\n", "ERROR: unexpected AST node type!");
         exit(2);
     }
 }
@@ -125,7 +125,7 @@ void AstNode::format_source() const {
     int is_directive = parent->type == AST_DIRECTIVE;
 
     if (has_newlines || is_c_directive) {
-        Io::print(" {\n");
+        Io::print("%s\n", " {");
         reindent(text, is_directive ? 4 : 8);
         Io::print("%s}", is_directive ? "" : "    ");
     } else {
@@ -134,20 +134,20 @@ void AstNode::format_source() const {
 }
 
 void AstNode::format_error() const {
-    Io::print(" ~");
+    Io::print("%s", " ~");
     format_source();
 }
 
 void AstNode::format_directive() const {
     AstNode* content = children[1];
 
-    Io::print("%%");
+    Io::print("%s", "%");
     children[0]->format();
     if (content->type == AST_STRING) {
-        Io::print(" ");
+        Io::print("%s", " ");
     }
     content->format();
-    Io::print(parent->children.back() == this ? "\n" : "\n\n");
+    Io::print("%s", parent->children.back() == this ? "\n" : "\n\n");
 }
 
 void AstNode::format_alternation() const {
@@ -164,7 +164,7 @@ void AstNode::format_alternation() const {
 void AstNode::format_sequence() const {
     for (size_t i = 0; i < children.size(); i++) {
         if (i > 0) {
-            Io::print(" ");
+            Io::print("%s", " ");
         }
         children[i]->format();
     }
@@ -186,7 +186,7 @@ void AstNode::format_ruleref() const {
     children[0]->format();
     if (children.size() == 2) {
         // has variable
-        Io::print(":");
+        Io::print("%s", ":");
         children[1]->format();
     }
 }
@@ -196,7 +196,7 @@ void AstNode::format_rule() const {
     bool hasAlternation = body->type == AST_ALTERNATION && body->children.size() > 1;
     Io::print("%s%s <- ", children[0]->text.c_str(), hasAlternation ? "\n   " : "");
     body->format();
-    Io::print(parent->children.back() == this ? "\n" : "\n\n");
+    Io::print("%s", parent->children.back() == this ? "\n" : "\n\n");
 }
 
 void AstNode::format_code() const {

@@ -99,7 +99,7 @@ int AstNode::optimize_repeats() {
     }
 
     if (first_op == '*' && second_op == '*') {
-        Io::debug("  Removing unnecessary repeated node (X* X* -> X*)\n");
+        Io::debug("%s\n", "  Removing unnecessary repeated node (X* X* -> X*)");
         second->parent->remove_child(second);
     } else if (first_op == '*' || second_op == '*') {
         Io::debug("  Removing unnecessary repeated node (X%c X%c -> X+)\n", first_op, second_op);
@@ -145,7 +145,7 @@ int AstNode::optimize_children() {
 }
 
 int AstNode::optimize_strip_comment() {
-    Io::debug("  Removing comment\n");
+    Io::debug("%s\n", "  Removing comment");
     parent->remove_child(this);
     return 1;
 }
@@ -313,6 +313,6 @@ int AstNode::optimize() {
     case AST_BACKREF:
         return optimize_children();
     }
-    Io::debug("ERROR: unexpected AST node type!\n");
+    Io::debug("%s\n", "ERROR: unexpected AST node type!");
     exit(2);
 }
