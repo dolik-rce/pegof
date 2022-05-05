@@ -125,11 +125,11 @@ void AstNode::format_source() const {
     int is_directive = parent->type == AST_DIRECTIVE;
 
     if (has_newlines || is_c_directive) {
-        Io::print("%s\n", " {");
+        Io::print("%s{\n", is_directive ? " " : "");
         reindent(text, is_directive ? 4 : 8);
         Io::print("%s}", is_directive ? "" : "    ");
     } else {
-        Io::print(" { %s }", trimmed.c_str());
+        Io::print("%s{ %s }", is_directive ? " " : "", trimmed.c_str());
     }
 }
 

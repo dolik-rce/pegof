@@ -8,7 +8,7 @@ run_test() {
     run "$PEGOF" -c "$1"
     for INPUT in "${INPUTS[@]}"; do
         [ "$INPUT" ] || continue
-        mv "$INPUT".backup "$INPUT"
+        mv -f "$INPUT".backup "$INPUT"
     done
 }
 

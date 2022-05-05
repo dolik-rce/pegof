@@ -91,15 +91,14 @@ sequence
 
 primary
     <- c:suffix_comment { $$ = c; }
-    / (pr:prefix_op? _* l:literal _* po:postfix_op? (_* <s:source> / _* <e:error>)?) {
-        if (!(pr || po || s || e )) {
+    / (pr:prefix_op? _* l:literal _* po:postfix_op? (_* <e:error>)?) {
+        if (!(pr || po || e )) {
             $$ = l;
         } else {
             $$ = create_ast_node(AST_PRIMARY);
             if (pr) append_child($$, pr);
             append_child($$, l);
             if (po) append_child($$, po);
-            if (s) append_child($$, s);
             if (e) append_child($$, e);
         }
     }
@@ -108,6 +107,7 @@ literal
     <- r:ruleref { $$ = r; }
     / s:string { $$ = s; }
     / cc:char_class { $$ = cc; }
+    / src:source { $$ = src; }
     / "." { $$ = create_ast_leaf(AST_DOT, $0, $0s); }
     / "$" [1-9] [0-9]* { $$ = create_ast_leaf(AST_BACKREF, $0, $0s); }
     / "<" _* asp:alternation_or_sequence_or_primary _* ">" { $$ = create_ast_node(AST_CAPTURE); append_child($$, asp); }
