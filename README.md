@@ -76,7 +76,7 @@ Currently implemented optimizations:
 ## Configuration file
 
 Configuration file can be specified on command line. This file can contain the same options as can be given
-on command line, only without the leading dashes. Short version are supported as well, but not recommended,
+on command line, only without the leading dashes. Short versions are supported as well, but not recommended,
 because config file should be easy to read. It is encouraged to keep one option per line, but any whitespace
 character can be used as separator.
 
