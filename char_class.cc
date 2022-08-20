@@ -10,6 +10,11 @@ int CharacterClass::get_char(const std::string& s, size_t& pos) {
         case 'n': return '\n';
         case 't': return '\t';
         case 'v': return '\v';
+        case '[': return '[';
+        case ']': return ']';
+        case '^': return '^';
+        case '-': return '-';
+        case '\\': return '\\';
         }
     }
     return s[pos-1];
@@ -21,6 +26,11 @@ std::string CharacterClass::to_char(int c) {
     case '\n': return "\\n";
     case '\t': return "\\t";
     case '\v': return "\\v";
+    case '[': return "\\[";
+    case ']': return "\\]";
+    case '^': return "\\^";
+    case '-': return "\\-";
+    case '\\': return "\\\\";
     default: return std::string(1, (char)c);
     }
 }

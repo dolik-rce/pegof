@@ -3,3 +3,4 @@ main
     / [u-z]
     / [aeiou]
     / [1-9ABa-h]
+    / [-\t\n\r&\[-\]]
