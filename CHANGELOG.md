@@ -1,3 +1,8 @@
+# 0.3.1
+
+- Fix reading files with unicode
+- Add Kotlin parser to tests, so we have some complex, real-world grammar
+
 # 0.3.0
 
 - Support actions at the beggining of rule (fixes #2)
