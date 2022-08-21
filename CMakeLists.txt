@@ -22,7 +22,12 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(test tests/run.sh DEPENDS pegof WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+add_custom_target(
+    test
+    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} tests/run.sh
+    DEPENDS pegof
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 target_include_directories(pegof BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(pegof PUBLIC cxx_std_17)

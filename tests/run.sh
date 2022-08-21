@@ -5,7 +5,7 @@ get_inputs() {
 }
 
 get_outputs() {
-    if grep inplace "$1"; then
+    if grep -q inplace "$1"; then
         get_inputs "$1"
     else
         sed -n '/^output/s/output\s\+//p;' "$1"
@@ -31,13 +31,22 @@ EOF
             [ -e "${OUTPUT//.tmp/.expected}" ] || continue
             echo "    check_file \"$OUTPUT\" \"${OUTPUT//.tmp/.expected}\""
         done
+        for OUTPUT in "${OUTPUTS[@]}"; do
+            [ -f "${CONF/.conf/.status}" ] && continue
+            grep -q -e ast -e debug "$CONF" && continue
+            if [ "$OUTPUT" ]; then
+                echo "    check_packcc_compatibility \"$OUTPUT\""
+            else
+                echo "    check_packcc_compatibility"
+            fi
+        done
         echo "}"
     done
 }
 
 
 clean() {
-    rm -f *.d/generated.bats *.d/*.tmp
+    rm -f ./*.d/generated.bats ./*.d/*.tmp
 }
 
 main() {
@@ -51,6 +60,7 @@ main() {
     export TESTDIR="$(cd "$(dirname "$0")" && pwd)"
     export ROOTDIR="$TESTDIR/.."
     export PEGOF="$ROOTDIR/build/pegof"
+    export PACKCC="${PACKCC:-packcc}"
     cd "$TESTDIR"
 
     clean

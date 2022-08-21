@@ -13,7 +13,7 @@ run_test() {
 }
 
 check_status() {
-    if [ -e $1 ]; then
+    if [ -e "$1" ]; then
         EXP="$(cat "$1")"
     else
         EXP=0
@@ -30,4 +30,13 @@ check_stdout() {
 
 check_file() {
     diff --strip-trailing-cr -uN "$1" "$2"
+}
+
+check_packcc_compatibility() {
+    if [ $# -gt 0 ]; then
+        "$PACKCC" -o "$1.processed" "$1"
+    else
+        echo "$output"
+        "$PACKCC" -o "stdout.processed" <<<"$output"
+    fi
 }

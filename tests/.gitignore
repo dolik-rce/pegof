@@ -1,2 +1,4 @@
 generated.bats
 *.tmp
+*.processed.c
+*.processed.h

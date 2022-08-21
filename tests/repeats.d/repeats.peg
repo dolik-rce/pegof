@@ -1,3 +1,7 @@
+Z <- A1 B1 C1 A2 B2 C2 A3 B3 C3
+
+X <- "X"
+
 A1 <- X X
 
 B1 <- X+ X
