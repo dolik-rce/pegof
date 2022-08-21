@@ -46,7 +46,8 @@ EOF
 
 
 clean() {
-    rm -f ./*.d/generated.bats ./*.d/*.tmp
+    rm -f ./*.d/generated.bats ./*.d/*.tmp ./*.d.processed.{h,c}
+
 }
 
 main() {
