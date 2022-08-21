@@ -35,7 +35,8 @@ void Io::close() {
 
 int Io::read() {
     if (pos < text.size()) {
-        return text[pos++];
+        int c = text[pos++];
+        return c < 0 ? c + 256 : c;
     } else {
         return EOF;
     }

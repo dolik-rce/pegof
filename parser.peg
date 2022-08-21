@@ -34,7 +34,7 @@ statement
     <- d:directive { $$ = d; }
     / r:rule { $$ = r; }
     / c:line_comment { $$ = c; }
-    / c:suffix_comment { $$ = c; } # this is needed to parse comment on first line (not preceeded by newline)
+    / s:suffix_comment { $$ = s; } # this is needed to parse comment on first line (not preceeded by newline)
 
 rule <- <identifier> _* "<-" _* asp:alternation_or_sequence_or_primary {
         AstNodeC name = create_ast_leaf(AST_RULE_NAME, $1, $1s);
