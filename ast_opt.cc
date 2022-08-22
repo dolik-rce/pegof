@@ -280,6 +280,9 @@ int AstNode::optimize_grammar() {
     for (int optimized = -1, i = 1; optimized != 0; i++) {
         Io::debug("Optimization pass %d:\n", i);
         optimized = optimize_children();
+        if (Config::get<bool>("verbose")) {
+            stats("  Optimized grammar contains ");
+        }
         if (optimized) {
             total += optimized;
             Io::debug(" => %d optimization%s done in pass %d (%d total)\n", optimized, optimized == 1 ? "" : "s", i, total);

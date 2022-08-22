@@ -66,6 +66,7 @@ public:
     void format() const;
     int optimize();
     void debug();
+    void stats(const char* prefix, bool force = false) const;
 
     AstNode(AstNodeType type, std::string text = "", size_t line = -1, size_t column=-1);
     AstNode(const AstNode& other, AstNode* parent);

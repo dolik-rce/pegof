@@ -1,6 +1,7 @@
 # 0.3.2
 
 - Separate threshold for terminal symbol inlining
+- Print rule counts in debug and verbose mode
 
 # 0.3.1
 

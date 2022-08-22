@@ -17,6 +17,9 @@ int Parser::parse_all() {
     for (int i = 0; i < conf.inputs.size(); i++) {
         Io::open(conf.inputs[i], conf.outputs[i]);
         AstNode* grammar = parse();
+        if (Config::get<bool>("verbose")) {
+            grammar->stats("Loaded grammar containing ");
+        }
 
         switch (conf.output_type) {
         case Config::OT_DEBUG:

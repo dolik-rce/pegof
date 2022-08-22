@@ -149,11 +149,34 @@ void AstNode::debug() {
     print_ast();
     Io::print("%s\n", "### Original formatted:");
     format();
+    Io::print("%s\n", "### Original stats:");
+    stats("", true);
     optimize();
     Io::print("%s\n", "### Optimized AST:");
     print_ast();
     Io::print("%s\n", "### Optimized formatted:");
     format();
+    Io::print("%s\n", "### Optimized stats:");
+    stats("", true);
+}
+
+void AstNode::stats(const char* prefix, bool force) const {
+    const AstNode* grammar = (type == AST_GRAMMAR) ? this : find_parent(AST_GRAMMAR);
+    int rules = 0;
+    int terminals = 0;
+    for (size_t i = 0; i < grammar->children.size(); i++) {
+        if (grammar->children[i]->type == AST_RULE) {
+            rules += 1;
+            if (grammar->children[i]->is_terminal()) {
+                terminals += 1;
+            }
+        }
+    }
+    if (force) {
+        Io::print("%s%d rules (%d terminal and %d non-terminal)\n", prefix, rules, rules - terminals, terminals);
+    } else {
+        Io::debug("%s%d rules (%d terminal and %d non-terminal)\n", prefix, rules, rules - terminals, terminals);
+    }
 }
 
 AstNode::AstNode(AstNodeType type, std::string text, size_t line, size_t column) :
