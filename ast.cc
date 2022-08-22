@@ -137,6 +137,13 @@ void AstNode::replace_child(AstNode* removed, AstNode* added, bool do_delete) {
     }
 }
 
+bool AstNode::is_terminal() const {
+    std::vector<AstNode*> refs = find_all([this](const AstNode& node) {
+        return node.type == AST_REFNAME;
+    });
+    return refs.empty();
+}
+
 void AstNode::debug() {
     Io::print("%s\n", "### Original AST:");
     print_ast();

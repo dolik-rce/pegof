@@ -70,8 +70,11 @@ Currently implemented optimizations:
     -N/--no-char-class
         Do not optimize character classes
     -l/--inline-limit N
-        Maximum number of references rule can have and still
+        Maximum number of references non-terminal rule can have and still
         be inlined (default 10)
+    -L/--terminal-inline-limit N
+        Maximum number of references terminal rule can have and still
+        be inlined (default 20)
 
 ## Configuration file
 

@@ -179,7 +179,8 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT) {
         Option(OG_OPT, "r", "keep-repeats", false, "Do not optimize repeated tokens"),
         Option(OG_OPT, "n", "no-concat", false, "Do not concatenate adjacent string"),
         Option(OG_OPT, "N", "no-char-class", false, "Do not optimize character classes"),
-        Option(OG_OPT, "l", "inline-limit", 10, "Maximum number of references rule can have and still\n        be inlined (default 10)", "N"),
+        Option(OG_OPT, "l", "inline-limit", 10, "Maximum number of references non-terminal rule can have and still\n        be inlined (default 10)", "N"),
+        Option(OG_OPT, "L", "terminal-inline-limit", 50, "Maximum number of references terminal rule can have and still\n        be inlined (default 20)", "N"),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
     process_args(arguments, false);

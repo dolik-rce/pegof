@@ -28,6 +28,8 @@ private:
     void remove_child(AstNode* child);
     void replace_child(AstNode* removed, AstNode* added, bool do_delete = true);
 
+    bool is_terminal() const;
+
     bool operator==(const AstNode& x) const;
     bool operator!=(const AstNode& x) const;
 

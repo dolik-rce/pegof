@@ -242,10 +242,16 @@ int AstNode::optimize_inline_rule() {
     std::vector<AstNode*> refs = find_all([name](const AstNode& node) {
         return node.type == AST_REFNAME && node.text == name;
     }, true);
-    if (refs.empty() || refs.size() > Config::get<int>("inline-limit")) {
+
+    bool is_terminal = rule->is_terminal();
+    int inline_limit = Config::get<int>(is_terminal ? "terminal-inline-limit" : "inline-limit");
+    if (refs.empty() || refs.size() > inline_limit) {
         return 0;
     }
-    Io::debug("  Inlining rule '%s' at %ld site%s\n", name.c_str(), refs.size(), refs.size() > 1 ? "s" : "");
+    Io::debug(
+        "  Inlining %srule '%s' at %ld site%s\n",
+        is_terminal ? "terminal " : "", name.c_str(), refs.size(), refs.size() > 1 ? "s" : ""
+    );
 
     // copy data to each reference
     for (int i = 0; i < refs.size(); i++) {

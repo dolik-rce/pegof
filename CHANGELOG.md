@@ -1,3 +1,7 @@
+# 0.3.2
+
+- Separate threshold for terminal symbol inlining
+
 # 0.3.1
 
 - Fix reading files with unicode
