@@ -1,1 +1,1 @@
-main <- [ABCDEF0123456789] / [xyuvzw] / [aeiou] / [a-fb-h6-91-5A-B] / [-\[\]&\r\n\t\\]
+main <- [ABCDEF0123456789] / [xyuvzw] / [aeiou] / [a-fb-h6-91-5A-B] / [-\[\]&\r\n\t\\] / [\u0041-\u005A\u0061-\u007A\u0660-\u0669]

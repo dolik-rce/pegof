@@ -5,9 +5,9 @@ class CharacterClass {
     using Token = std::pair<int, int>;
     using Tokens = std::vector<Token>;
 
-
     static int get_char(const std::string& s, size_t& pos);
     static std::string to_char(int c);
+    static std::string to_unicode(const int c);
 
     static Token get_range(const std::string& s, size_t& pos);
     static Tokens tokenize(const std::string& input);

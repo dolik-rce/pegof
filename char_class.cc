@@ -1,6 +1,7 @@
 #include "char_class.h"
 
 #include <algorithm>
+#include <iomanip>
 #include <numeric>
 
 int CharacterClass::get_char(const std::string& s, size_t& pos) {
@@ -15,12 +16,25 @@ int CharacterClass::get_char(const std::string& s, size_t& pos) {
         case '^': return '^';
         case '-': return '-';
         case '\\': return '\\';
+        case 'u':
+            int c = std::stoi(std::string(s.c_str() + pos, 4), nullptr, 16);
+            pos += 4;
+            return c;
         }
     }
     return s[pos-1];
 }
 
+std::string CharacterClass::to_unicode(const int c) {
+    std::stringstream ss;
+    ss << "\\u" << std::setfill('0') << std::setw(4) << std::hex << c;
+    return ss.str();
+}
+
 std::string CharacterClass::to_char(int c) {
+    if (c > 127) {
+        return to_unicode(c);
+    }
     switch (c) {
     case '\r': return "\\r";
     case '\n': return "\\n";
@@ -46,7 +60,6 @@ CharacterClass::Token CharacterClass::get_range(const std::string& s, size_t& po
     }
     return result;
 }
-
 
 CharacterClass::Tokens CharacterClass::tokenize(const std::string& input) {
     Tokens tokens;
