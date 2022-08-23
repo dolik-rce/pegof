@@ -14,7 +14,17 @@ add_custom_command(
     VERBATIM
 )
 
-add_executable(pegof main.cc ast.cc ast_format.cc ast_opt.cc c_api.cc char_class.cc config.cc io.cc peg.c parser.cc)
+list(APPEND sources main.cc ast.cc ast_format.cc ast_opt.cc c_api.cc char_class.cc config.cc io.cc peg.c parser.cc)
+add_library(common INTERFACE)
+target_include_directories(common BEFORE INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_features(common INTERFACE cxx_std_17)
+
+add_executable(pegof ${sources})
+target_link_libraries(pegof common)
+
+add_executable(pegof_test ${sources})
+target_compile_options(pegof_test PRIVATE --coverage)
+target_link_libraries(pegof_test common gcov)
 
 add_custom_command(
     TARGET pegof POST_BUILD
@@ -24,10 +34,7 @@ add_custom_command(
 
 add_custom_target(
     test
-    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} tests/run.sh
-    DEPENDS pegof
+    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} tests/run.sh
+    DEPENDS pegof_test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-target_include_directories(pegof BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-target_compile_features(pegof PUBLIC cxx_std_17)

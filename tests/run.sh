@@ -44,14 +44,13 @@ EOF
     done
 }
 
-
 clean() {
-    rm -f ./*.d/generated.bats ./*.d/*.tmp ./*.d.processed.{h,c}
-
+    rm -f "$TESTDIR"/*.d/generated.bats "$TESTDIR"/*.d/*.tmp "$TESTDIR"/**/*.processed.{c,h} "$BUILDDIR"/**/*.gcda
 }
 
 main() {
     set -e
+    shopt -s globstar
 
     if ! which bats &> /dev/null; then
         echo "Warning: 'bats' executable not found on PATH, skipping tests"
@@ -60,7 +59,8 @@ main() {
 
     export TESTDIR="$(cd "$(dirname "$0")" && pwd)"
     export ROOTDIR="$TESTDIR/.."
-    export PEGOF="$ROOTDIR/build/pegof"
+    export BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
+    export PEGOF="$BUILDDIR/pegof_test"
     export PACKCC="${PACKCC:-packcc}"
     cd "$TESTDIR"
 
@@ -74,6 +74,12 @@ main() {
 
     echo "Running tests:"
     bats "$@" ./*.d
+    if which gcovr &> /dev/null; then
+        cd "$BUILDDIR"
+        mkdir -p "coverage"
+        gcovr -r "$ROOTDIR" . --html-details="coverage/report.html"
+        echo "Coverage report: file://$BUILDDIR/coverage/report.html"
+    fi
 }
 
 main "$@"
