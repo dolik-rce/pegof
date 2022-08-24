@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <numeric>
 
-int CharacterClass::get_char(const std::string& s, size_t& pos) {
+int CharacterClass::get_char(const std::string& s, size_t& pos) const {
     if(s[pos++] == '\\') {
         switch (s[pos++]) {
         case 'r': return '\r';
@@ -25,13 +25,25 @@ int CharacterClass::get_char(const std::string& s, size_t& pos) {
     return s[pos-1];
 }
 
-std::string CharacterClass::to_unicode(const int c) {
+CharacterClass::Token CharacterClass::get_range(const std::string& s, size_t& pos) const {
+    Token result;
+    result.first = get_char(s, pos);
+    if (s.size() > pos && s[pos] == '-') {
+        pos++;
+        result.second = get_char(s, pos);
+    } else {
+        result.second = result.first;
+    }
+    return result;
+}
+
+std::string CharacterClass::to_unicode(const int c) const {
     std::stringstream ss;
     ss << "\\u" << std::setfill('0') << std::setw(4) << std::hex << c;
     return ss.str();
 }
 
-std::string CharacterClass::to_char(int c) {
+std::string CharacterClass::to_char(int c) const {
     if (c > 127) {
         return to_unicode(c);
     }
@@ -49,32 +61,46 @@ std::string CharacterClass::to_char(int c) {
     }
 }
 
-CharacterClass::Token CharacterClass::get_range(const std::string& s, size_t& pos) {
-    Token result;
-    result.first = get_char(s, pos);
-    if (s.size() > pos && s[pos] == '-') {
-        pos++;
-        result.second = get_char(s, pos);
-    } else {
-        result.second = result.first;
+int CharacterClass::size() const {
+    int sum = dash;
+    for (size_t i = 0; i<tokens.size(); i++) {
+        sum += 1 + (tokens[i].second - tokens[i].first);
     }
-    return result;
+    return sum;
 }
 
-CharacterClass::Tokens CharacterClass::tokenize(const std::string& input) {
-    Tokens tokens;
-    size_t pos = 0;
-    while (pos < input.size()) {
-        Token r;
-        tokens.push_back(get_range(input, pos));
-    }
+std::string CharacterClass::to_string() const {
+    std::string r;
+    if(negation) r.push_back('^');
+    if(dash) r.push_back('-');
 
-    return tokens;
+    for (size_t i = 0; i<tokens.size(); i++) {
+        size_t size = tokens[i].second - tokens[i].first;
+        switch (size) {
+        case 0:
+            r += to_char(tokens[i].first);
+            break;
+        case 1:
+            r += to_char(tokens[i].first);
+            r += to_char(tokens[i].second);
+            break;
+        default:
+            r += to_char(tokens[i].first);
+            r.push_back('-');
+            r += to_char(tokens[i].second);
+            break;
+        }
+    }
+    return r;
 }
 
-CharacterClass::Tokens CharacterClass::join(const CharacterClass::Tokens& tokens) {
+CharacterClass& CharacterClass::normalize() {
+    if (tokens.empty()) {
+        return *this;
+    }
+    sort(tokens.begin(), tokens.end());
     Tokens init(1, tokens[0]);
-    return accumulate(tokens.begin() + 1, tokens.end(), init, [](Tokens& acc, const Token& item){
+    tokens = accumulate(tokens.begin() + 1, tokens.end(), init, [](Tokens& acc, const Token& item){
         Token& prev = acc.back();
         if (prev.second + 1 < item.first) {
             acc.push_back(item);
@@ -83,37 +109,15 @@ CharacterClass::Tokens CharacterClass::join(const CharacterClass::Tokens& tokens
         }
         return acc;
     });
+    return *this;
 }
 
-std::string CharacterClass::normalize(const std::string& str) {
-    bool negation = str[0] == '^';
-    bool dash = str[negation] == '-';
-    std::string input(str, negation + dash);
-
-    Tokens tokens = tokenize(input);
-    sort(tokens.begin(), tokens.end());
-    Tokens normalized = join(tokens);
-
-    std::string r;
-    if(negation) r.push_back('^');
-    if(dash) r.push_back('-');
-
-    for (size_t i=0; i<normalized.size(); i++) {
-        size_t size = normalized[i].second - normalized[i].first;
-        switch (size) {
-        case 0:
-            r += to_char(normalized[i].first);
-            break;
-        case 1:
-            r += to_char(normalized[i].first);
-            r += to_char(normalized[i].second);
-            break;
-        default:
-            r += to_char(normalized[i].first);
-            r.push_back('-');
-            r += to_char(normalized[i].second);
-            break;
-        }
+CharacterClass::CharacterClass(const std::string str) {
+    negation = str[0] == '^';
+    dash = str[negation] == '-';
+    size_t pos = negation + dash;
+    while (pos < str.size()) {
+        Token r;
+        tokens.push_back(get_range(str, pos));
     }
-    return r;
 }

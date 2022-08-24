@@ -32,7 +32,7 @@ int AstNode::optimize_character_class() {
     if (Config::get<bool>("no-char-class")) {
         return 0;
     }
-    std::string normalized = CharacterClass::normalize(text);
+    std::string normalized = CharacterClass(text).normalize().to_string();
     if (normalized == text) {
         return 0;
     }
