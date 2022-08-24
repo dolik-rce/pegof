@@ -16,7 +16,7 @@ file <- ("#!" [^\n\r]* _* NL+)? NL* (("@" / (Hidden / NL) "@") "file" !(Letter /
 
 filePart <- (classDeclaration / objectDeclaration / functionDeclaration / propertyDeclaration / typeAlias _* semis? / ((label / annotation)* (classDeclaration / objectDeclaration / functionDeclaration / propertyDeclaration / typeAlias / assignment / loopStatement / expression) _* (_* (";" / NL) _*) NL*)) { resetFailure(auxil, $0s); }
 
-unparsable <- [^\n]+ NL* { reportFailure(auxil, $0s); }
+unparsable <- !"\n"+ NL* { reportFailure(auxil, $0s); }
 
 packageHeader <- "package" !(Letter / UnicodeDigit) { PUSH_KIND(auxil, K_PACKAGE); } _ <simpleIdentifier (__* "." simpleIdentifier)*> { makeKotlinTag(auxil, $1, $1s, true); } _* ((_* (";" / NL) _*) NL*)?
 

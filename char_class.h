@@ -16,6 +16,7 @@ class CharacterClass {
     Tokens tokens;
 public:
     CharacterClass& normalize();
+    bool negative() const;
     std::string to_string() const;
     int size() const;
 

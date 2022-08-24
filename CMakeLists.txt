@@ -23,7 +23,7 @@ add_executable(pegof ${sources})
 target_link_libraries(pegof common)
 
 add_executable(pegof_test ${sources})
-target_compile_options(pegof_test PRIVATE --coverage)
+target_compile_options(pegof_test PRIVATE --coverage -g -O0)
 target_link_libraries(pegof_test common gcov)
 
 add_custom_command(

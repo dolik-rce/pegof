@@ -61,6 +61,10 @@ std::string CharacterClass::to_char(int c) const {
     }
 }
 
+bool CharacterClass::negative() const {
+    return negation;
+}
+
 int CharacterClass::size() const {
     int sum = dash;
     for (size_t i = 0; i<tokens.size(); i++) {

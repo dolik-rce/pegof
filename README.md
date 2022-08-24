@@ -14,6 +14,7 @@ Currently implemented optimizations:
  - **Rule inlining:** Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser.
  - **String concatenation:** Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
  - **Character class optimization:** Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`.
+ - **Convert single character classes to strings:** The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\n]` to `"\n"` or `[^ ]` to `!" "`.
  - **Remove unnecessary repeats:** Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
  - **Removing unused captures:** Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
@@ -69,6 +70,8 @@ Currently implemented optimizations:
         Do not concatenate adjacent string
     -N/--no-char-class
         Do not optimize character classes
+    -s/--no-single-char
+        Do not convert single character classes to string
     -l/--inline-limit N
         Maximum number of references non-terminal rule can have and still
         be inlined (default 10)

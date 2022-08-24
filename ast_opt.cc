@@ -29,10 +29,25 @@ int AstNode::optimize_strings() {
 }
 
 int AstNode::optimize_character_class() {
+    CharacterClass cc = CharacterClass(text).normalize();
+
+    if (cc.size() == 1 && !Config::get<bool>("no-single-char")) {
+        if (cc.negative()) {
+            append_child(new AstNode(AST_PREFIX_OP, "!"));
+            append_child(new AstNode(AST_STRING, cc.to_string().substr(1)));
+            type = AST_PRIMARY;
+            text = "";
+        } else {
+            type = AST_STRING;
+            text = cc.to_string();
+        }
+        return 1;
+    }
+
     if (Config::get<bool>("no-char-class")) {
         return 0;
     }
-    std::string normalized = CharacterClass(text).normalize().to_string();
+    std::string normalized = cc.to_string();
     if (normalized == text) {
         return 0;
     }
