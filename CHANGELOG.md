@@ -4,6 +4,7 @@
 - Print rule counts in debug and verbose mode
 - Basic unicode support in character classes
 - Convert single letter character classes to string (e.g. [^x] -> !"x")
+- Remove double negations (e.g. `!(!TERM)` -> `TERM`)
 
 # 0.3.1
 

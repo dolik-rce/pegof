@@ -53,6 +53,7 @@ private:
     int optimize_single_child();
     int optimize_strings();
     int optimize_character_class();
+    int optimize_negation();
     int optimize_repeats();
     int optimize_strip_comment();
     int optimize_inline_rule();

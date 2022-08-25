@@ -65,6 +65,11 @@ bool CharacterClass::negative() const {
     return negation;
 }
 
+CharacterClass& CharacterClass::toggle_negation() {
+    negation = !negation;
+    return *this;
+}
+
 int CharacterClass::size() const {
     int sum = dash;
     for (size_t i = 0; i<tokens.size(); i++) {

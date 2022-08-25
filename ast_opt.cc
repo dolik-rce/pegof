@@ -290,6 +290,34 @@ int AstNode::optimize_inline_rule() {
     return refs.size();
 }
 
+int AstNode::optimize_negation() {
+    if (text != "!" || Config::get<bool>("no-negation")) {
+        return 0;
+    }
+    AstNode* next = find_next_sibling();
+
+    if (next != nullptr && next->type == AST_CHARCLASS) {
+        type = AST_CHARCLASS;
+        text = CharacterClass(next->text).toggle_negation().to_string();
+        parent->remove_child(next);
+        return 1;
+    }
+
+    if (next != nullptr && next->type == AST_GROUP && next->children.size() == 1) {
+        AstNode* child = next->children[0];
+        if (child->type == AST_PRIMARY && child->children.size() == 2) {
+            AstNode* grandchild = child->children[0];
+            if (grandchild->type == AST_PREFIX_OP && grandchild->text == "!") {
+                parent->replace_child(this, new AstNode(*child->children[1], parent));
+                parent->remove_child(next);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
 int AstNode::optimize_grammar() {
     int total = 0;
     for (int optimized = -1, i = 1; optimized != 0; i++) {
@@ -319,6 +347,7 @@ int AstNode::optimize() {
     case AST_COMMENT:           return optimize_strip_comment();
     case AST_VAR:               return optimize_unused_variable();
     case AST_CHARCLASS:         return optimize_character_class();
+    case AST_PREFIX_OP:         return optimize_children() + optimize_negation();
 
     // everything else just call optimize on children
     case AST_DIRECTIVE:
@@ -331,7 +360,6 @@ int AstNode::optimize() {
     case AST_CAPTURE:
     case AST_RULE_NAME:
     case AST_DIRECTIVE_NAME:
-    case AST_PREFIX_OP:
     case AST_POSTFIX_OP:
     case AST_DOT:
     case AST_BACKREF:

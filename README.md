@@ -15,7 +15,9 @@ Currently implemented optimizations:
  - **String concatenation:** Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
  - **Character class optimization:** Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`.
  - **Convert single character classes to strings:** The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\n]` to `"\n"` or `[^ ]` to `!" "`.
- - **Remove unnecessary repeats:** Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
+ - **Simplify negation of character classes:** Negation of character classes can be written as negative character class (e.g. `![\n]` -> `[^\n]`).
+ - **Removing double negations:** Negation of negation can be ignored, because it results in the original term (e.g. `!(!TERM)` -> `TERM`).
+ - **Removing unnecessary repeats:** Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
  - **Removing unused captures:** Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
  - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
@@ -72,6 +74,8 @@ Currently implemented optimizations:
         Do not optimize character classes
     -s/--no-single-char
         Do not convert single character classes to string
+    -e/--no-negation
+        Do not optimize negations
     -l/--inline-limit N
         Maximum number of references non-terminal rule can have and still
         be inlined (default 10)
