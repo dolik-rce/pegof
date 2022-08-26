@@ -16,6 +16,7 @@ Currently implemented optimizations:
  - **Character class optimization:** Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`.
  - **Convert single character classes to strings:** The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\n]` to `"\n"` or `[^ ]` to `!" "`.
  - **Simplify negation of character classes:** Negation of character classes can be written as negative character class (e.g. `![\n]` -> `[^\n]`).
+ - **Removing double quantifications:** If a single term is quantified twice, it is always possible to convert this into a single potfix operator with equel meaning (e.g. `(X+)?` -> `X*`).
  - **Removing double negations:** Negation of negation can be ignored, because it results in the original term (e.g. `!(!TERM)` -> `TERM`).
  - **Removing unnecessary repeats:** Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
@@ -68,6 +69,8 @@ Currently implemented optimizations:
         Do not discard unused variables
     -r/--keep-repeats
         Do not optimize repeated tokens
+    -q/--keep-quantifications
+        Do not optimize quantifications
     -n/--no-concat
         Do not concatenate adjacent string
     -N/--no-char-class

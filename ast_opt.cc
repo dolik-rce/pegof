@@ -135,6 +135,41 @@ int AstNode::optimize_repeats() {
     return 1;
 }
 
+int AstNode::optimize_double_postfix() {
+/**
+ *  (X*)*  (X*)+  (X*)?          X*  X*  X*
+ *  (X+)*  (X+)+  (X+)?    ->    X*  X+  X*
+ *  (X?)*  (X?)+  (X?)?          X*  X*  X?
+ */
+    if (Config::get<bool>("keep-quantifications")) {
+        return 0;
+    }
+    AstNode* prev = find_prev_sibling();
+    if (prev == nullptr) {
+        return 0;
+    }
+    if (prev->type != AST_GROUP || prev->children.size() != 1) {
+        return 0;
+    }
+    AstNode* primary = prev->children[0];
+    if (primary->type != AST_PRIMARY || primary->children.size() != 2) {
+        return 0;
+    }
+    AstNode* subject = primary->children[0];
+    AstNode* inner_postfix = primary->children[1];
+    if (inner_postfix->type != AST_POSTFIX_OP) {
+        return 0;
+    }
+
+    Io::debug("  Simplifying doubled quantification: (X)%s%s", inner_postfix->text.c_str(), text.c_str());
+    inner_postfix->text = (inner_postfix->text == text) ? text : "*";
+    Io::debug(" -> X%s\n", inner_postfix->text.c_str());
+    parent->replace_child(prev, new AstNode(*primary, parent));
+    parent->remove_child(this);
+
+    return 1;
+}
+
 int AstNode::optimize_single_child() {
     if (children.size() != 1) {
         return 0;
@@ -347,7 +382,8 @@ int AstNode::optimize() {
     case AST_COMMENT:           return optimize_strip_comment();
     case AST_VAR:               return optimize_unused_variable();
     case AST_CHARCLASS:         return optimize_character_class();
-    case AST_PREFIX_OP:         return optimize_children() + optimize_negation();
+    case AST_PREFIX_OP:         return optimize_negation();
+    case AST_POSTFIX_OP:        return optimize_double_postfix();
 
     // everything else just call optimize on children
     case AST_DIRECTIVE:
@@ -360,7 +396,6 @@ int AstNode::optimize() {
     case AST_CAPTURE:
     case AST_RULE_NAME:
     case AST_DIRECTIVE_NAME:
-    case AST_POSTFIX_OP:
     case AST_DOT:
     case AST_BACKREF:
         return optimize_children();

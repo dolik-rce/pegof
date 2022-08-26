@@ -55,6 +55,7 @@ private:
     int optimize_character_class();
     int optimize_negation();
     int optimize_repeats();
+    int optimize_double_postfix();
     int optimize_strip_comment();
     int optimize_inline_rule();
     int optimize_unused_variable();

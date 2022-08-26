@@ -177,6 +177,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT) {
         Option(OG_OPT, "C", "keep-captures", false, "Do not discard unused captures"),
         Option(OG_OPT, "V", "keep-variables", false, "Do not discard unused variables"),
         Option(OG_OPT, "r", "keep-repeats", false, "Do not optimize repeated tokens"),
+        Option(OG_OPT, "q", "keep-quantifications", false, "Do not optimize quantifications"),
         Option(OG_OPT, "n", "no-concat", false, "Do not concatenate adjacent string"),
         Option(OG_OPT, "N", "no-char-class", false, "Do not optimize character classes"),
         Option(OG_OPT, "s", "no-single-char", false, "Do not convert single character classes to string"),

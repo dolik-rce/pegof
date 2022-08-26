@@ -186,7 +186,7 @@ AstNode::AstNode(const AstNode& other, AstNode* parent) :
     text(other.text), type(other.type), line(other.line), column(other.column), parent(parent)
 {
     for (int i = 0; i < other.children.size(); i++) {
-        children.push_back(new AstNode(*other.children[i], this));
+        children.push_back(new AstNode(*(other.children[i]), this));
     }
 }
 
