@@ -41,6 +41,15 @@ AstNodeC create_ast_leaf(AstNodeType type, const char* text, size_t start);
 AstNodeC create_ast_node(AstNodeType type);
 void append_child(AstNodeC parent, AstNodeC child);
 
+AstNodeC list_create(AstNodeC item);
+AstNodeC list_append(AstNodeC list, AstNodeC item);
+
+AstNodeC create_grammar(AstNodeC nodes);
+AstNodeC create_directive(const char* name, const char* content);
+AstNodeC create_rule(const char* name);
+AstNodeC create_comment(const char* text);
+
+
 #ifdef __cplusplus
 }
 #endif

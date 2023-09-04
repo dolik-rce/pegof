@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <variant>
 
 struct AstNode {
 private:
@@ -73,6 +74,129 @@ public:
     AstNode(AstNodeType type, std::string text = "", size_t line = -1, size_t column=-1);
     AstNode(const AstNode& other, AstNode* parent);
     ~AstNode();
+};
+
+struct Grammar;
+struct Directive;
+struct Error;
+struct Action;
+struct Expand;
+struct Capture;
+struct Alternation;
+struct Sequence;
+struct Predicate;
+struct Quantity;
+struct CharClass;
+struct String;
+struct Reference;
+struct Rule;
+struct Comment;
+
+typedef std::variant<
+    std::vector<void*>,
+    Grammar, Directive, Error, Action, Expand, Capture, Alternation, Sequence,
+    Predicate, Quantity, CharClass, String, Reference, Rule, Comment
+> AnyNode;
+
+struct Node {
+    const char* type;
+    Node(const char* type): type(type) {}
+    std::string to_string() { return "TODO"; }
+};
+
+struct WithPlacement {
+    int line;
+    int column;
+};
+
+struct WithExpession {
+    Alternation *expression;
+};
+
+struct Comment : Node, WithPlacement {
+    std::string text;
+    Comment(const char* text): Node("COMMENT"), text(text) {}
+};
+
+
+struct Rule : Node, WithPlacement, WithExpession {
+    std::string name;
+    Rule(const char* name): Node("Rule"), name(name) {}
+    std::string to_string() {
+        return std::string("Rule '") + name + "' [" + std::to_string(line) + ":" + std::to_string(column) + "]";
+    }
+};
+
+struct Reference : Node, WithPlacement {
+    std::string variable;
+    int index;
+};
+
+struct String : Node {
+    std::string value;
+};
+
+struct CharClass : Node {
+    // TODO: rename or merge with Characterstruct
+    std::string value;
+};
+
+struct Quantity : Node, WithExpession {
+    int min;
+    int max;
+};
+
+struct Predicate : Node, WithExpession {
+    bool negative;
+};
+
+struct Sequence : Node {
+    std::vector<Alternation*> children;
+};
+
+struct Alternation : Node {
+    std::vector<Alternation*> children;
+};
+
+struct Capture : Node, WithExpession {
+    int index;
+};
+
+struct Expand : Node, WithPlacement {
+    int index;
+};
+
+struct Action : Node {
+    int index;
+    std::string code;
+};
+
+struct Error : Node, WithExpession {
+    int index;
+    std::string code;
+};
+
+struct Directive : Node {
+    std::string name;
+    std::string code;
+    Directive(const char* name, const char* code) : Node("DIRECTIVE"), name(name), code(code) {}
+};
+
+struct Grammar : Node {
+    std::vector<AnyNode*> children;
+    std::string code;
+    Grammar(const std::vector<void*>& nodes) : Node("GRAMMAR") {
+        for (const auto& child : nodes) {
+            children.push_back((AnyNode*) child);
+        }
+    }
+    std::string to_string() {
+        std::string s = "Grammmar:\n";
+        for (const auto& child : children) {
+            s += ((Rule*)child)->to_string() + "\n";
+        }
+        return s;
+    }
 };
 
 #endif /* INCLUDED_AST_H */
