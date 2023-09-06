@@ -3,16 +3,16 @@
 Parser2::State::State(Parser2* p) : p(p), saved_pos(p->pos) {};
 
 bool Parser2::State::rollback() {
-    if (p->pos != saved_pos) {
-        printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
-    }
+    //~ if (p->pos != saved_pos) {
+        //~ printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
+    //~ }
     p->pos = saved_pos;
     return false;
 };
 
 bool Parser2::State::commit() {
     p->last_match = p->input.substr(saved_pos, p->pos - saved_pos);
-    printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
+    //~ printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
     return true;
 };
 
@@ -174,55 +174,3 @@ bool Parser2::peek_re(const std::string& r) {
     s.rollback();
     return result;
 }
-
-
-/*
-Grammar* Parser::parse() {
-    const int res = peg_parse(parser, (AstNodeC*)&grammar);
-    if (res != 0) {
-        exit(10);
-        fprintf(stderr, "FATAL: Could not parse the grammar.\n");
-    }
-    if (!grammar) {
-        exit(11);
-        fprintf(stderr, "FATAL: Could not parse the grammar.\n");
-    }
-    return grammar;
-}
-
-int Parser::parse_all() {
-    for (int i = 0; i < conf.inputs.size(); i++) {
-        Io::open(conf.inputs[i], conf.outputs[i]);
-        Grammar* grammar = parse();
-        printf("DBG: %s\n", grammar->to_string().c_str());
-
-        //~ if (Config::get<bool>("verbose")) {
-            //~ grammar->stats("Loaded grammar containing ");
-        //~ }
-
-        //~ switch (conf.output_type) {
-        //~ case Config::OT_DEBUG:
-            //~ grammar->debug();
-            //~ break;
-        //~ case Config::OT_AST:
-            //~ Config::get<bool>("optimize") && grammar->optimize();
-            //~ grammar->print_ast();
-            //~ break;
-        //~ case Config::OT_FORMAT:
-            //~ Config::get<bool>("optimize") && grammar->optimize();
-            //~ grammar->format();
-        //~ }
-        if (grammar) {
-            delete grammar;
-        }
-        Io:: close();
-    }
-    return 0;
-}
-
-Parser::Parser(const Config& conf) : conf(conf), parser(peg_create(NULL)), grammar(NULL) {}
-
-Parser::~Parser() {
-    peg_destroy(parser);
-}
-*/

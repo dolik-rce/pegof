@@ -1,10 +1,10 @@
 #include "character_class.h"
 
-CharacterClass2::CharacterClass2(const std::string& content) : content(content) {}
-CharacterClass2::CharacterClass2(Parser2& p) { parse(p); }
+CharacterClass2::CharacterClass2(const std::string& content) : Node("CharacterClass"), content(content) {}
+CharacterClass2::CharacterClass2(Parser2& p) : Node("CharacterClass") { parse(p); }
 
 void CharacterClass2::parse(Parser2& p) {
-    printf("parsing CharacterClass2\n");
+    //~ printf("parsing CharacterClass2\n");
     p.skip_space();
     if (p.match('.')) {
         content = ".";
@@ -17,5 +17,9 @@ void CharacterClass2::parse(Parser2& p) {
 }
 
 std::string CharacterClass2::to_string() const {
-    return "CHAR_CLASS " + content;
+    return content;
+}
+
+std::string CharacterClass2::dump(std::string indent) const {
+    return indent + "CHAR_CLASS " + content;
 }

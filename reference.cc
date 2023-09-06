@@ -1,12 +1,12 @@
 #include "reference.h"
 
-Reference::Reference(const std::string& name, const std::string& var): name(name), var(var) {}
-Reference::Reference(Parser2& p) {
+Reference::Reference(const std::string& name, const std::string& var): Node("Reference"), name(name), var(var) {}
+Reference::Reference(Parser2& p) : Node("Reference") {
     parse(p);
 }
 
 void Reference::parse(Parser2& p) {
-    printf("parsing  Reference\n");
+    //~ printf("parsing  Reference\n");
     if (!p.match_identifier()) {
         return;
     }
@@ -27,7 +27,14 @@ void Reference::parse(Parser2& p) {
 }
 
 std::string Reference::to_string() const {
-    std::string result = "REF ";
+    if (!var.empty()) {
+        return var + ":" + name;
+    }
+    return name;
+}
+
+std::string Reference::dump(std::string indent) const {
+    std::string result = indent + "REF ";
     if (!var.empty()) {
         result += var + ":";
     }

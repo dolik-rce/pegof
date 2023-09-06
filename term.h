@@ -12,7 +12,7 @@
 
 using Primary = std::variant<String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
 
-class Term : public Node<Term> {
+class Term : public Node {
     char prefix;
     char quantifier;
     Primary primary;
@@ -27,4 +27,9 @@ public:
 
     std::string to_string(const Primary& x) const;
     virtual std::string to_string() const override;
+    std::string dump(const Primary& x, std::string indent) const;
+    virtual std::string dump(std::string indent = "") const override;
+
+    virtual Node* operator[](int index);
+    virtual long size() const;
 };

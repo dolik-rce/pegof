@@ -1,10 +1,10 @@
 #include "rule.h"
 
-Rule::Rule(const std::string& name, const Alternation& expression): name(name), expression(expression) {}
-Rule::Rule(Parser2& p) { parse(p); }
+Rule::Rule(const std::string& name, const Alternation& expression): Node("Rule"), name(name), expression(expression) {}
+Rule::Rule(Parser2& p) : Node("Rule") { parse(p); }
 
 void Rule::parse(Parser2& p) {
-    printf("parsing  Rule\n");
+    //~ printf("parsing  Rule\n");
     if (!p.match_re("(\\S+)\\s*<-")) {
         return;
     }
@@ -17,5 +17,9 @@ void Rule::parse(Parser2& p) {
 }
 
 std::string Rule::to_string() const {
-    return "RULE " + name + " <- " + expression.to_string() + "\n";
+    return name + " <- " + expression.to_string() + "\n";
+}
+
+std::string Rule::dump(std::string indent) const {
+    return indent + "RULE " + name + "\n" + expression.dump(indent + "  ");
 }

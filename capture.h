@@ -3,7 +3,7 @@
 
 class Alternation;
 
-class Capture : public Node<Capture> {
+class Capture : public Node {
     std::shared_ptr<Alternation> expression;
 public:
     Capture(const Alternation& expression);
@@ -11,4 +11,8 @@ public:
 
     virtual void parse(Parser2& p);
     virtual std::string to_string() const override;
+    virtual std::string dump(std::string = "") const override;
+
+    virtual Node* operator[](int index);
+    virtual long size() const;
 };
