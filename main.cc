@@ -1,11 +1,6 @@
 #include "parser.h"
 #include "grammar.h"
-
-//~ std::string get_name(const AnyNode& x) {
-    //~ return std::visit([](const auto& value) -> std::string {
-        //~ return value->get_name();
-    //~ }, x);
-//~ }
+#include "checker.h"
 
 int main(int argc, char **argv) {
 
@@ -62,6 +57,10 @@ int main() {
     return 0;
 }
 )";
+    printf("Check input: %d\n", Checker().validate_string(peg));
+    printf("Check input: %d\n", Checker().validate_file("/home/h/prog/pegof/packcc/examples/calc-broken.peg"));
+    return 0;
+
     Grammar g(peg);
     if (!g) {
         printf("ERROR: Failed to parse grammar!\n");
@@ -70,6 +69,7 @@ int main() {
     //~ printf("%s\n", g.dump().c_str());
     //~ printf("------------------------\n");
     printf("%s\n", g.to_string().c_str());
+    //~ printf("Check output: %d\n", Checker::validate(g.to_string()));
     //~ printf("------------------------\n");
     //~ printf("%s\n", g.type);
     //~ printf("%s\n", g.rules[0].type);

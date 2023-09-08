@@ -2,7 +2,7 @@
 #include <variant>
 
 #include "node.h"
-#include "string.h"
+#include "stringnode.h"
 #include "reference.h"
 #include "character_class.h"
 #include "expand.h"

@@ -1,4 +1,4 @@
-#include "string.h"
+#include "stringnode.h"
 
 String::String(const std::string& content) : Node("String"), content(content) {}
 String::String(Parser2& p) : Node("String") { parse(p); }
