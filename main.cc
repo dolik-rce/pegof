@@ -67,21 +67,21 @@ int main() {
         printf("ERROR: Failed to parse grammar!\n");
         exit(1);
     }
-    printf("%s\n", g.dump().c_str());
-    printf("------------------------\n");
+    //~ printf("%s\n", g.dump().c_str());
+    //~ printf("------------------------\n");
     printf("%s\n", g.to_string().c_str());
-    printf("------------------------\n");
-    printf("%s\n", g.type);
-    printf("%s\n", g.rules[0].type);
-    printf("%s\n", g.rules[0].expression.type);
-    for (int i = 0; i < g.size(); i++) {
-        printf("%d: %s\n", i, g[i]->type);
-    }
+    //~ printf("------------------------\n");
+    //~ printf("%s\n", g.type);
+    //~ printf("%s\n", g.rules[0].type);
+    //~ printf("%s\n", g.rules[0].expression.type);
+    //~ for (int i = 0; i < g.size(); i++) {
+        //~ printf("%d: %s\n", i, g[i]->type);
+    //~ }
 
-    std::vector<Rule*> rules = g.find_all<Rule>([](const Rule& r){ return r.name == "EOL"; });
-    for (Rule* rule : rules) {
-        printf("- %s\n", rule->to_string().c_str());
-    }
+    //~ std::vector<Rule*> rules = g.find_all<Rule>([](const Rule& r){ return r.name == "EOL"; });
+    //~ for (Rule* rule : rules) {
+        //~ printf("- %s\n", rule->to_string().c_str());
+    //~ }
 
     return 0;
 }

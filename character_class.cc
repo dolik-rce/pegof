@@ -17,7 +17,11 @@ void CharacterClass2::parse(Parser2& p) {
 }
 
 std::string CharacterClass2::to_string() const {
-    return content;
+    if (content == ".") {
+        return ".";
+    } else {
+        return "[" + content + "]";
+    }
 }
 
 std::string CharacterClass2::dump(std::string indent) const {

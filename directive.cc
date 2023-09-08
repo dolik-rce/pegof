@@ -14,8 +14,9 @@ void Directive::parse(Parser2& p) {
         valid = true;
     } else if (p.match_re("%(value|auxil|prefix)")) {
         name = p.last_re_match.str(1);
-        if (p.match_quoted("\"", "\"")) {
+        if (p.match_quoted("\"", "\"") || p.match_quoted("'", "'")) {
             value = p.last_match;
+            //~ printf("value=%s\n", value.c_str());
         }
         code = false;
         valid = true;
@@ -25,15 +26,15 @@ void Directive::parse(Parser2& p) {
 std::string Directive::to_string() const {
     std::string result = "%" + name;
     if (code) {
-        result += " " + value + "\n";
+        result += " {" + value + "}\n";
     } else {
-        result += " " + value + "\n";
+        result += " \"" + value + "\"\n";
     }
     return result;
 }
 
 std::string Directive::dump(std::string indent) const {
     std::string result = indent + "DIRECTIVE " + name;
-    result += " " + to_c_string(value);
+    result += (code ? " {": " \"" ) + to_c_string(value) + (code ? "}": "\"" );
     return result;
 }

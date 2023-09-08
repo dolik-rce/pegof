@@ -22,7 +22,7 @@ void Alternation::parse(Parser2& p) {
 std::string Alternation::to_string() const {
     std::string result = sequences[0].to_string();
     for (int i = 1; i < sequences.size(); i++) {
-        result += "/" + sequences[i].to_string();
+        result += " / " + sequences[i].to_string();
     }
     return result;
 }

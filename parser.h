@@ -3,11 +3,6 @@
 #include <string>
 #include <regex>
 
-//~ #include "ast.h"
-//~ #include "peg.h"
-//~ #include "io.h"
-//~ #include "config.h"
-
 class Parser2 {
     std::string input;
     unsigned long pos;
@@ -19,6 +14,7 @@ class Parser2 {
         State(Parser2* p);
         bool rollback();
         bool commit();
+        bool commit(int start, int end);
     };
 
 public:
@@ -51,16 +47,3 @@ public:
     bool peek(const std::string& str);
     bool peek_re(const std::string& r);
 };
-
-//~ class Parser {
-    //~ const Config& conf;
-    //~ peg_context_t *parser;
-    //~ Grammar* grammar;
-
-    //~ Grammar* parse();
-//~ public:
-    //~ int parse_all();
-
-    //~ Parser(const Config& conf);
-    //~ ~Parser();
-//~ };

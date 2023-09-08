@@ -16,6 +16,11 @@ bool Parser2::State::commit() {
     return true;
 };
 
+bool Parser2::State::commit(int start, int end) {
+    p->last_match = p->input.substr(start, end - start);
+    return true;
+};
+
 Parser2::Parser2(std::string input) : input(input), pos(0) {}
 
 bool Parser2::is_eof() {
@@ -103,14 +108,17 @@ bool Parser2::match_macro() {
 }
 
 bool Parser2::match_quoted(const char *left, const char *right) {
+    // TODO: unescape enclosed quotes
     State s(this);
     skip_space();
     if (match(left)) {
+        int start = pos;
         while (!match(right)) {
             match('\\');
             pos++;
         }
-        return s.commit();
+        //~ printf("s=%d, p=%d, e=%d\n", start, pos, pos - std::string(right).size());
+        return s.commit(start, pos - std::string(right).size());
     }
     return s.rollback();
 }
@@ -121,6 +129,7 @@ bool Parser2::match_code() {
     if (!match('{')) {
         return s.rollback();
     }
+    int start = pos;
     int level = 1;
     while (true) {
         if (is_eof()) {
@@ -143,7 +152,7 @@ bool Parser2::match_code() {
             pos++;
         }
     }
-    return s.commit();
+    return s.commit(start, pos - 1);
 }
 
 bool Parser2::match_number() {

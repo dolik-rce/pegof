@@ -13,7 +13,7 @@ void String::parse(Parser2& p) {
 }
 
 std::string String::to_string() const {
-    return content;
+    return "\"" + content + "\"";
 }
 
 std::string String::dump(std::string indent) const {
