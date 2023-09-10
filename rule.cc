@@ -5,6 +5,7 @@ Rule::Rule(Parser2& p) : Node("Rule") { parse(p); }
 
 void Rule::parse(Parser2& p) {
     //~ printf("parsing  Rule\n");
+    parse_comments(p);
     if (!p.match_re("(\\S+)\\s*<-")) {
         return;
     }
@@ -17,7 +18,7 @@ void Rule::parse(Parser2& p) {
 }
 
 std::string Rule::to_string() const {
-    return name + " <- " + expression.to_string() + "\n";
+    return comments() + name + " <- " + expression.to_string() + "\n";
 }
 
 std::string Rule::dump(std::string indent) const {

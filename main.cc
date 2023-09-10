@@ -57,9 +57,9 @@ int main() {
     return 0;
 }
 )";
-    printf("Check input: %d\n", Checker().validate_string(peg));
-    printf("Check input: %d\n", Checker().validate_file("/home/h/prog/pegof/packcc/examples/calc-broken.peg"));
-    return 0;
+    //~ printf("Check input: %d\n", Checker().validate_string(peg));
+    //~ printf("Check input: %d\n", Checker().validate_file("/home/h/prog/pegof/packcc/examples/calc-broken.peg"));
+    //~ return 0;
 
     Grammar g(peg);
     if (!g) {

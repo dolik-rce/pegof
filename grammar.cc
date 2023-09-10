@@ -17,6 +17,7 @@ Grammar::Grammar(const std::string& s): Node("Grammar") {
 
 void Grammar::parse(Parser2& p) {
     //~ printf("parsing  Grammar\n");
+    parse_comments(p);
     while (true) {
         Directive d(p);
         if (d) {
@@ -39,7 +40,7 @@ void Grammar::parse(Parser2& p) {
 }
 
 std::string Grammar::to_string() const {
-    std::string result;
+    std::string result = comments();
     for (const Directive& directive : directives) {
         result += directive.to_string();
     }

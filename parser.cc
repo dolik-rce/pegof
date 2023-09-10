@@ -18,6 +18,7 @@ bool Parser2::State::commit() {
 
 bool Parser2::State::commit(int start, int end) {
     p->last_match = p->input.substr(start, end - start);
+    //~ printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
     return true;
 };
 
@@ -33,7 +34,8 @@ void Parser2::skip_space() {
             pos++;
             continue;
         }
-        if (!match_comment()) break;
+        break;
+        //~ if (!(include_comments && match_comment())) break;
     }
 }
 
@@ -79,12 +81,15 @@ void Parser2::skip_rest_of_line(bool continuable) {
 }
 
 bool Parser2::match_comment() {
-    State s(this);
-    if (!match('#')) {
-        return s.rollback();
+    std::string result = "";
+    while (match_re("[ \t]*#[ \t]*([^\\n]*\\n)")) {
+        result += last_re_match.str(1);
     }
-    while (input[pos] != '\n' && !is_eof()) pos++;
-    return s.commit();
+    if (!result.empty() && result.back() == '\n') {
+        result.resize(result.size() - 1);
+    }
+    last_match = result;
+    return !result.empty();
 }
 
 bool Parser2::match_block_comment() {

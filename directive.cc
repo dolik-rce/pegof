@@ -4,6 +4,7 @@ Directive::Directive(const std::string& name, const std::string& value, bool cod
 Directive::Directive(Parser2& p) : Node("Directive") { parse(p); }
 
 void Directive::parse(Parser2& p) {
+    parse_comments(p);
     //~ printf("parsing  Directive\n");
     if (p.match_re("%(earlysource|earlycommon|earlyheader|source|header|common)")) {
         name = p.last_re_match.str(1);
@@ -24,7 +25,7 @@ void Directive::parse(Parser2& p) {
 }
 
 std::string Directive::to_string() const {
-    std::string result = "%" + name;
+    std::string result = comments() + "%" + name;
     if (code) {
         result += " {" + value + "}\n";
     } else {

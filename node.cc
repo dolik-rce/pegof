@@ -37,3 +37,14 @@ std::string Node::to_c_string(std::string str) const {
     }
     return result;
 }
+
+void Node::parse_comments(Parser2& p) {
+    if (p.match_comment()) {
+        comment = p.last_match;
+    }
+}
+
+std::string Node::comments(std::string indent) const {
+    if (comment.empty()) return "";
+    return indent + "# " + std::regex_replace(comment, std::regex("\n"), "\n" + indent + "# ") + "\n";
+}
