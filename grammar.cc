@@ -42,9 +42,12 @@ void Grammar::parse(Parser2& p) {
 
 std::string Grammar::to_string() const {
     std::string result = comments();
+    if (!result.empty()) result += "\n";
     for (const Directive& directive : directives) {
         result += directive.to_string();
     }
+    if (!directives.empty())
+        result += "\n";
     for (const Rule& rule : rules) {
         result += rule.to_string();
     }

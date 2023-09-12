@@ -31,6 +31,7 @@ public:
     bool match(char c);
     bool match(const std::string& str);
     bool match_re(const std::string& r);
+    bool match_any();
 
     bool match_comment();
 
@@ -47,4 +48,6 @@ public:
     bool peek(const char c);
     bool peek(const std::string& str);
     bool peek_re(const std::string& r);
+
+    char current() const;
 };

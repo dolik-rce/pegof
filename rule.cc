@@ -1,4 +1,5 @@
 #include "rule.h"
+#include "config.h"
 
 Rule::Rule(const std::string& name, const Alternation& expression): Node("Rule"), name(name), expression(expression) {}
 Rule::Rule(Parser2& p) : Node("Rule") { parse(p); }
@@ -18,7 +19,12 @@ void Rule::parse(Parser2& p) {
 }
 
 std::string Rule::to_string() const {
-    return comments() + name + " <- " + expression.to_string() + "\n";
+    std::string result = comments() + name + " <- ";
+    if (expression.sequences.size() > Config::get<int>("wrap-limit")) {
+         result += "\n    ";
+    }
+    result += expression.to_string() + "\n\n";
+    return result;
 }
 
 std::string Rule::dump(std::string indent) const {

@@ -3,8 +3,8 @@
 #include "sequence.h"
 
 class Alternation : public Node {
-    std::vector<Sequence> sequences;
 public:
+    std::vector<Sequence> sequences;
     Alternation(const std::vector<Sequence>& sequences);
     Alternation(Parser2& p);
     Alternation();

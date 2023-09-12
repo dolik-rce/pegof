@@ -17,7 +17,7 @@ void write_file(const std::string& filename, const std::string& content) {
     ofs.close();
 }
 
-std::string to_c_string(std::string str) {
+std::string to_c_string(std::string str, EscapeMode mode) {
     std::string result;
     for (int i = 0; i < str.size(); i++) {
         switch (str[i]) {
@@ -30,8 +30,8 @@ std::string to_c_string(std::string str) {
         case '\x09': result += "\\t"; break;
         case '\x0b': result += "\\v"; break;
         case '\\':   result += "\\\\"; break;
-        case '\'':   result += "\\\'"; break;
-        case '\"':   result += "\\\""; break;
+        case '\'':   result += (mode & ESCAPE_SINGLE_QUOTES) ? "\\'" : "'"; break;
+        case '\"':   result += (mode & ESCAPE_DOUBLE_QUOTES) ? "\\\"" : "\""; break;
         default:
             if (str[i] >= '\x20' && str[i] < '\x7f') {
                 result += str[i];

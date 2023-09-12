@@ -1,5 +1,6 @@
 #include "stringnode.h"
 #include "utils.h"
+#include "config.h"
 
 String::String(const std::string& content) : Node("String"), content(content) {}
 String::String(Parser2& p) : Node("String") { parse(p); }
@@ -14,7 +15,11 @@ void String::parse(Parser2& p) {
 }
 
 std::string String::to_string() const {
-    return "\"" + to_c_string(content) + "\"";
+    if (Config::get<Config::QuoteType>("quotes") == Config::QT_SINGLE) {
+        return '\'' + to_c_string(content, ESCAPE_SINGLE_QUOTES) + '\'';
+    } else {
+        return '"' + to_c_string(content, ESCAPE_DOUBLE_QUOTES) + '"';
+    }
 }
 
 std::string String::dump(std::string indent) const {

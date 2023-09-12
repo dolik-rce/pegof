@@ -78,6 +78,13 @@ bool Parser2::match_re(const std::string& r) {
     return s.rollback();
 }
 
+bool Parser2::match_any() {
+    if (is_eof()) return false;
+    last_match = std::string(1, input[pos]);
+    pos++;
+    return true;
+}
+
 void Parser2::skip_rest_of_line(bool continuable) {
     while (!is_eof()) {
         if (continuable) match("\\\n");
@@ -209,4 +216,8 @@ bool Parser2::peek_re(const std::string& r) {
     bool result = match_re(r);
     s.rollback();
     return result;
+}
+
+char Parser2::current() const {
+    return input[pos];
 }
