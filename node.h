@@ -3,8 +3,6 @@
 #include <optional>
 #include <regex>
 #include <variant>
-#include <sstream>
-#include <iomanip>
 
 #include "parser.h"
 
@@ -34,8 +32,6 @@ public:
 
     template <class U>
     void find_all(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
-
-    std::string to_c_string(std::string str) const;
 
     void parse_comments(Parser2& p);
     std::string comments(std::string indent = "") const;

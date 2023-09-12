@@ -1,4 +1,5 @@
 #include "stringnode.h"
+#include "utils.h"
 
 String::String(const std::string& content) : Node("String"), content(content) {}
 String::String(Parser2& p) : Node("String") { parse(p); }
@@ -13,9 +14,9 @@ void String::parse(Parser2& p) {
 }
 
 std::string String::to_string() const {
-    return "\"" + content + "\"";
+    return "\"" + to_c_string(content) + "\"";
 }
 
 std::string String::dump(std::string indent) const {
-    return indent + "STRING " + content;
+    return indent + "STRING " + to_c_string(content);
 }

@@ -1,4 +1,5 @@
 #include "grammar.h"
+#include "utils.h"
 
 Grammar::Grammar(
     const std::vector<Directive>& directives,

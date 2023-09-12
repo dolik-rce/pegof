@@ -22,6 +22,12 @@ bool Parser2::State::commit(int start, int end) {
     return true;
 };
 
+bool Parser2::State::commit(const std::string& result) {
+    p->last_match = result;
+    //~ printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
+    return true;
+};
+
 Parser2::Parser2(std::string input) : input(input), pos(0) {}
 
 bool Parser2::is_eof() {
@@ -93,7 +99,11 @@ bool Parser2::match_comment() {
 }
 
 bool Parser2::match_block_comment() {
-    return match_quoted("/*", "*/");
+    State s(this);
+    if (!match("/*")) return s.rollback();
+    unsigned long start = pos;
+    for (; !match("*/"); pos++) {}
+    return s.commit(start, pos - 2);
 }
 
 bool Parser2::match_line_comment() {
@@ -113,17 +123,29 @@ bool Parser2::match_macro() {
 }
 
 bool Parser2::match_quoted(const char *left, const char *right) {
-    // TODO: unescape enclosed quotes
     State s(this);
     skip_space();
+    std::string result;
     if (match(left)) {
         int start = pos;
-        while (!match(right)) {
-            match('\\');
-            pos++;
+        for (; !match(right); pos++) {
+            if (match('\\')) {
+                switch (input[pos]) {
+                case '\x00': result += '\0'; break;
+                case 'f': result += '\f'; break;
+                case 't': result += '\t'; break;
+                case 'v': result += '\v'; break;
+                case 'r': result += '\r'; break;
+                case 'n': result += '\n'; break;
+                case 'a': result += '\a'; break;
+                case 'b': result += '\b'; break;
+                default: result += input[pos];
+                }
+            } else {
+                result += input[pos];
+            }
         }
-        //~ printf("s=%d, p=%d, e=%d\n", start, pos, pos - std::string(right).size());
-        return s.commit(start, pos - std::string(right).size());
+        return s.commit(result);
     }
     return s.rollback();
 }

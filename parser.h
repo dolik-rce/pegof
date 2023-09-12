@@ -15,6 +15,7 @@ class Parser2 {
         bool rollback();
         bool commit();
         bool commit(int start, int end);
+        bool commit(const std::string& result);
     };
 
 public:
