@@ -25,6 +25,66 @@ Currently implemented optimizations:
  - **Removing comments:** This makes it simpler to implement the other optimizations. Also, most of the comments would not make much sense in the reorganized grammar.
 
 ## Usage:
+    pegof [<options>] [--] [<input_file> ...]
+
+### Basic options:
+    -h/--help
+        Show help (this text)
+    -c/--conf FILE
+        Use given configuration file
+    -v/--verbose
+        Verbose logging to stderr
+
+### Input/output options:
+    -f/--format
+        Output formatted grammar (default)
+    -a/--ast
+        Output abstract syntax tree representation
+    -d/--debug
+        Output debug info (includes AST and formatted output)
+    -I/--inplace
+        Modify the input files (only when formatting)
+    -i/--input FILE
+        Path to file with PEG grammar, multiple paths can be given
+        Value "-" can be used to specify standard input
+        Mainly useful for config file
+        If no file or --input is given, read standard input.
+    -o/--output FILE
+        Output to file (should be repeated if there is more inputs)
+        Value "-" can be used to specify standard output
+        Must not be used together with --inplace.
+
+### Formatting options:
+    -q/--quotes single/double
+        Switch between double and single quoted strings (defaults to double)
+    -w/--wrap-limit N
+        Wrap alternations with more than N sequences (default 1)
+
+### Optimization options:
+    -O/--optimize
+        Apply optimizations
+    -C/--keep-captures
+        Do not discard unused captures
+    -V/--keep-variables
+        Do not discard unused variables
+    -r/--keep-repeats
+        Do not optimize repeated tokens
+    -q/--keep-quantifications
+        Do not optimize quantifications
+    -n/--no-concat
+        Do not concatenate adjacent string
+    -N/--no-char-class
+        Do not optimize character classes
+    -s/--no-single-char
+        Do not convert single character classes to string
+    -e/--no-negation
+        Do not optimize negations
+    -l/--inline-limit N
+        Maximum number of references non-terminal rule can have and still
+        be inlined (default 10)
+    -L/--terminal-inline-limit N
+        Maximum number of references terminal rule can have and still
+        be inlined (default 20)
 
 ## Configuration file
 

@@ -1,4 +1,5 @@
 #include "checker.h"
+#include "utils.h"
 
 #include <fstream>
 #include <sstream>
@@ -34,11 +35,11 @@ Checker::Checker() {
     output = (tmp_dir / "output").native();
     tmp = tmp_dir.native();
     fs::create_directory(tmp_dir);
-    printf("DBG: create %s\n", tmp.c_str());
+    //~ printf("DBG: create %s\n", tmp.c_str());
 }
 
 Checker::~Checker() {
-    printf("DBG: delete %s\n", tmp.c_str());
+    //~ printf("DBG: delete %s\n", tmp.c_str());
     fs::remove_all(tmp);
 }
 
@@ -88,11 +89,7 @@ bool Checker::validate(const std::string& input) const {
 
 bool Checker::validate_string(const std::string& peg) const {
         fs::path input = fs::path(tmp) / "temporary.peg";
-
-        std::ofstream ofs(input.native());
-        ofs << peg;
-        ofs.close();
-
+        write_file(input.native(), peg);
         return validate(input.native());
 }
 
