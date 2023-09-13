@@ -2,19 +2,23 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 
 std::string read_file(const std::string& filename) {
-    std::ifstream ifs(filename);
     std::stringstream buffer;
-    buffer << ifs.rdbuf();
+    buffer << (filename.empty() ? std::cin.rdbuf() : std::ifstream(filename).rdbuf());
     return buffer.str();
 }
 
 void write_file(const std::string& filename, const std::string& content) {
-    std::ofstream ofs(filename);
-    ofs << content;
-    ofs.close();
+    if (filename.empty()) {
+        printf("%s", content.c_str());
+    } else {
+        std::ofstream ofs(filename);
+        ofs << content;
+        ofs.close();
+    }
 }
 
 std::string to_c_string(std::string str, EscapeMode mode) {

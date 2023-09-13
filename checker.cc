@@ -87,8 +87,16 @@ bool Checker::validate(const std::string& input) const {
         return true;
 }
 
-bool Checker::validate_string(const std::string& peg) const {
-        fs::path input = fs::path(tmp) / "temporary.peg";
+bool Checker::validate(const std::string& filename, const std::string& content) const {
+        if (filename.empty()) {
+            return validate_string("stdin", content);
+        } else {
+            return validate_file(filename);
+        }
+}
+
+bool Checker::validate_string(const std::string& filename, const std::string& peg) const {
+        fs::path input = fs::path(tmp) / filename;
         write_file(input.native(), peg);
         return validate(input.native());
 }

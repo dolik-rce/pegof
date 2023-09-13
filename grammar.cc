@@ -63,7 +63,7 @@ std::string Grammar::dump(std::string indent) const {
     for (const Rule& rule : rules) {
         result += rule.dump(indent + "  ") + "\n";
     }
-    result += indent + "CODE: \"" + to_c_string(code) + "\"";
+    result += indent + "  CODE: \"" + to_c_string(code) + "\"";
     return result;
 }
 
