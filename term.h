@@ -17,8 +17,8 @@ class Term : public Node {
     char quantifier;
     Primary primary;
 public:
-    Term(char prefix, char quantifier, const Primary& primary);
-    Term(Parser2& p);
+    Term(char prefix, char quantifier, const Primary& primary, Node* parent);
+    Term(Parser2& p, Node* parent);
 
     template<class T>
     bool parse(Parser2& p);

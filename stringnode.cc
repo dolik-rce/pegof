@@ -2,9 +2,9 @@
 #include "utils.h"
 #include "config.h"
 
-String::String(const std::string& content) : Node("String"), content(content) {}
-String::String(Parser2& p) : Node("String") { parse(p); }
-String::String() : Node("String"), content("ERROR") {}
+String::String(const std::string& content, Node* parent) : Node("String", parent), content(content) {}
+String::String(Parser2& p, Node* parent) : Node("String", parent) { parse(p); }
+String::String() : Node("String", nullptr), content("ERROR") {}
 
 void String::parse(Parser2& p) {
     //~ printf("parsing  String\n");

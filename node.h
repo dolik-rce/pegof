@@ -9,7 +9,8 @@
 class Node {
 protected:
     bool valid;
-    Node(const char* type): valid(false), type(type) {}
+    Node* parent;
+    Node(const char* type, Node* parent): valid(false), parent(parent), type(type) {}
 public:
     const char* type;
     std::string comment;
@@ -22,6 +23,12 @@ public:
 
     template<class U>
     bool is() const;
+
+    template<class U>
+    U* as() const;
+
+    template<class U>
+    U* get_parent() const;
 
     virtual Node* operator[](int index);
 
@@ -40,6 +47,18 @@ public:
 template<class U>
 bool Node::is() const {
     return typeid(*this) == typeid(U);
+}
+
+template<class U>
+U* Node::as() const {
+    if (!is<U>()) return nullptr;
+    return (U*)this;
+}
+
+template<class U>
+U* Node::get_parent() const {
+    if (!parent) return nullptr;
+    return parent->as<U>();
 }
 
 template <class U>

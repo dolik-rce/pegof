@@ -1,15 +1,15 @@
 #include "capture.h"
 #include "alternation.h"
 
-Capture::Capture(const Alternation& expression) : Node("Capture"), expression(new Alternation(expression)) {}
-Capture::Capture(Parser2& p) : Node("Capture") { parse(p); }
+Capture::Capture(const Alternation& expression, Node* parent) : Node("Capture", parent), expression(new Alternation(expression)) {}
+Capture::Capture(Parser2& p, Node* parent) : Node("Capture", parent) { parse(p); }
 
 void Capture::parse(Parser2& p) {
     //~ printf("parsing Capture\n");
     if (!p.match("<")) {
         return;
     }
-    expression.reset(new Alternation(p));
+    expression.reset(new Alternation(p, this));
     if (!*expression) {
         return;
     }

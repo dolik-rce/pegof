@@ -1,7 +1,7 @@
 #include "reference.h"
 
-Reference::Reference(const std::string& name, const std::string& var): Node("Reference"), name(name), var(var) {}
-Reference::Reference(Parser2& p) : Node("Reference") {
+Reference::Reference(const std::string& name, const std::string& var, Node* parent): Node("Reference", parent), name(name), var(var) {}
+Reference::Reference(Parser2& p, Node* parent) : Node("Reference", parent) {
     parse(p);
 }
 

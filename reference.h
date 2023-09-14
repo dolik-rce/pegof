@@ -4,9 +4,9 @@
 class Reference : public Node {
     std::string name;
     std::string var;
-    Reference(const std::string& name, const std::string& var);
+    Reference(const std::string& name, const std::string& var, Node* parent);
 public:
-    Reference(Parser2& p);
+    Reference(Parser2& p, Node* parent);
 
     virtual void parse(Parser2& p);
     virtual std::string to_string() const override;

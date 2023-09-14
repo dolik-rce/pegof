@@ -1,17 +1,17 @@
 #include "sequence.h"
 
-Sequence::Sequence(const std::vector<Term>& terms) : Node("Sequence"), terms(terms) {}
-Sequence::Sequence(Parser2& p) : Node("Sequence") { parse(p); }
+Sequence::Sequence(const std::vector<Term>& terms) : Node("Sequence", this), terms(terms) {}
+Sequence::Sequence(Parser2& p) : Node("Sequence", this) { parse(p); }
 
 void Sequence::parse(Parser2& p) {
     //~ printf("parsing Sequence\n");
     p.skip_space();
-    Term t(p);
+    Term t(p, this);
     if (!t) return;
     while (t) {
         terms.push_back(t);
         if (p.peek_re("\\S+\\s*<-")) break; // avoid parsing into the next rule
-        t = Term(p);
+        t = Term(p, this);
     }
     valid = true;
 }

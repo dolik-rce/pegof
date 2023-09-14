@@ -13,8 +13,8 @@ class CharacterClass2 : public Node {
 
     void parseContent();
 public:
-    CharacterClass2(const std::string& content);
-    CharacterClass2(Parser2& p);
+    CharacterClass2(const std::string& content, Node* parent);
+    CharacterClass2(Parser2& p, Node* parent);
 
     virtual void normalize();
 

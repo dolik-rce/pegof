@@ -8,8 +8,8 @@ public:
     // replace this with actual nodes
     Alternation expression;
 
-    Rule(const std::string& name, const Alternation& expression);
-    Rule(Parser2& p);
+    Rule(const std::string& name, const Alternation& expression, Node* parent);
+    Rule(Parser2& p, Node* parent);
 
     virtual void parse(Parser2& p);
     virtual std::string to_string() const override;

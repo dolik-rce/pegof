@@ -1,8 +1,8 @@
 #include "rule.h"
 #include "config.h"
 
-Rule::Rule(const std::string& name, const Alternation& expression): Node("Rule"), name(name), expression(expression) {}
-Rule::Rule(Parser2& p) : Node("Rule") { parse(p); }
+Rule::Rule(const std::string& name, const Alternation& expression, Node* parent): Node("Rule", parent), name(name), expression(expression) {}
+Rule::Rule(Parser2& p, Node* parent) : Node("Rule", parent) { parse(p); }
 
 void Rule::parse(Parser2& p) {
     //~ printf("parsing  Rule\n");
@@ -11,7 +11,7 @@ void Rule::parse(Parser2& p) {
         return;
     }
     name = p.last_re_match.str(1);
-    expression = Alternation(p);
+    expression = Alternation(p, this);
     if (!expression) {
         return;
     }

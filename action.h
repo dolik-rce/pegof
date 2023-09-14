@@ -5,8 +5,8 @@
 class Action : public Node {
     std::string code;
 public:
-    Action(const std::string& code);
-    Action(Parser2& p);
+    Action(const std::string& code, Node* parent);
+    Action(Parser2& p, Node* parent);
 
     virtual void parse(Parser2& p);
 

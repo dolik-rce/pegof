@@ -1,11 +1,11 @@
 #include "term.h"
 
-Term::Term(char prefix, char quantifier, const Primary& primary) : Node("Term"), prefix(prefix), quantifier(quantifier), primary(primary) {}
-Term::Term(Parser2& p) : Node("Term") { parse(p); }
+Term::Term(char prefix, char quantifier, const Primary& primary, Node* parent) : Node("Term", parent), prefix(prefix), quantifier(quantifier), primary(primary) {}
+Term::Term(Parser2& p, Node* parent) : Node("Term", parent) { parse(p); }
 
 template<class T>
 bool Term::parse(Parser2& p) {
-    T parsed(p);
+    T parsed(p, this);
     if (parsed) {
         primary = parsed;
         return true;

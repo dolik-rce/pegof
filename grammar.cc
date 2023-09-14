@@ -5,13 +5,13 @@ Grammar::Grammar(
     const std::vector<Directive>& directives,
     const std::vector<Rule>& rules,
     const std::string& code
-) : Node("Grammar"), directives(directives), rules(rules), code(code) {}
+) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code) {}
 
-Grammar::Grammar(Parser2& p): Node("Grammar") {
+Grammar::Grammar(Parser2& p): Node("Grammar", nullptr) {
     parse(p);
 }
 
-Grammar::Grammar(const std::string& s): Node("Grammar") {
+Grammar::Grammar(const std::string& s): Node("Grammar", nullptr) {
     Parser2 p(s);
     parse(p);
 }
@@ -20,12 +20,12 @@ void Grammar::parse(Parser2& p) {
     //~ printf("parsing  Grammar\n");
     parse_comments(p);
     while (true) {
-        Directive d(p);
+        Directive d(p, this);
         if (d) {
             directives.push_back(d);
             continue;
         }
-        Rule r(p);
+        Rule r(p, this);
         if (r) {
             rules.push_back(r);
             continue;

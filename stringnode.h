@@ -4,8 +4,8 @@
 class String : public Node {
     std::string content;
 public:
-    String(const std::string& content);
-    String(Parser2& p);
+    String(const std::string& content, Node* parent);
+    String(Parser2& p, Node* parent);
     String();
 
     virtual void parse(Parser2& p);

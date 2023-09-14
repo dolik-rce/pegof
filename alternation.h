@@ -5,8 +5,8 @@
 class Alternation : public Node {
 public:
     std::vector<Sequence> sequences;
-    Alternation(const std::vector<Sequence>& sequences);
-    Alternation(Parser2& p);
+    Alternation(const std::vector<Sequence>& sequences, Node* parent);
+    Alternation(Parser2& p, Node* parent);
     Alternation();
 
     virtual void parse(Parser2& p);
