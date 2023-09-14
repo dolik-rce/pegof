@@ -31,6 +31,7 @@ void process(const std::string& input, const std::string& output, const Checker&
         printf("ERROR: Formatted grammar is invalid!\n");
         exit(1);
     }
+    checker.stats();
     write_file(output, result);
 }
 

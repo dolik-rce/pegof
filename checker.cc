@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -31,15 +32,13 @@ extern "C" {
 }
 
 Checker::Checker() {
-    fs::path tmp_dir = fs::temp_directory_path() / ("pegof_" + std::to_string(rand()));
+    fs::path tmp_dir = fs::temp_directory_path() / ("pegof_" + std::to_string(time(0)));
     output = (tmp_dir / "output").native();
     tmp = tmp_dir.native();
     fs::create_directory(tmp_dir);
-    //~ printf("DBG: create %s\n", tmp.c_str());
 }
 
 Checker::~Checker() {
-    //~ printf("DBG: delete %s\n", tmp.c_str());
     fs::remove_all(tmp);
 }
 
@@ -76,6 +75,12 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
 
     errors = buffer;
     return result;
+}
+
+void Checker::stats() const {
+        std::string code = read_file(output + ".c");
+        std::size_t lines = std::count(code.begin(), code.end(), '\n');
+        printf("Resulting code has %ld bytes and %ld lines\n", code.size(), lines);
 }
 
 bool Checker::validate(const std::string& input) const {

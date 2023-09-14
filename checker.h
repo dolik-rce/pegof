@@ -12,4 +12,5 @@ public:
     bool validate_string(const std::string& filename, const std::string& peg) const;
     bool validate_file(const std::string& filename) const;
     bool validate(const std::string& filename, const std::string& content) const;
+    void stats() const;
 };
