@@ -1,5 +1,5 @@
-main
-    <- A B
+main <-
+    A B
     / C
 
 A <- "A"

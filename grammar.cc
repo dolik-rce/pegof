@@ -33,25 +33,26 @@ void Grammar::parse(Parser2& p) {
         if (p.match("%%")) {
             p.match_re("[\\s\\S]*");
             code = p.last_re_match.str(0);
-            break;
         }
-        return;
+        break;
     }
-    valid = true;
+    valid = true; // !rules.empty();
 }
 
 std::string Grammar::to_string() const {
     std::string result = comments();
     if (!result.empty()) result += "\n";
     for (const Directive& directive : directives) {
-        result += directive.to_string();
+        result += directive.to_string() + "\n";
     }
     if (!directives.empty())
         result += "\n";
     for (const Rule& rule : rules) {
         result += rule.to_string();
     }
-    result += "%%\n" + code;
+    if (!code.empty()) {
+        result += "%%\n" + code;
+    }
     return result;
 }
 

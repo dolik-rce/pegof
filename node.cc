@@ -1,5 +1,9 @@
 #include "node.h"
 
+Node::Node(const char* type, Node* parent): valid(false), parent(parent), type(type) {
+    //~ printf("DBG: creating %s\n", type);
+}
+
 Node::operator bool() {
     return valid;
 }

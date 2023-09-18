@@ -2,9 +2,11 @@
 %value "value"
 %auxil "auxil"
 
-%header { #define TEST 1 }
-%source {source}
-%common {    common   }
+%header {
+    #define TEST 1
+}
+%source { source }
+%common { common }
 
 %earlyheader {
     earlyheader
@@ -13,4 +15,5 @@
 earlysource
 }
 %earlycommon {
-earlycommon}
+earlycommon
+}

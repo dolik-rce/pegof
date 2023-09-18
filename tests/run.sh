@@ -31,15 +31,6 @@ EOF
             [ -e "${OUTPUT//.tmp/.expected}" ] || continue
             echo "    check_file \"$OUTPUT\" \"${OUTPUT//.tmp/.expected}\""
         done
-        for OUTPUT in "${OUTPUTS[@]}"; do
-            [ -f "${CONF/.conf/.status}" ] && continue
-            grep -q -e ast -e debug "$CONF" && continue
-            if [ "$OUTPUT" ]; then
-                echo "    check_packcc_compatibility \"$OUTPUT\""
-            else
-                echo "    check_packcc_compatibility"
-            fi
-        done
         echo "}"
     done
 }
@@ -61,7 +52,6 @@ main() {
     export ROOTDIR="$TESTDIR/.."
     export BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
     export PEGOF="$BUILDDIR/pegof_test"
-    export PACKCC="${PACKCC:-packcc}"
     cd "$TESTDIR"
 
     clean

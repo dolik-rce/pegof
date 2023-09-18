@@ -19,9 +19,11 @@ void Rule::parse(Parser2& p) {
 }
 
 std::string Rule::to_string() const {
-    std::string result = comments() + name + " <- ";
+    std::string result = comments() + name + " <-";
     if (expression.sequences.size() > Config::get<int>("wrap-limit")) {
          result += "\n    ";
+    } else {
+        result += " ";
     }
     result += expression.to_string() + "\n\n";
     return result;

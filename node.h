@@ -10,7 +10,7 @@ class Node {
 protected:
     bool valid;
     Node* parent;
-    Node(const char* type, Node* parent): valid(false), parent(parent), type(type) {}
+    Node(const char* type, Node* parent);
 public:
     const char* type;
     std::string comment;

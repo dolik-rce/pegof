@@ -31,12 +31,3 @@ check_stdout() {
 check_file() {
     diff --strip-trailing-cr -uN "$1" "$2"
 }
-
-check_packcc_compatibility() {
-    if [ $# -gt 0 ]; then
-        "$PACKCC" -o "$1.processed" "$1"
-    else
-        echo "$output"
-        "$PACKCC" -o "stdout.processed" <<<"$output"
-    fi
-}

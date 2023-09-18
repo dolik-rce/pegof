@@ -7,7 +7,7 @@
 Grammar parse(const std::string& input, const std::string& output, const Checker& checker) {
     std::string content = read_file(input);
     if (content.empty()) {
-        printf("ERROR: Failed to load grammar from %s!\n", input.empty() ? "stdin" : input.c_str());
+        //~ printf("ERROR: Failed to load grammar from %s!\n", input.empty() ? "stdin" : input.c_str());
         exit(1);
     }
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
         const std::string& input = conf.inputs[i];
         const std::string& output = conf.outputs[i];
 
-        printf("Processing '%s' -> '%s'\n", input.c_str(), output.c_str());
+        //~ printf("Processing '%s' -> '%s'\n", input.c_str(), output.c_str());
         switch (conf.output_type) {
         case Config::OT_FORMAT:
             process(input, output, checker);

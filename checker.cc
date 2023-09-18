@@ -80,7 +80,7 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
 void Checker::stats() const {
         std::string code = read_file(output + ".c");
         std::size_t lines = std::count(code.begin(), code.end(), '\n');
-        printf("Resulting code has %ld bytes and %ld lines\n", code.size(), lines);
+        //~ printf("Resulting code has %ld bytes and %ld lines\n", code.size(), lines);
 }
 
 bool Checker::validate(const std::string& input) const {

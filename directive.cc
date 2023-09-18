@@ -9,16 +9,19 @@ void Directive::parse(Parser2& p) {
     //~ printf("parsing  Directive\n");
     if (p.match_re("%(earlysource|earlycommon|earlyheader|source|header|common)")) {
         name = p.last_re_match.str(1);
+        //~ printf("DBG0: name=%s\n", name.c_str());
         if(p.match_code()) {
             value = p.last_match;
+            //~ printf("DBG1: value=%s\n", value.c_str());
         }
         code = true;
         valid = true;
     } else if (p.match_re("%(value|auxil|prefix)")) {
         name = p.last_re_match.str(1);
+        //~ printf("DBG2: name=%s\n", name.c_str());
         if (p.match_quoted("\"", "\"") || p.match_quoted("'", "'")) {
             value = p.last_match;
-            //~ printf("value=%s\n", value.c_str());
+            //~ printf("DBG3: value=%s\n", value.c_str());
         }
         code = false;
         valid = true;
