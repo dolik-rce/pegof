@@ -11,7 +11,7 @@ class CharacterClass2 : public Node {
     bool negation;
     Tokens tokens;
 
-    void parseContent();
+    void parseContent(Parser2& p);
 public:
     CharacterClass2(const std::string& content, Node* parent);
     CharacterClass2(Parser2& p, Node* parent);

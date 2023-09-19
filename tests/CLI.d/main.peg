@@ -1,1 +1,3 @@
-start <- X_A X_B
+start <- A B
+A <- "A"
+B <- "B"

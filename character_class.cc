@@ -1,14 +1,27 @@
 #include "character_class.h"
+#include "packcc_wrapper.h"
+#include "utils.h"
 
+#include <cstring>
 #include <sstream>
 #include <iomanip>
 #include <numeric>
 
 CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content) {
-    parseContent();
+    Parser2 p(content);
+    parseContent(p);
 }
 CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent) {
     parse(p);
+}
+
+static std::string unescape(const std::string& s) {
+    char* char_array = new char[s.size() + 1];
+    strcpy(char_array, s.c_str());
+    unescape_string(char_array, FALSE);
+    std::string result = char_array;
+    delete char_array;
+    return result;
 }
 
 static std::string to_char(int c) {
@@ -18,54 +31,53 @@ static std::string to_char(int c) {
         return ss.str();
     }
     switch (c) {
-    case '\r': return "\\r";
-    case '\n': return "\\n";
-    case '\t': return "\\t";
-    case '\v': return "\\v";
-    case '[': return "\\[";
-    case ']': return "\\]";
-    case '^': return "\\^";
-    case '-': return "\\-";
-    case '\\': return "\\\\";
+    case '\r': return R"(\r)";
+    case '\n': return R"(\n)";
+    case '\t': return R"(\t)";
+    case '\v': return R"(\v)";
+    case '[': return R"(\[)";
+    case ']': return R"(\])";
+    case '^': return R"(\^)";
+    case '-': return R"(\-)";
+    case '\\': return R"(\\)";
     default: return std::string(1, (char)c);
     }
 }
 
-static int get_char(Parser2& p) {
-    if (p.match('\\')) {
-        switch (p.current()) {
-        case 'r': return '\r';
-        case 'n': return '\n';
-        case 't': return '\t';
-        case 'v': return '\v';
-        case '[': return '[';
-        case ']': return ']';
-        case '^': return '^';
-        case '-': return '-';
-        case '\\': return '\\';
-        case 'u':
-            if (!p.match_re("\\d\\d\\d\\d")) {
-                printf("ERROR: Invalid unicode char in character class!\n");
-            }
-            std::string code = p.last_re_match.str(0);
-            return std::stoi(code.c_str(), nullptr, 16);
-        }
+static int get_char(const std::string& s, int& pos) {
+    int result;
+    pos += utf8_to_utf32(s.c_str() + pos, &result);
+    if (result != '\\' || pos == s.size()) {
+        return result;
     }
-    if (!p.match_any()) {
-        return -1; // this should never happen for well-formed charracter classes
+    switch (s[pos]) {
+    case '[': pos++; return '[';
+    case ']': pos++; return ']';
+    case '\\': pos++; return '\\';
+    default: return result;
     }
-    return p.last_match[0];
 }
 
-void CharacterClass2::parseContent() {
-    Parser2 p(content);
+void CharacterClass2::parseContent(Parser2& p) {
     negation = p.match('^');
     dash = p.match('-');
     while (!p.is_eof()) {
+        if (p.match(']')) break;
+        content += p.current();
+        if (p.current() == '\\') {
+            p.match_any();
+            content += p.current();
+        }
+        p.match_any();
+    }
+    content = unescape(content);
+    int pos = 0;
+    while (pos < content.size()) {
         Token result;
-        result.first = get_char(p);
-        if (p.match('-')) {
-            result.second = get_char(p);
+        result.first = get_char(content, pos);
+        if (content[pos] == '-') {
+            pos++;
+            result.second = get_char(content, pos);
         } else {
             result.second = result.first;
         }
@@ -78,9 +90,8 @@ void CharacterClass2::parse(Parser2& p) {
     p.skip_space();
     if (p.match('.')) {
         content = ".";
-    } else if (p.match_quoted("[", "]")) {
-        content = p.last_match;
-        parseContent();
+    } else if (p.match('[')) {
+        parseContent(p);
     } else {
         return;
     }
@@ -118,7 +129,7 @@ std::string CharacterClass2::to_string() const {
 }
 
 std::string CharacterClass2::dump(std::string indent) const {
-    return indent + "CHAR_CLASS " + content;
+    return indent + "CHAR_CLASS " + to_c_string(content);
 }
 
 void CharacterClass2::normalize() {

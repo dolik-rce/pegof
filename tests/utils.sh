@@ -19,7 +19,7 @@ check_status() {
         EXP=0
     fi
     if [ "$status" -ne "$EXP" ]; then
-        echo "Expected status code '$EXP', but pegof returned '$status'!" > /dev/stderr
+        echo "Expected status code '$EXP', but pegof returned '$status'!"$'\n'"$output" > /dev/stderr
         return 1
     fi
 }

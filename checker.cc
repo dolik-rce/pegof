@@ -1,4 +1,5 @@
 #include "checker.h"
+#include "packcc_wrapper.h"
 #include "utils.h"
 
 #include <fstream>
@@ -11,25 +12,6 @@
 #include <unistd.h>
 
 namespace fs = std::filesystem;
-
-extern "C" {
-typedef enum bool_tag {
-    FALSE = 0,
-    TRUE
-} bool_t;
-
-typedef struct options_tag {
-    bool_t ascii;
-    bool_t lines;
-    bool_t debug;
-} options_t;
-
-void *create_context(const char *iname, const char *oname, const options_t *opts);
-void destroy_context(void *ctx);
-
-bool parse(void *ctx);
-bool generate(void *ctx);
-}
 
 Checker::Checker() {
     fs::path tmp_dir = fs::temp_directory_path() / ("pegof_" + std::to_string(time(0)));

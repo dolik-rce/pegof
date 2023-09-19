@@ -20,7 +20,7 @@ void Expand::parse(Parser2& p) {
 }
 
 std::string Expand::to_string() const {
-    return content;
+    return "$" + content;
 }
 
 std::string Expand::dump(std::string indent) const {
