@@ -1,0 +1,3 @@
+[submodule "packcc"]
+	path = packcc
+	url = https://github.com/arithy/packcc.git
