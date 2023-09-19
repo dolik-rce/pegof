@@ -25,5 +25,7 @@ public:
             exit(1);
         }
     }
-    virtual long size() const { return 2; }
+    virtual long size() const {
+        return 2;
+    }
 };

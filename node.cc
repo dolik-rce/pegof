@@ -1,6 +1,6 @@
 #include "node.h"
 
-Node::Node(const char* type, Node* parent): valid(false), parent(parent), type(type) {
+Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(type) {
     //~ printf("DBG: creating %s\n", type);
 }
 
@@ -12,7 +12,9 @@ Node* Node::operator[](int index) {
     return this;
 }
 
-long Node::size() const { return 1; }
+long Node::size() const {
+    return 1;
+}
 
 void Node::parse_comments(Parser2& p) {
     if (p.match_comment()) {

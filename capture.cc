@@ -2,7 +2,9 @@
 #include "alternation.h"
 
 Capture::Capture(const Alternation& expression, Node* parent) : Node("Capture", parent), expression(new Alternation(expression)) {}
-Capture::Capture(Parser2& p, Node* parent) : Node("Capture", parent) { parse(p); }
+Capture::Capture(Parser2& p, Node* parent) : Node("Capture", parent) {
+    parse(p);
+}
 
 void Capture::parse(Parser2& p) {
     //~ printf("parsing Capture\n");

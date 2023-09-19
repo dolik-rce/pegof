@@ -1,8 +1,10 @@
 #include "directive.h"
 #include "utils.h"
 
-Directive::Directive(const std::string& name, const std::string& value, bool code, Node* parent): Node("Directive", parent), name(name), value(value), code(code) {}
-Directive::Directive(Parser2& p, Node* parent) : Node("Directive", parent) { parse(p); }
+Directive::Directive(const std::string& name, const std::string& value, bool code, Node* parent) : Node("Directive", parent), name(name), value(value), code(code) {}
+Directive::Directive(Parser2& p, Node* parent) : Node("Directive", parent) {
+    parse(p);
+}
 
 void Directive::parse(Parser2& p) {
     parse_comments(p);

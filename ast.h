@@ -93,15 +93,17 @@ struct Rule;
 struct Comment;
 
 typedef std::variant<
-    std::vector<void*>,
-    Grammar, Directive, Error, Action, Expand, Capture, Alternation, Sequence,
-    Predicate, Quantity, CharClass, String, Reference, Rule, Comment
+        std::vector<void*>,
+        Grammar, Directive, Error, Action, Expand, Capture, Alternation, Sequence,
+        Predicate, Quantity, CharClass, String, Reference, Rule, Comment
 > AnyNode;
 
 struct Node {
     const char* type;
-    Node(const char* type): type(type) {}
-    std::string to_string() { return "TODO"; }
+    Node(const char* type) : type(type) {}
+    std::string to_string() {
+        return "TODO";
+    }
 };
 
 struct WithPlacement {
@@ -115,13 +117,13 @@ struct WithExpession {
 
 struct Comment : Node, WithPlacement {
     std::string text;
-    Comment(const char* text): Node("COMMENT"), text(text) {}
+    Comment(const char* text) : Node("COMMENT"), text(text) {}
 };
 
 
 struct Rule : Node, WithPlacement, WithExpession {
     std::string name;
-    Rule(const char* name): Node("Rule"), name(name) {}
+    Rule(const char* name) : Node("Rule"), name(name) {}
     std::string to_string() {
         return std::string("Rule '") + name + "' [" + std::to_string(line) + ":" + std::to_string(column) + "]";
     }

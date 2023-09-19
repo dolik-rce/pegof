@@ -4,7 +4,7 @@ Parser2::State::State(Parser2* p) : p(p), saved_pos(p->pos) {};
 
 bool Parser2::State::rollback() {
     //~ if (p->pos != saved_pos) {
-        //~ printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
+    //~ printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
     //~ }
     p->pos = saved_pos;
     return false;

@@ -13,22 +13,22 @@
 namespace fs = std::filesystem;
 
 extern "C" {
-    typedef enum bool_tag {
-        FALSE = 0,
-        TRUE
-    } bool_t;
+typedef enum bool_tag {
+    FALSE = 0,
+    TRUE
+} bool_t;
 
-    typedef struct options_tag {
-        bool_t ascii;
-        bool_t lines;
-        bool_t debug;
-    } options_t;
+typedef struct options_tag {
+    bool_t ascii;
+    bool_t lines;
+    bool_t debug;
+} options_t;
 
-    void *create_context(const char *iname, const char *oname, const options_t *opts);
-    void destroy_context(void *ctx);
+void *create_context(const char *iname, const char *oname, const options_t *opts);
+void destroy_context(void *ctx);
 
-    bool parse(void *ctx);
-    bool generate(void *ctx);
+bool parse(void *ctx);
+bool generate(void *ctx);
 }
 
 Checker::Checker() {
@@ -78,34 +78,34 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
 }
 
 void Checker::stats() const {
-        std::string code = read_file(output + ".c");
-        std::size_t lines = std::count(code.begin(), code.end(), '\n');
-        //~ printf("Resulting code has %ld bytes and %ld lines\n", code.size(), lines);
+    std::string code = read_file(output + ".c");
+    std::size_t lines = std::count(code.begin(), code.end(), '\n');
+    //~ printf("Resulting code has %ld bytes and %ld lines\n", code.size(), lines);
 }
 
 bool Checker::validate(const std::string& input) const {
-        std::string errors;
-        if (!call_packcc(input, errors)) {
-            printf("ERROR: Failed to parse grammar by packcc:\n%s\n", errors.c_str());
-            return false;
-        }
-        return true;
+    std::string errors;
+    if (!call_packcc(input, errors)) {
+        printf("ERROR: Failed to parse grammar by packcc:\n%s\n", errors.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool Checker::validate(const std::string& filename, const std::string& content) const {
-        if (filename.empty()) {
-            return validate_string("stdin", content);
-        } else {
-            return validate_file(filename);
-        }
+    if (filename.empty()) {
+        return validate_string("stdin", content);
+    } else {
+        return validate_file(filename);
+    }
 }
 
 bool Checker::validate_string(const std::string& filename, const std::string& peg) const {
-        fs::path input = fs::path(tmp) / filename;
-        write_file(input.native(), peg);
-        return validate(input.native());
+    fs::path input = fs::path(tmp) / filename;
+    write_file(input.native(), peg);
+    return validate(input.native());
 }
 
 bool Checker::validate_file(const std::string& filename) const {
-        return validate(filename);
+    return validate(filename);
 }

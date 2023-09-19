@@ -4,8 +4,12 @@
 #include <iomanip>
 #include <numeric>
 
-CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content) { parseContent(); }
-CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent) { parse(p); }
+CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content) {
+    parseContent();
+}
+CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent) {
+    parse(p);
+}
 
 static std::string to_char(int c) {
     if (c > 127) {

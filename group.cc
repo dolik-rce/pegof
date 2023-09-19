@@ -2,7 +2,9 @@
 #include "alternation.h"
 
 Group::Group(const Alternation& expression, Node* parent) : Node("Group", parent), expression(new Alternation(expression)) {}
-Group::Group(Parser2& p, Node* parent) : Node("Group", parent) { parse(p); }
+Group::Group(Parser2& p, Node* parent) : Node("Group", parent) {
+    parse(p);
+}
 
 void Group::parse(Parser2& p) {
     //~ printf("parsing  Group\n");

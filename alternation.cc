@@ -2,7 +2,9 @@
 #include "config.h"
 
 Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent) : Node("Alternation", parent), sequences(sequences) {}
-Alternation::Alternation(Parser2& p, Node* parent) : Node("Alternation", parent) { parse(p); }
+Alternation::Alternation(Parser2& p, Node* parent) : Node("Alternation", parent) {
+    parse(p);
+}
 Alternation::Alternation() : Node("Alternation", nullptr) {}
 
 void Alternation::parse(Parser2& p) {

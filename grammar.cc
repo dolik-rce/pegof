@@ -7,11 +7,11 @@ Grammar::Grammar(
     const std::string& code
 ) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code) {}
 
-Grammar::Grammar(Parser2& p): Node("Grammar", nullptr) {
+Grammar::Grammar(Parser2& p) : Node("Grammar", nullptr) {
     parse(p);
 }
 
-Grammar::Grammar(const std::string& s): Node("Grammar", nullptr) {
+Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr) {
     Parser2 p(s);
     parse(p);
 }

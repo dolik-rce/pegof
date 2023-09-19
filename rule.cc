@@ -1,8 +1,10 @@
 #include "rule.h"
 #include "config.h"
 
-Rule::Rule(const std::string& name, const Alternation& expression, Node* parent): Node("Rule", parent), name(name), expression(expression) {}
-Rule::Rule(Parser2& p, Node* parent) : Node("Rule", parent) { parse(p); }
+Rule::Rule(const std::string& name, const Alternation& expression, Node* parent) : Node("Rule", parent), name(name), expression(expression) {}
+Rule::Rule(Parser2& p, Node* parent) : Node("Rule", parent) {
+    parse(p);
+}
 
 void Rule::parse(Parser2& p) {
     //~ printf("parsing  Rule\n");
@@ -21,7 +23,7 @@ void Rule::parse(Parser2& p) {
 std::string Rule::to_string() const {
     std::string result = comments() + name + " <-";
     if (expression.sequences.size() > Config::get<int>("wrap-limit")) {
-         result += "\n    ";
+        result += "\n    ";
     } else {
         result += " ";
     }

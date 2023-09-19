@@ -35,13 +35,13 @@ AstNodeC list_create(void* item) {
 
 AstNodeC list_append(void* list, void* item) {
     printf("DBG: adding to list\n");
-    std::vector<void*>& v = std::get<std::vector<void*>>(*(AnyNode*) list);
+    std::vector<void*>& v = std::get<std::vector<void*> >(*(AnyNode*) list);
     v.push_back(item);
     return list;
 }
 
 AstNodeC create_grammar(AstNodeC nodes) {
-    std::vector<void*>& children = std::get<std::vector<void*>>(*(AnyNode*) nodes);
+    std::vector<void*>& children = std::get<std::vector<void*> >(*(AnyNode*) nodes);
     printf("DBG: grammar %d\n", children.size());
     return new AnyNode(Grammar(children));
 }

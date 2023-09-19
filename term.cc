@@ -1,7 +1,9 @@
 #include "term.h"
 
 Term::Term(char prefix, char quantifier, const Primary& primary, Node* parent) : Node("Term", parent), prefix(prefix), quantifier(quantifier), primary(primary) {}
-Term::Term(Parser2& p, Node* parent) : Node("Term", parent) { parse(p); }
+Term::Term(Parser2& p, Node* parent) : Node("Term", parent) {
+    parse(p);
+}
 
 template<class T>
 bool Term::parse(Parser2& p) {
@@ -22,12 +24,12 @@ void Term::parse(Parser2& p) {
         prefix = 0;
     }
     if (!(parse<Reference>(p)
-        || parse<String>(p)
-        || parse<CharacterClass2>(p)
-        || parse<Expand>(p)
-        || parse<Group>(p)
-        || parse<Capture>(p)
-        || parse<Action>(p))
+          || parse<String>(p)
+          || parse<CharacterClass2>(p)
+          || parse<Expand>(p)
+          || parse<Group>(p)
+          || parse<Capture>(p)
+          || parse<Action>(p))
     ) {
         return;
     }
