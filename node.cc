@@ -26,3 +26,11 @@ std::string Node::comments(std::string indent) const {
     if (comment.empty()) return "";
     return indent + "# " + std::regex_replace(comment, std::regex("\n"), "\n" + indent + "# ") + "\n";
 }
+
+void Node::map(const std::function<void(Node&)>& transform) {
+    transform(*this);
+    for (int i = 1; i < size(); i++) {
+        Node* n = (*this)[i];
+        n->map(transform);
+    }
+}

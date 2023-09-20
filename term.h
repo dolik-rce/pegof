@@ -13,10 +13,11 @@
 using Primary = std::variant<String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
 
 class Term : public Node {
+public:
     char prefix;
     char quantifier;
     Primary primary;
-public:
+
     Term(char prefix, char quantifier, const Primary& primary, Node* parent);
     Term(Parser2& p, Node* parent);
 

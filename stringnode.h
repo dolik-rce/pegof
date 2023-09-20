@@ -2,8 +2,8 @@
 #include "node.h"
 
 class String : public Node {
-    std::string content;
 public:
+    std::string content;
     String(const std::string& content, Node* parent);
     String(Parser2& p, Node* parent);
     String();

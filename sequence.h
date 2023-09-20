@@ -3,8 +3,9 @@
 #include "term.h"
 
 class Sequence : public Node {
-    std::vector<Term> terms;
 public:
+    std::vector<Term> terms;
+
     Sequence(const std::vector<Term>& terms);
     Sequence(Parser2& p);
 

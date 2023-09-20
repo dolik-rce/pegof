@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "grammar.h"
 #include "checker.h"
+#include "optimizer.h"
 #include "config.h"
 #include "utils.h"
 
@@ -26,6 +27,12 @@ Grammar parse(const std::string& input, const std::string& output, const Checker
 
 void process(const std::string& input, const std::string& output, const Checker& checker) {
     Grammar g = parse(input, output, checker);
+
+    if (Config::get<bool>("optimize")) {
+        Optimizer opt(g);
+        g = opt.optimize();
+    }
+
     std::string result = g.to_string();
     if (!checker.validate_string("formatted.peg", result)) {
         printf("ERROR: Formatted grammar is invalid!\n");
