@@ -9,7 +9,7 @@
 
 CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content) {
     Parser2 p(content);
-    parseContent(p);
+    parse_content(p);
 }
 CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent) {
     parse(p);
@@ -20,7 +20,7 @@ static std::string unescape(const std::string& s) {
     strcpy(char_array, s.c_str());
     unescape_string(char_array, FALSE);
     std::string result = char_array;
-    delete char_array;
+    delete[] char_array;
     return result;
 }
 
@@ -58,7 +58,7 @@ static int get_char(const std::string& s, int& pos) {
     }
 }
 
-void CharacterClass2::parseContent(Parser2& p) {
+void CharacterClass2::parse_content(Parser2& p) {
     negation = p.match('^');
     dash = p.match('-');
     while (!p.is_eof()) {
@@ -91,13 +91,36 @@ void CharacterClass2::parse(Parser2& p) {
     if (p.match('.')) {
         content = ".";
     } else if (p.match('[')) {
-        parseContent(p);
+        parse_content(p);
     } else {
         return;
     }
     valid = true;
 }
 
+void CharacterClass2::update_content() {
+    if (content == ".") return;
+
+    content = "";
+
+    for (size_t i = 0; i<tokens.size(); i++) {
+        size_t size = tokens[i].second - tokens[i].first;
+        switch (size) {
+        case 0:
+            content += to_char(tokens[i].first);
+            break;
+        case 1:
+            content += to_char(tokens[i].first);
+            content += to_char(tokens[i].second);
+            break;
+        default:
+            content += to_char(tokens[i].first);
+            content += '-';
+            content += to_char(tokens[i].second);
+            break;
+        }
+    }
+}
 
 std::string CharacterClass2::to_string() const {
     if (content == ".") {
@@ -106,24 +129,7 @@ std::string CharacterClass2::to_string() const {
         std::string result;
         if(negation) result += '^';
         if(dash) result += '-';
-
-        for (size_t i = 0; i<tokens.size(); i++) {
-            size_t size = tokens[i].second - tokens[i].first;
-            switch (size) {
-            case 0:
-                result += to_char(tokens[i].first);
-                break;
-            case 1:
-                result += to_char(tokens[i].first);
-                result += to_char(tokens[i].second);
-                break;
-            default:
-                result += to_char(tokens[i].first);
-                result += '-';
-                result += to_char(tokens[i].second);
-                break;
-            }
-        }
+        result += content;
         return "[" + result + "]";
     }
 }
@@ -147,4 +153,5 @@ void CharacterClass2::normalize() {
         }
         return acc;
     });
+    update_content();
 }

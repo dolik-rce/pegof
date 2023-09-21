@@ -1,7 +1,7 @@
 #include "sequence.h"
 
-Sequence::Sequence(const std::vector<Term>& terms) : Node("Sequence", this), terms(terms) {}
-Sequence::Sequence(Parser2& p) : Node("Sequence", this) {
+Sequence::Sequence(const std::vector<Term>& terms, Node* parent) : Node("Sequence", parent), terms(terms) {}
+Sequence::Sequence(Parser2& p, Node* parent) : Node("Sequence", parent) {
     parse(p);
 }
 

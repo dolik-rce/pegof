@@ -36,6 +36,7 @@ void Grammar::parse(Parser2& p) {
         }
         break;
     }
+    update_parents();
     valid = true; // !rules.empty();
 }
 

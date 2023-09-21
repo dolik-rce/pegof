@@ -10,7 +10,7 @@
 #include "group.h"
 #include "capture.h"
 
-using Primary = std::variant<String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
+using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
 
 class Term : public Node {
 public:

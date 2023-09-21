@@ -6,7 +6,7 @@ public:
     std::string content;
     String(const std::string& content, Node* parent);
     String(Parser2& p, Node* parent);
-    String();
+    //~ String();
 
     virtual void parse(Parser2& p);
     virtual std::string to_string() const override;

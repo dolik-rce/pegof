@@ -2,6 +2,7 @@
 #include "node.h"
 
 class CharacterClass2 : public Node {
+public:
     std::string content;
 
     using Token = std::pair<int, int>;
@@ -11,7 +12,9 @@ class CharacterClass2 : public Node {
     bool negation;
     Tokens tokens;
 
-    void parseContent(Parser2& p);
+private:
+    void parse_content(Parser2& p);
+    void update_content();
 public:
     CharacterClass2(const std::string& content, Node* parent);
     CharacterClass2(Parser2& p, Node* parent);

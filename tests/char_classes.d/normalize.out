@@ -1,5 +1,5 @@
-main
-    <- [0-9A-F]
+main <-
+    [0-9A-F]
     / [u-z]
     / [aeiou]
     / [1-9ABa-h]

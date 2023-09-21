@@ -1,7 +1,7 @@
 #include "optimizer.h"
 #include "config.h"
 
-Optimizer::Optimizer(const Grammar& g) : g(g) {}
+Optimizer::Optimizer(Grammar& g) : g(g) {}
 
 int Optimizer::concat_strings() {
     if (Config::get<bool>("no-concat")) {
@@ -34,10 +34,48 @@ int Optimizer::concat_strings() {
     return optimized;
 }
 
+int Optimizer::normalize_character_classes() {
+    if (Config::get<bool>("no-char-class")) {
+        return 0;
+    }
+    int optimized = 0;
+    g.map([optimized](Node& node) mutable {
+        CharacterClass2* cc = node.as<CharacterClass2>();
+        if (!cc || cc->content == ".") return;
+        std::string orig = cc->content;
+        cc->normalize();
+        if (cc->content != orig) optimized++;
+    });
+    return optimized;
+}
+
+int Optimizer::single_char_character_classes() {
+    if (Config::get<bool>("no-single-char")) {
+        return 0;
+    }
+    int optimized = 0;
+    g.map([optimized](Node& node) mutable {
+        CharacterClass2* cc = node.as<CharacterClass2>();
+        if (!cc || cc->content == ".") return;
+        int size = cc->content.size() + (cc->dash ? 1 : 0);
+        if (size != 1) return;
+        Term* parent = cc->get_parent<Term>();
+        if (!parent) return; // should never happen
+        //~ printf("Optimizing character class: %s\n", cc->dump().c_str());
+        if (cc->negation) {
+            parent->prefix = parent->prefix == '!' ? 0 : '!';
+        }
+        parent->primary = Primary(String(cc->dash ? "-" : cc->content, parent));
+    });
+    return optimized;
+}
+
 Grammar Optimizer::optimize() {
     int opts = 1;
     while (opts > 0) {
-        opts = concat_strings();
+        opts = normalize_character_classes();
+        opts += single_char_character_classes();
+        opts += concat_strings();
     }
     return g;
 }

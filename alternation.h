@@ -7,7 +7,7 @@ public:
     std::vector<Sequence> sequences;
     Alternation(const std::vector<Sequence>& sequences, Node* parent);
     Alternation(Parser2& p, Node* parent);
-    Alternation();
+    Alternation(Node* parent);
 
     virtual void parse(Parser2& p);
     virtual std::string to_string() const override;

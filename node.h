@@ -7,6 +7,7 @@
 #include "parser.h"
 
 class Node {
+public:
 protected:
     bool valid;
     Node* parent;
@@ -33,6 +34,8 @@ public:
     virtual Node* operator[](int index);
 
     virtual long size() const;
+
+    void update_parents();
 
     template <class U>
     std::vector<U*> find_all(const std::function<bool(const U&)>& predicate);

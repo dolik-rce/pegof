@@ -1,10 +1,12 @@
 #include "grammar.h"
 
 class Optimizer {
-    Grammar g;
+    Grammar& g;
 
     int concat_strings();
+    int normalize_character_classes();
+    int single_char_character_classes();
 public:
-    Optimizer(const Grammar& g);
+    Optimizer(Grammar& g);
     Grammar optimize();
 };

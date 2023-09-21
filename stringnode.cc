@@ -6,7 +6,7 @@ String::String(const std::string& content, Node* parent) : Node("String", parent
 String::String(Parser2& p, Node* parent) : Node("String", parent) {
     parse(p);
 }
-String::String() : Node("String", nullptr), content("ERROR") {}
+//~ String::String() : Node("String", nullptr), content("ERROR") {}
 
 void String::parse(Parser2& p) {
     //~ printf("parsing  String\n");

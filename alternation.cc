@@ -5,11 +5,11 @@ Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent) :
 Alternation::Alternation(Parser2& p, Node* parent) : Node("Alternation", parent) {
     parse(p);
 }
-Alternation::Alternation() : Node("Alternation", nullptr) {}
+Alternation::Alternation(Node* parent) : Node("Alternation", parent) {}
 
 void Alternation::parse(Parser2& p) {
     p.skip_space();
-    Sequence s = Sequence(p);
+    Sequence s = Sequence(p, this);
     if (!s) return;
     while (s) {
         sequences.push_back(s);
@@ -17,7 +17,7 @@ void Alternation::parse(Parser2& p) {
             break;
         }
         //~ printf("DBG: alt %s\n", p.last_match.c_str());
-        s = Sequence(p);
+        s = Sequence(p, this);
     }
     valid = true;
 }

@@ -42,15 +42,33 @@ void Term::parse(Parser2& p) {
 }
 
 std::string Term::to_string(const Primary& x) const {
-    return std::visit([](const auto& value) -> std::string {
-        return value.to_string();
-    }, x);
+    switch(x.index()) {
+        case 1: return std::get_if<String>(&x)->as<String>()->to_string();
+        case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string();
+        case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->to_string();
+        case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
+        case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
+        case 6: return std::get_if<Capture>(&x)->as<Capture>()->to_string();
+        case 7: return std::get_if<Group>(&x)->as<Group>()->to_string();
+        default:
+            printf("ERROR: unsupporrted type!\n");
+            exit(1);
+    }
 }
 
 std::string Term::dump(const Primary& x, std::string indent) const {
-    return std::visit([indent](const auto& value) -> std::string {
-        return value.dump(indent);
-    }, x);
+    switch(x.index()) {
+        case 1: return std::get_if<String>(&x)->as<String>()->dump(indent);
+        case 2: return std::get_if<Reference>(&x)->as<Reference>()->dump(indent);
+        case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->dump(indent);
+        case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
+        case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
+        case 6: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
+        case 7: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
+        default:
+            printf("ERROR: unsupporrted type!\n");
+            exit(1);
+    }
 }
 
 std::string Term::to_string() const {
@@ -62,7 +80,7 @@ std::string Term::to_string() const {
 }
 
 std::string Term::dump(std::string indent) const {
-    std::string result = indent  + "TERM ";
+    std::string result = indent + "TERM ";
     if (prefix != 0) result += std::string(1, prefix);
     if (quantifier != 0) result += std::string(1, quantifier);
     result += "\n" + dump(primary, indent + "  ");
@@ -73,13 +91,13 @@ Node* Term::operator[](int index) {
     if (index == 0) {
         return this;
     } else if (index == 1) {
-        if (std::get_if<0>(&primary)) return (Node*)(std::get_if<0>(&primary));
         if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary));
         if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary));
         if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary));
         if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary));
         if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
         if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
+        if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary));
         printf("ERROR: unsupported type\n");
         exit(1);
     } else {
