@@ -28,7 +28,6 @@ void Term::parse(Parser2& p) {
           || parse<CharacterClass2>(p)
           || parse<Expand>(p)
           || parse<Group>(p)
-          || parse<Capture>(p)
           || parse<Action>(p))
     ) {
         return;
@@ -49,13 +48,11 @@ std::string Term::to_string(const Primary& x) const {
     case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
     case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
     case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
-    case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string();
     default:
         printf("ERROR: unsupporrted type!\n");
         exit(1);
     }
 }
-using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
 
 std::string Term::dump(const Primary& x, std::string indent) const {
     switch(x.index()) {
@@ -65,7 +62,6 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
     case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
-    case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
     default:
         printf("ERROR: unsupporrted type!\n");
         exit(1);
@@ -98,7 +94,6 @@ Node* Term::operator[](int index) {
         if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary));
         if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
         if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
-        if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary));
         printf("ERROR: unsupported type\n");
         exit(1);
     } else {

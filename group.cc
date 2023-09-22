@@ -8,25 +8,28 @@ Group::Group(Parser2& p, Node* parent) : Node("Group", parent) {
 
 void Group::parse(Parser2& p) {
     //~ printf("parsing  Group\n");
-    if (!p.match("(")) {
+    if (!p.match('(') && !p.match('<')) {
         return;
     }
+    capture = p.last_match[0] == '<';
     expression.reset(new Alternation(p, this));
     if (!*expression) {
         return;
     }
-    if (!p.match(")")) {
+    if (!p.match(capture ? '>' : ')')) {
         return;
     }
     valid = true;
 }
 
 std::string Group::to_string() const {
-    return "(" + expression->to_string() + ")";
+    char start = capture ? '<' : '(';
+    char end = capture ? '>' : ')';
+    return start + expression->to_string() + end;
 }
 
 std::string Group::dump(std::string indent) const {
-    return indent + "GROUP\n" + expression->dump(indent + "  ");
+    return indent + "GROUP" + (capture ? "capturing" : "") + "\n" + expression->dump(indent + "  ");
 }
 
 Node* Group::operator[](int index) {

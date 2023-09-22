@@ -8,9 +8,8 @@
 #include "expand.h"
 #include "action.h"
 #include "group.h"
-#include "capture.h"
 
-using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
+using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group>;
 
 class Term : public Node {
 public:
@@ -33,4 +32,13 @@ public:
 
     virtual Node* operator[](int index);
     virtual long size() const;
+
+    template<class T>
+    bool contains() const;
 };
+
+
+template<class T>
+bool Term::contains() const {
+    return std::holds_alternative<T>(primary);
+}
