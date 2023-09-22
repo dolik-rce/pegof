@@ -43,32 +43,32 @@ void Term::parse(Parser2& p) {
 
 std::string Term::to_string(const Primary& x) const {
     switch(x.index()) {
-        case 1: return std::get_if<String>(&x)->as<String>()->to_string();
-        case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string();
-        case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->to_string();
-        case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
-        case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
-        case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
-        case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string();
-        default:
-            printf("ERROR: unsupporrted type!\n");
-            exit(1);
+    case 1: return std::get_if<String>(&x)->as<String>()->to_string();
+    case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string();
+    case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->to_string();
+    case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
+    case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
+    case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
+    case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string();
+    default:
+        printf("ERROR: unsupporrted type!\n");
+        exit(1);
     }
 }
 using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
 
 std::string Term::dump(const Primary& x, std::string indent) const {
     switch(x.index()) {
-        case 1: return std::get_if<String>(&x)->as<String>()->dump(indent);
-        case 2: return std::get_if<Reference>(&x)->as<Reference>()->dump(indent);
-        case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->dump(indent);
-        case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
-        case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
-        case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
-        case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
-        default:
-            printf("ERROR: unsupporrted type!\n");
-            exit(1);
+    case 1: return std::get_if<String>(&x)->as<String>()->dump(indent);
+    case 2: return std::get_if<Reference>(&x)->as<Reference>()->dump(indent);
+    case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->dump(indent);
+    case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
+    case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
+    case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
+    case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
+    default:
+        printf("ERROR: unsupporrted type!\n");
+        exit(1);
     }
 }
 
