@@ -3,15 +3,15 @@
 #include <string>
 #include <regex>
 
-class Parser2 {
+class Parser {
     std::string input;
     unsigned long pos;
 
     struct State {
         unsigned long saved_pos;
-        Parser2* p;
+        Parser* p;
 
-        State(Parser2* p);
+        State(Parser* p);
         bool rollback();
         bool commit();
         bool commit(int start, int end);
@@ -22,7 +22,7 @@ public:
     std::smatch last_re_match;
     std::string last_match;
 
-    Parser2(std::string input);
+    Parser(std::string input);
 
     bool is_eof();
     void skip_space();

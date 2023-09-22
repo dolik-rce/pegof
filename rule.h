@@ -9,9 +9,9 @@ public:
     Alternation expression;
 
     Rule(const std::string& name, const Alternation& expression, Node* parent);
-    Rule(Parser2& p, Node* parent);
+    Rule(Parser& p, Node* parent);
 
-    virtual void parse(Parser2& p);
+    virtual void parse(Parser& p);
     virtual std::string to_string() const override;
     virtual std::string dump(std::string indent = "") const override;
 

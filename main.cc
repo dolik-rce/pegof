@@ -16,7 +16,7 @@ Grammar parse(const std::string& input, const std::string& output, const Checker
         exit(1);
     }
 
-    Parser2 peg(content);
+    Parser peg(content);
     Grammar g(peg);
     if (!g) {
         printf("ERROR: Failed to parse grammar!\n");

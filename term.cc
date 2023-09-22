@@ -1,12 +1,12 @@
 #include "term.h"
 
 Term::Term(char prefix, char quantifier, const Primary& primary, Node* parent) : Node("Term", parent), prefix(prefix), quantifier(quantifier), primary(primary) {}
-Term::Term(Parser2& p, Node* parent) : Node("Term", parent) {
+Term::Term(Parser& p, Node* parent) : Node("Term", parent) {
     parse(p);
 }
 
 template<class T>
-bool Term::parse(Parser2& p) {
+bool Term::parse(Parser& p) {
     T parsed(p, this);
     if (parsed) {
         primary = parsed;
@@ -15,7 +15,7 @@ bool Term::parse(Parser2& p) {
     return false;
 }
 
-void Term::parse(Parser2& p) {
+void Term::parse(Parser& p) {
     //~ printf("parsing  Term\n");
     p.skip_space();
     if (p.match('!') || p.match('&')) {
@@ -25,7 +25,7 @@ void Term::parse(Parser2& p) {
     }
     if (!(parse<Reference>(p)
           || parse<String>(p)
-          || parse<CharacterClass2>(p)
+          || parse<CharacterClass>(p)
           || parse<Expand>(p)
           || parse<Group>(p)
           || parse<Action>(p))
@@ -44,7 +44,7 @@ std::string Term::to_string(const Primary& x) const {
     switch(x.index()) {
     case 1: return std::get_if<String>(&x)->as<String>()->to_string();
     case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string();
-    case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->to_string();
+    case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->to_string();
     case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
     case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
     case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
@@ -58,7 +58,7 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     switch(x.index()) {
     case 1: return std::get_if<String>(&x)->as<String>()->dump(indent);
     case 2: return std::get_if<Reference>(&x)->as<Reference>()->dump(indent);
-    case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->dump(indent);
+    case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->dump(indent);
     case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
     case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);

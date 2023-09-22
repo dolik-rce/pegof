@@ -1,11 +1,11 @@
 #include "expand.h"
 
 Expand::Expand(const std::string& content, Node* parent) : Node("Expand", parent), content(content) {}
-Expand::Expand(Parser2& p, Node* parent) : Node("Expand", parent) {
+Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
     parse(p);
 }
 
-void Expand::parse(Parser2& p) {
+void Expand::parse(Parser& p) {
     //~ printf("parsing Expand\n");
     p.skip_space();
     if (!p.match('$')) {

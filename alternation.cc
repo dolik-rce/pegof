@@ -3,12 +3,12 @@
 #include "config.h"
 
 Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent) : Node("Alternation", parent), sequences(sequences) {}
-Alternation::Alternation(Parser2& p, Node* parent) : Node("Alternation", parent) {
+Alternation::Alternation(Parser& p, Node* parent) : Node("Alternation", parent) {
     parse(p);
 }
 Alternation::Alternation(Node* parent) : Node("Alternation", parent) {}
 
-void Alternation::parse(Parser2& p) {
+void Alternation::parse(Parser& p) {
     p.skip_space();
     Sequence s = Sequence(p, this);
     if (!s) return;

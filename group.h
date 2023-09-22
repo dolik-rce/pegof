@@ -9,9 +9,9 @@ public:
     std::shared_ptr<Alternation> expression;
 
     Group(const Alternation& expression, Node* parent);
-    Group(Parser2& p, Node* parent);
+    Group(Parser& p, Node* parent);
 
-    virtual void parse(Parser2& p);
+    virtual void parse(Parser& p);
     virtual std::string to_string() const override;
     virtual std::string dump(std::string = "") const override;
 

@@ -15,7 +15,7 @@ public:
     const char* type;
     std::string comment;
 
-    virtual void parse(Parser2& p) = 0;
+    virtual void parse(Parser& p) = 0;
     virtual std::string to_string() const = 0;
     virtual std::string dump(std::string indent = "") const = 0;
 
@@ -44,7 +44,7 @@ public:
 
     void map(const std::function<bool(Node&)>& transform);
 
-    void parse_comments(Parser2& p);
+    void parse_comments(Parser& p);
     std::string comments(std::string indent = "") const;
 };
 

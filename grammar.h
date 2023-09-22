@@ -15,10 +15,10 @@ public:
         const std::vector<Rule>& rules,
         const std::string& code
     );
-    Grammar(Parser2& p);
+    Grammar(Parser& p);
     Grammar(const std::string& p);
 
-    virtual void parse(Parser2& p);
+    virtual void parse(Parser& p);
     virtual std::string to_string() const override;
     virtual std::string dump(std::string indent = "") const override;
 

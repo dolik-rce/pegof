@@ -2,11 +2,11 @@
 #include "config.h"
 
 Rule::Rule(const std::string& name, const Alternation& expression, Node* parent) : Node("Rule", parent), name(name), expression(expression) {}
-Rule::Rule(Parser2& p, Node* parent) : Node("Rule", parent), expression(this) {
+Rule::Rule(Parser& p, Node* parent) : Node("Rule", parent), expression(this) {
     parse(p);
 }
 
-void Rule::parse(Parser2& p) {
+void Rule::parse(Parser& p) {
     //~ printf("parsing  Rule\n");
     parse_comments(p);
     if (!p.match_re("(\\S+)\\s*<-")) {

@@ -1,8 +1,8 @@
 #include "parser.h"
 
-Parser2::State::State(Parser2* p) : p(p), saved_pos(p->pos) {};
+Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {};
 
-bool Parser2::State::rollback() {
+bool Parser::State::rollback() {
     //~ if (p->pos != saved_pos) {
     //~ printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
     //~ }
@@ -10,31 +10,31 @@ bool Parser2::State::rollback() {
     return false;
 };
 
-bool Parser2::State::commit() {
+bool Parser::State::commit() {
     p->last_match = p->input.substr(saved_pos, p->pos - saved_pos);
     //~ printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
     return true;
 };
 
-bool Parser2::State::commit(int start, int end) {
+bool Parser::State::commit(int start, int end) {
     p->last_match = p->input.substr(start, end - start);
     //~ printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
     return true;
 };
 
-bool Parser2::State::commit(const std::string& result) {
+bool Parser::State::commit(const std::string& result) {
     p->last_match = result;
     //~ printf("matched %lu-%lu: %s\n", saved_pos, p->pos, p->last_match.c_str());
     return true;
 };
 
-Parser2::Parser2(std::string input) : input(input), pos(0) {}
+Parser::Parser(std::string input) : input(input), pos(0) {}
 
-bool Parser2::is_eof() {
+bool Parser::is_eof() {
     return pos == input.size();
 }
 
-void Parser2::skip_space() {
+void Parser::skip_space() {
     while (true) {
         if (isspace(input[pos])) {
             pos++;
@@ -45,7 +45,7 @@ void Parser2::skip_space() {
     }
 }
 
-bool Parser2::match(char c) {
+bool Parser::match(char c) {
     if (input[pos] == c) {
         pos++;
         last_match = std::string(1, c);
@@ -54,7 +54,7 @@ bool Parser2::match(char c) {
     return false;
 }
 
-bool Parser2::match(const std::string& str) {
+bool Parser::match(const std::string& str) {
     State s(this);
     skip_space();
     if (input.compare(pos, str.size(), str) == 0) {
@@ -64,7 +64,7 @@ bool Parser2::match(const std::string& str) {
     return s.rollback();
 }
 
-bool Parser2::match_re(const std::string& r) {
+bool Parser::match_re(const std::string& r) {
     State s(this);
     skip_space();
     std::smatch m;
@@ -78,14 +78,14 @@ bool Parser2::match_re(const std::string& r) {
     return s.rollback();
 }
 
-bool Parser2::match_any() {
+bool Parser::match_any() {
     if (is_eof()) return false;
     last_match = std::string(1, input[pos]);
     pos++;
     return true;
 }
 
-void Parser2::skip_rest_of_line(bool continuable) {
+void Parser::skip_rest_of_line(bool continuable) {
     while (!is_eof()) {
         if (continuable) match("\\\n");
         if (match('\n')) break;
@@ -93,7 +93,7 @@ void Parser2::skip_rest_of_line(bool continuable) {
     }
 }
 
-bool Parser2::match_comment() {
+bool Parser::match_comment() {
     std::string result = "";
     while (match_re("[ \t]*#[ \t]*([^\\n]*\\n)")) {
         result += last_re_match.str(1);
@@ -105,7 +105,7 @@ bool Parser2::match_comment() {
     return !result.empty();
 }
 
-bool Parser2::match_block_comment() {
+bool Parser::match_block_comment() {
     State s(this);
     if (!match("/*")) return s.rollback();
     unsigned long start = pos;
@@ -113,7 +113,7 @@ bool Parser2::match_block_comment() {
     return s.commit(start, pos - 2);
 }
 
-bool Parser2::match_line_comment() {
+bool Parser::match_line_comment() {
     if (match("//")) {
         skip_rest_of_line(false);
         return true;
@@ -121,7 +121,7 @@ bool Parser2::match_line_comment() {
     return false;
 }
 
-bool Parser2::match_macro() {
+bool Parser::match_macro() {
     if (match('#')) {
         skip_rest_of_line(true);
         return true;
@@ -129,7 +129,7 @@ bool Parser2::match_macro() {
     return false;
 }
 
-bool Parser2::match_quoted(const char *left, const char *right) {
+bool Parser::match_quoted(const char *left, const char *right) {
     State s(this);
     skip_space();
     std::string result;
@@ -157,7 +157,7 @@ bool Parser2::match_quoted(const char *left, const char *right) {
     return s.rollback();
 }
 
-bool Parser2::match_code() {
+bool Parser::match_code() {
     State s(this);
     skip_space();
     if (!match('{')) {
@@ -189,35 +189,35 @@ bool Parser2::match_code() {
     return s.commit(start, pos - 1);
 }
 
-bool Parser2::match_number() {
+bool Parser::match_number() {
     return match_re("[0-9]+");
 }
 
-bool Parser2::match_identifier() {
+bool Parser::match_identifier() {
     return match_re("[_a-zA-Z][_a-zA-Z0-9]*");
 }
 
-bool Parser2::peek(const char c) {
+bool Parser::peek(const char c) {
     State s(this);
     bool result = match(c);
     s.rollback();
     return result;
 }
 
-bool Parser2::peek(const std::string& str) {
+bool Parser::peek(const std::string& str) {
     State s(this);
     bool result = match(str);
     s.rollback();
     return result;
 }
 
-bool Parser2::peek_re(const std::string& r) {
+bool Parser::peek_re(const std::string& r) {
     State s(this);
     bool result = match_re(r);
     s.rollback();
     return result;
 }
 
-char Parser2::current() const {
+char Parser::current() const {
     return input[pos];
 }

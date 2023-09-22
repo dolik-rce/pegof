@@ -9,7 +9,7 @@
 #include "action.h"
 #include "group.h"
 
-using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group>;
+using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group>;
 
 class Term : public Node {
 public:
@@ -18,12 +18,12 @@ public:
     Primary primary;
 
     Term(char prefix, char quantifier, const Primary& primary, Node* parent);
-    Term(Parser2& p, Node* parent);
+    Term(Parser& p, Node* parent);
 
     template<class T>
-    bool parse(Parser2& p);
+    bool parse(Parser& p);
 
-    virtual void parse(Parser2& p);
+    virtual void parse(Parser& p);
 
     std::string to_string(const Primary& x) const;
     virtual std::string to_string() const override;

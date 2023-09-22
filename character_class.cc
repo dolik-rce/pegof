@@ -7,11 +7,11 @@
 #include <iomanip>
 #include <numeric>
 
-CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content), dash(false), negation(false) {
-    Parser2 p(content);
+CharacterClass::CharacterClass(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content), dash(false), negation(false) {
+    Parser p(content);
     parse(p);
 }
-CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent), dash(false), negation(false) {
+CharacterClass::CharacterClass(Parser& p, Node* parent) : Node("CharacterClass", parent), dash(false), negation(false) {
     parse(p);
 }
 
@@ -58,7 +58,7 @@ static int get_char(const std::string& s, int& pos) {
     }
 }
 
-void CharacterClass2::parse_content(Parser2& p) {
+void CharacterClass::parse_content(Parser& p) {
     negation = p.match('^');
     dash = p.match('-');
     while (!p.is_eof()) {
@@ -85,8 +85,8 @@ void CharacterClass2::parse_content(Parser2& p) {
     }
 }
 
-void CharacterClass2::parse(Parser2& p) {
-    //~ printf("parsing CharacterClass2\n");
+void CharacterClass::parse(Parser& p) {
+    //~ printf("parsing CharacterClass\n");
     p.skip_space();
     if (p.match('.')) {
         content = ".";
@@ -98,7 +98,7 @@ void CharacterClass2::parse(Parser2& p) {
     valid = true;
 }
 
-void CharacterClass2::update_content() {
+void CharacterClass::update_content() {
     if (content == ".") return;
 
     content = "";
@@ -122,7 +122,7 @@ void CharacterClass2::update_content() {
     }
 }
 
-std::string CharacterClass2::to_string() const {
+std::string CharacterClass::to_string() const {
     if (content == ".") {
         return ".";
     } else {
@@ -134,11 +134,11 @@ std::string CharacterClass2::to_string() const {
     }
 }
 
-std::string CharacterClass2::dump(std::string indent) const {
+std::string CharacterClass::dump(std::string indent) const {
     return indent + "CHAR_CLASS " + to_c_string(content);
 }
 
-void CharacterClass2::normalize() {
+void CharacterClass::normalize() {
     if (tokens.empty()) {
         return;
     }

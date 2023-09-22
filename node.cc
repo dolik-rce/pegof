@@ -16,7 +16,7 @@ long Node::size() const {
     return 1;
 }
 
-void Node::parse_comments(Parser2& p) {
+void Node::parse_comments(Parser& p) {
     if (p.match_comment()) {
         comment = p.last_match;
     }

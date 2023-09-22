@@ -7,9 +7,9 @@ public:
     std::vector<Term> terms;
 
     Sequence(const std::vector<Term>& terms, Node* parent);
-    Sequence(Parser2& p, Node* parent);
+    Sequence(Parser& p, Node* parent);
 
-    virtual void parse(Parser2& p);
+    virtual void parse(Parser& p);
     virtual std::string to_string() const override;
     virtual std::string dump(std::string indent = "") const override;
 

@@ -2,11 +2,11 @@
 #include "utils.h"
 
 Action::Action(const std::string& code, Node* parent) : Node("Action", parent), code(code) {}
-Action::Action(Parser2& p, Node* parent) : Node("Action", parent) {
+Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
     parse(p);
 }
 
-void Action::parse(Parser2& p) {
+void Action::parse(Parser& p) {
     //~ printf("parsing Action\n");
     p.skip_space();
     if (p.match_code()) {

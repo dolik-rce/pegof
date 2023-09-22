@@ -1,7 +1,7 @@
 #pragma once
 #include "node.h"
 
-class CharacterClass2 : public Node {
+class CharacterClass : public Node {
 public:
     std::string content;
 
@@ -13,15 +13,15 @@ public:
     Tokens tokens;
 
 private:
-    void parse_content(Parser2& p);
+    void parse_content(Parser& p);
     void update_content();
 public:
-    CharacterClass2(const std::string& content, Node* parent);
-    CharacterClass2(Parser2& p, Node* parent);
+    CharacterClass(const std::string& content, Node* parent);
+    CharacterClass(Parser& p, Node* parent);
 
     virtual void normalize();
 
-    virtual void parse(Parser2& p);
+    virtual void parse(Parser& p);
     virtual std::string to_string() const override;
     virtual std::string dump(std::string = "") const override;
 };

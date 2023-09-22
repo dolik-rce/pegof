@@ -2,11 +2,11 @@
 #include "utils.h"
 
 Directive::Directive(const std::string& name, const std::string& value, bool code, Node* parent) : Node("Directive", parent), name(name), value(value), code(code) {}
-Directive::Directive(Parser2& p, Node* parent) : Node("Directive", parent) {
+Directive::Directive(Parser& p, Node* parent) : Node("Directive", parent) {
     parse(p);
 }
 
-void Directive::parse(Parser2& p) {
+void Directive::parse(Parser& p) {
     parse_comments(p);
     //~ printf("parsing  Directive\n");
     if (p.match_re("%(earlysource|earlycommon|earlyheader|source|header|common)")) {

@@ -41,7 +41,7 @@ int Optimizer::normalize_character_classes() {
     }
     int optimized = 0;
     g.map([optimized](Node& node) mutable -> bool {
-        CharacterClass2* cc = node.as<CharacterClass2>();
+        CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->content == ".") return false;
         std::string orig = cc->content;
         cc->normalize();
@@ -57,7 +57,7 @@ int Optimizer::single_char_character_classes() {
     }
     int optimized = 0;
     g.map([optimized](Node& node) mutable -> bool {
-        CharacterClass2* cc = node.as<CharacterClass2>();
+        CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->content == ".") return false;
         int size = cc->content.size() + (cc->dash ? 1 : 0);
         if (size != 1) return false;

@@ -1,11 +1,11 @@
 #include "sequence.h"
 
 Sequence::Sequence(const std::vector<Term>& terms, Node* parent) : Node("Sequence", parent), terms(terms) {}
-Sequence::Sequence(Parser2& p, Node* parent) : Node("Sequence", parent) {
+Sequence::Sequence(Parser& p, Node* parent) : Node("Sequence", parent) {
     parse(p);
 }
 
-void Sequence::parse(Parser2& p) {
+void Sequence::parse(Parser& p) {
     //~ printf("parsing Sequence\n");
     p.skip_space();
     Term t(p, this);

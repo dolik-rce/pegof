@@ -3,12 +3,12 @@
 #include "config.h"
 
 String::String(const std::string& content, Node* parent) : Node("String", parent), content(content) {}
-String::String(Parser2& p, Node* parent) : Node("String", parent) {
+String::String(Parser& p, Node* parent) : Node("String", parent) {
     parse(p);
 }
 //~ String::String() : Node("String", nullptr), content("ERROR") {}
 
-void String::parse(Parser2& p) {
+void String::parse(Parser& p) {
     //~ printf("parsing  String\n");
     if (p.match_quoted("\"", "\"") || p.match_quoted("'", "'")) {
         content = p.last_match;

@@ -1,11 +1,11 @@
 #include "reference.h"
 
 Reference::Reference(const std::string& name, const std::string& var, Node* parent) : Node("Reference", parent), name(name), var(var) {}
-Reference::Reference(Parser2& p, Node* parent) : Node("Reference", parent) {
+Reference::Reference(Parser& p, Node* parent) : Node("Reference", parent) {
     parse(p);
 }
 
-void Reference::parse(Parser2& p) {
+void Reference::parse(Parser& p) {
     //~ printf("parsing  Reference\n");
     if (!p.match_identifier()) {
         return;
