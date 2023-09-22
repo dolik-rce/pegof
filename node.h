@@ -8,11 +8,10 @@
 
 class Node {
 public:
-protected:
     bool valid;
     Node* parent;
     Node(const char* type, Node* parent);
-public:
+
     const char* type;
     std::string comment;
 

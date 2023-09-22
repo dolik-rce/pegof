@@ -2,10 +2,10 @@
 #include "node.h"
 
 class Reference : public Node {
+public:
     std::string name;
     std::string var;
     Reference(const std::string& name, const std::string& var, Node* parent);
-public:
     Reference(Parser2& p, Node* parent);
 
     virtual void parse(Parser2& p);

@@ -34,3 +34,9 @@ std::string Rule::to_string() const {
 std::string Rule::dump(std::string indent) const {
     return indent + "RULE " + name + "\n" + expression.dump(indent + "  ");
 }
+
+bool Rule::is_terminal() {
+    if (expression.sequences.size() != 1) return false;
+    if (expression.sequences[0].terms.size() != 1) return false;
+    return true;
+}

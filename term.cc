@@ -48,13 +48,14 @@ std::string Term::to_string(const Primary& x) const {
         case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->to_string();
         case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
         case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
-        case 6: return std::get_if<Capture>(&x)->as<Capture>()->to_string();
-        case 7: return std::get_if<Group>(&x)->as<Group>()->to_string();
+        case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
+        case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string();
         default:
             printf("ERROR: unsupporrted type!\n");
             exit(1);
     }
 }
+using Primary = std::variant<std::monostate, String, Reference, CharacterClass2, Expand, Action, Group, Capture>;
 
 std::string Term::dump(const Primary& x, std::string indent) const {
     switch(x.index()) {
@@ -63,8 +64,8 @@ std::string Term::dump(const Primary& x, std::string indent) const {
         case 3: return std::get_if<CharacterClass2>(&x)->as<CharacterClass2>()->dump(indent);
         case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
         case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
-        case 6: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
-        case 7: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
+        case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
+        case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
         default:
             printf("ERROR: unsupporrted type!\n");
             exit(1);

@@ -70,10 +70,49 @@ int Optimizer::single_char_character_classes() {
     return optimized;
 }
 
+int Optimizer::inline_rules() {
+    int optimized = 0;
+    for (int i = g.rules.size() - 1; i >= 0; i--) {
+        Rule& rule = g.rules[i];
+        if (rule.expression.sequences.size() > 1) continue; // do not inline rules with alternation
+
+        // check for direct recursion
+        bool is_recursive = !rule.find_all<Reference>([rule](const Reference& node) -> bool {
+            return node.name == rule.name;
+        }).empty();
+        if (is_recursive) continue;
+
+        std::vector<Reference*> refs = g.find_all<Reference>([rule, optimized](const Reference& node) -> bool {
+            Reference* ref = node.as<Reference>();
+            if (!ref) return false;
+            return ref->name == rule.name;
+        });
+        bool is_terminal = rule.is_terminal();
+        int inline_limit = Config::get<int>(is_terminal ? "terminal-inline-limit" : "inline-limit");
+        //~ printf("DBG: found %d references to rule %s, limit = %d\n", refs.size(), rule.name.c_str(), inline_limit);
+        if (refs.size() == 0 /* main rule */ || refs.size() > inline_limit) continue;
+
+        Term src = rule.expression.sequences[0].terms[0];
+        for (int j = 0; j < refs.size(); j++) {
+            Term* dest = refs[j]->parent->as<Term>();
+            Group group(*(src.parent->parent->as<Alternation>()), nullptr);
+            //~ printf("DBG: inlining \n%s\nDBG:into \n%s\n", group.dump().c_str(), dest->dump().c_str());
+            dest->primary = group;
+            dest->update_parents();
+            //~ printf("DBG: result: \n%s\n", dest->dump().c_str());
+        }
+        //~ printf("DBG: removing rule %s\n", rule.name.c_str());
+        g.rules.erase(g.rules.begin() + i);
+        optimized++;
+    }
+    return optimized;
+}
+
 Grammar Optimizer::optimize() {
     int opts = 1;
     while (opts > 0) {
         opts = normalize_character_classes();
+        opts += inline_rules();
         opts += single_char_character_classes();
         opts += concat_strings();
     }

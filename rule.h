@@ -28,4 +28,6 @@ public:
     virtual long size() const {
         return 2;
     }
+
+    bool is_terminal();
 };

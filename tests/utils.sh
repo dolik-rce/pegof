@@ -8,8 +8,12 @@ run_test() {
     run "$PEGOF" -c "$1"
     for INPUT in "${INPUTS[@]}"; do
         [ "$INPUT" ] || continue
-        mv -f "$INPUT".backup "$INPUT"
-    done
+        if ! cmp -s "$INPUT".backup "$INPUT"; then
+            mv -f "$INPUT".backup "$INPUT"
+        else
+            rm -f "$INPUT".backup
+        fi
+        done
 }
 
 check_status() {

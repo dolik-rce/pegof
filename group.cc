@@ -22,7 +22,7 @@ void Group::parse(Parser2& p) {
 }
 
 std::string Group::to_string() const {
-    return "( " + expression->to_string() + " )";
+    return "(" + expression->to_string() + ")";
 }
 
 std::string Group::dump(std::string indent) const {
