@@ -1,5 +1,5 @@
 #pragma once
-#include "node.h"
+#include "ast/node.h"
 #include "reference.h"
 
 class Action : public Node {

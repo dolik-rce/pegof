@@ -1,5 +1,5 @@
 #pragma once
-#include "node.h"
+#include "ast/node.h"
 #include "sequence.h"
 
 class Alternation : public Node {

@@ -1,7 +1,7 @@
 #pragma once
 #include <variant>
 
-#include "node.h"
+#include "ast/node.h"
 #include "stringnode.h"
 #include "reference.h"
 #include "character_class.h"

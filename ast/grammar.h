@@ -1,5 +1,5 @@
 #pragma once
-#include "node.h"
+#include "ast/node.h"
 #include "reference.h"
 #include "directive.h"
 #include "rule.h"

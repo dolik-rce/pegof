@@ -1,5 +1,5 @@
 #pragma once
-#include "node.h"
+#include "ast/node.h"
 
 class Expand : public Node {
     std::string content; // TODO: shoud be number

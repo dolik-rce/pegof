@@ -1,4 +1,4 @@
-#include "grammar.h"
+#include "ast/grammar.h"
 
 class Optimizer {
     Grammar& g;

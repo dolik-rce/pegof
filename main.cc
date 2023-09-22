@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "grammar.h"
+#include "ast/grammar.h"
 #include "checker.h"
 #include "optimizer.h"
 #include "config.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "node.h"
+#include "ast/node.h"
 
 class Directive : public Node {
     std::string name;
