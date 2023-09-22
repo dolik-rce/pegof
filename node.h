@@ -42,7 +42,7 @@ public:
     template <class U>
     void find_all(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
 
-    void map(const std::function<void(Node&)>& transform);
+    void map(const std::function<bool(Node&)>& transform);
 
     void parse_comments(Parser2& p);
     std::string comments(std::string indent = "") const;

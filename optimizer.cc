@@ -8,9 +8,9 @@ int Optimizer::concat_strings() {
         return 0;
     }
     int optimized = 0;
-    g.map([optimized](Node& node) mutable {
+    g.map([optimized](Node& node) mutable -> bool {
         Sequence* s = node.as<Sequence>();
-        if (!s) return;
+        if (!s) return false;
 
         String* prev = nullptr;
         int prev_index;
@@ -30,6 +30,7 @@ int Optimizer::concat_strings() {
                 prev = nullptr;
             }
         }
+        return optimized;
     });
     return optimized;
 }
@@ -39,12 +40,13 @@ int Optimizer::normalize_character_classes() {
         return 0;
     }
     int optimized = 0;
-    g.map([optimized](Node& node) mutable {
+    g.map([optimized](Node& node) mutable -> bool {
         CharacterClass2* cc = node.as<CharacterClass2>();
-        if (!cc || cc->content == ".") return;
+        if (!cc || cc->content == ".") return false;
         std::string orig = cc->content;
         cc->normalize();
         if (cc->content != orig) optimized++;
+        return false; // this doesn't move any nodes, so we can always return false
     });
     return optimized;
 }
@@ -54,18 +56,53 @@ int Optimizer::single_char_character_classes() {
         return 0;
     }
     int optimized = 0;
-    g.map([optimized](Node& node) mutable {
+    g.map([optimized](Node& node) mutable -> bool {
         CharacterClass2* cc = node.as<CharacterClass2>();
-        if (!cc || cc->content == ".") return;
+        if (!cc || cc->content == ".") return false;
         int size = cc->content.size() + (cc->dash ? 1 : 0);
-        if (size != 1) return;
+        if (size != 1) return false;
         Term* parent = cc->get_parent<Term>();
-        if (!parent) return; // should never happen
+        if (!parent) return false; // should never happen
         //~ printf("Optimizing character class: %s\n", cc->dump().c_str());
         if (cc->negation) {
             parent->prefix = parent->prefix == '!' ? 0 : '!';
         }
         parent->primary = Primary(String(cc->dash ? "-" : cc->content, parent));
+        optimized++;
+        return true;
+    });
+    return optimized;
+}
+
+int Optimizer::remove_unnecessary_groups() {
+    int optimized = 0;
+    g.map([optimized](Node& node) mutable -> bool {
+        Term* t = node.as<Term>();
+        if (!t || !t->contains<Group>()) return false;
+        Group group = t->get<Group>();
+        if (group.capture) return false;
+        if (group.expression->sequences.size() > 1) return false;
+
+        if (!t->prefix && !t->quantifier) {
+            // A (B C) D -> A B C D
+            //~ printf("DBG: Removing grouping from '%s'\n", group.parent->to_string().c_str());
+            Sequence* s = t->parent->as<Sequence>();
+            int pos;
+            for (pos = 0; pos < s->size(); pos++) {
+                if (&(s->terms[pos]) == t) break;
+            }
+            s->terms.erase(s->terms.begin()+pos);
+            s->terms.insert(s->terms.begin()+pos, group.expression->sequences[0].terms.begin(), group.expression->sequences[0].terms.end());
+            s->update_parents();
+            optimized++;
+        } else if (group.expression->sequences[0].terms.size() == 1) {
+            // A (B)* C -> A B* C
+            //~ printf("DBG: Removing grouping from '%s'\n", group.parent->to_string().c_str());
+            t->primary = group.expression->sequences[0].terms[0].primary;
+            t->update_parents();
+            optimized++;
+        }
+        return optimized;
     });
     return optimized;
 }
@@ -113,6 +150,7 @@ Grammar Optimizer::optimize() {
     while (opts > 0) {
         opts = normalize_character_classes();
         opts += inline_rules();
+        opts += remove_unnecessary_groups();
         opts += single_char_character_classes();
         opts += concat_strings();
     }

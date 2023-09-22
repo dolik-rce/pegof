@@ -1,4 +1,5 @@
 #include "alternation.h"
+#include "rule.h"
 #include "config.h"
 
 Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent) : Node("Alternation", parent), sequences(sequences) {}
@@ -23,7 +24,7 @@ void Alternation::parse(Parser2& p) {
 }
 
 std::string Alternation::to_string() const {
-    int multiline = sequences.size() > Config::get<int>("wrap-limit");
+    bool multiline = parent->is<Rule>() && sequences.size() > Config::get<int>("wrap-limit");
     const char *delimiter = multiline ? "\n    / " : " / ";
     std::string result = sequences[0].to_string();
     for (int i = 1; i < sequences.size(); i++) {

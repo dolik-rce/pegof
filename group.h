@@ -4,9 +4,10 @@
 class Alternation;
 
 class Group : public Node {
+public:
     bool capture;
     std::shared_ptr<Alternation> expression;
-public:
+
     Group(const Alternation& expression, Node* parent);
     Group(Parser2& p, Node* parent);
 

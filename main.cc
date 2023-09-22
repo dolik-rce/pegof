@@ -27,10 +27,12 @@ Grammar parse(const std::string& input, const std::string& output, const Checker
 
 void process(const std::string& input, const std::string& output, const Checker& checker) {
     Grammar g = parse(input, output, checker);
+    g.update_parents();
 
     if (Config::get<bool>("optimize")) {
         Optimizer opt(g);
         g = opt.optimize();
+        g.update_parents();
     }
 
     std::string result = g.to_string();

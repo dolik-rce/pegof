@@ -27,8 +27,8 @@ std::string Node::comments(std::string indent) const {
     return indent + "# " + std::regex_replace(comment, std::regex("\n"), "\n" + indent + "# ") + "\n";
 }
 
-void Node::map(const std::function<void(Node&)>& transform) {
-    transform(*this);
+void Node::map(const std::function<bool(Node&)>& transform) {
+    if (transform(*this)) return;
     for (int i = 1; i < size(); i++) {
         Node* n = (*this)[i];
         n->map(transform);
@@ -38,6 +38,7 @@ void Node::map(const std::function<void(Node&)>& transform) {
 void Node::update_parents() {
     for (int i = 1; i < size(); i++) {
         Node* n = (*this)[i];
+        //~ printf("DBG: %s %p, p=%p -> %p%s\n", n->type, n, n->parent, this, n->parent == this ? " NOT CHANGED" : "");
         n->parent = this;
         n->update_parents();
     }

@@ -7,11 +7,11 @@
 #include <iomanip>
 #include <numeric>
 
-CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content) {
+CharacterClass2::CharacterClass2(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content), dash(false), negation(false) {
     Parser2 p(content);
-    parse_content(p);
+    parse(p);
 }
-CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent) {
+CharacterClass2::CharacterClass2(Parser2& p, Node* parent) : Node("CharacterClass", parent), dash(false), negation(false) {
     parse(p);
 }
 

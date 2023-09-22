@@ -35,10 +35,18 @@ public:
 
     template<class T>
     bool contains() const;
+
+    template<class T>
+    T get() const;
 };
 
 
 template<class T>
 bool Term::contains() const {
     return std::holds_alternative<T>(primary);
+}
+
+template<class T>
+T Term::get() const {
+    return std::get<T>(primary);
 }
