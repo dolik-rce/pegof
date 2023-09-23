@@ -30,18 +30,26 @@ void Grammar::parse(Parser& p) {
             rules.push_back(r);
             continue;
         }
+        while (p.match_comment()) {
+            code_comments.push_back(p.last_match);
+            //~ printf("DBG: got code_comment '%s'\n", code_comments.back().c_str());
+        }
+        p.skip_space();
         if (p.match("%%")) {
             p.match_re("[\\s\\S]*");
             code = p.last_re_match.str(0);
+            break;
         }
-        break;
+        if (p.is_eof()) break;
+        printf("ERROR: Failed to parse grammar!\n");
+        exit(1);
     }
     update_parents();
     valid = true; // !rules.empty();
 }
 
 std::string Grammar::to_string() const {
-    std::string result = comments();
+    std::string result = format_comments();
     if (!result.empty()) result += "\n";
     for (const Directive& directive : directives) {
         result += directive.to_string() + "\n";
@@ -51,6 +59,9 @@ std::string Grammar::to_string() const {
     for (const Rule& rule : rules) {
         result += rule.to_string();
     }
+    for (const std::string& comment : code_comments) {
+        result += "# " + comment + "\n";
+    }
     if (!code.empty()) {
         result += "%%\n" + code;
     }
@@ -58,14 +69,15 @@ std::string Grammar::to_string() const {
 }
 
 std::string Grammar::dump(std::string indent) const {
-    std::string result = indent + "GRAMMAR\n";
+    std::string comments_info = " (" + std::to_string(comments.size()) + " comments)";
+    std::string result = indent + "GRAMMAR" + comments_info + "\n";
     for (const Directive& directive : directives) {
         result += directive.dump(indent + "  ") + "\n";
     }
     for (const Rule& rule : rules) {
         result += rule.dump(indent + "  ") + "\n";
     }
-    result += indent + "  CODE: \"" + to_c_string(code) + "\"";
+    result += indent + "  CODE (" + std::to_string(code_comments.size()) + "): \"" + to_c_string(code) + "\"";
     return result;
 }
 

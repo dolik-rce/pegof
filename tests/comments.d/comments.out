@@ -1,0 +1,19 @@
+# This is grammar comment
+
+# This is rule comment for 'main'
+main <-
+    A
+    / B
+    / C
+
+# This is indented comment for rule 'A'
+A <- "A"
+
+# This is multiline
+# comment for rule 'B'
+B <- "B"
+
+# This is not really well placed comment for rule 'C'
+C <- "C"
+
+# This is comment for code section (which might or might not be present)

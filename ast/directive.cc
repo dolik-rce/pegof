@@ -7,8 +7,9 @@ Directive::Directive(Parser& p, Node* parent) : Node("Directive", parent) {
 }
 
 void Directive::parse(Parser& p) {
-    parse_comments(p);
     //~ printf("parsing  Directive\n");
+    Parser::State s = p.save_point();
+    parse_comments(p);
     if (p.match_re("%(earlysource|earlycommon|earlyheader|source|header|common)")) {
         name = p.last_re_match.str(1);
         //~ printf("DBG0: name=%s\n", name.c_str());
@@ -28,10 +29,14 @@ void Directive::parse(Parser& p) {
         code = false;
         valid = true;
     }
+    if (!valid) {
+        s.rollback();
+    }
+    //~ printf("DBG: parsed %d directive %s with %d comments\n", valid, name.c_str(), comment.size());
 }
 
 std::string Directive::to_string() const {
-    std::string result = comments() + "%" + name;
+    std::string result = format_comments() + "%" + name;
     if (code) {
         result += " {" + value + "}\n";
     } else {
@@ -41,7 +46,8 @@ std::string Directive::to_string() const {
 }
 
 std::string Directive::dump(std::string indent) const {
-    std::string result = indent + "DIRECTIVE " + name;
+    std::string comments_info = " (" + std::to_string(comments.size()) + " comments)";
+    std::string result = indent + "DIRECTIVE " + name + comments_info;
     result += (code ? " {": " \"" ) + to_c_string(value) + (code ? "}": "\"" );
     return result;
 }

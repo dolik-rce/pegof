@@ -4,7 +4,7 @@ Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {};
 
 bool Parser::State::rollback() {
     //~ if (p->pos != saved_pos) {
-    //~ printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
+        //~ printf("rollback %lu-%lu: %s\n", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
     //~ }
     p->pos = saved_pos;
     return false;
@@ -29,6 +29,10 @@ bool Parser::State::commit(const std::string& result) {
 };
 
 Parser::Parser(std::string input) : input(input), pos(0) {}
+
+Parser::State Parser::save_point() {
+    return State(this);
+}
 
 bool Parser::is_eof() {
     return pos == input.size();
@@ -64,9 +68,9 @@ bool Parser::match(const std::string& str) {
     return s.rollback();
 }
 
-bool Parser::match_re(const std::string& r) {
+bool Parser::match_re(const std::string& r, bool space) {
     State s(this);
-    skip_space();
+    if (space) skip_space();
     std::smatch m;
     if (std::regex_search(input.cbegin() + pos, input.cend(), m, std::regex(r))) {
         if (m.position(0) == 0) {
@@ -94,9 +98,10 @@ void Parser::skip_rest_of_line(bool continuable) {
 }
 
 bool Parser::match_comment() {
-    std::string result = "";
-    while (match_re("[ \t]*#[ \t]*([^\\n]*\\n)")) {
-        result += last_re_match.str(1);
+    //~ printf("DBG: matching comment @%d: %s\n", pos, input.substr(pos).c_str());
+    std::string result;
+    if (match_re("[ \t]*#[ \t]*([^\\n]*\\n)", false)) {
+        result = last_re_match.str(1);
     }
     if (!result.empty() && result.back() == '\n') {
         result.resize(result.size() - 1);

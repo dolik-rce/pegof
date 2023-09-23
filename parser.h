@@ -7,6 +7,8 @@ class Parser {
     std::string input;
     unsigned long pos;
 
+public:
+
     struct State {
         unsigned long saved_pos;
         Parser* p;
@@ -18,11 +20,12 @@ class Parser {
         bool commit(const std::string& result);
     };
 
-public:
     std::smatch last_re_match;
     std::string last_match;
 
     Parser(std::string input);
+
+    State save_point();
 
     bool is_eof();
     void skip_space();
@@ -30,7 +33,7 @@ public:
 
     bool match(char c);
     bool match(const std::string& str);
-    bool match_re(const std::string& r);
+    bool match_re(const std::string& r, bool space = true);
     bool match_any();
 
     bool match_comment();

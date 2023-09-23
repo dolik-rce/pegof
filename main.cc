@@ -61,8 +61,14 @@ int main(int argc, char **argv) {
             printf("%s\n", parse(input, output, checker).dump().c_str());
             break;
         case Config::OT_DEBUG:
-            printf("ERROR: Debug mode is not implemeted yet");
-            exit(1);
+            Grammar g = parse(input, output, checker);
+            printf("--- Input AST ---\n%s\n", g.dump().c_str());
+            printf("--- Formatted ---\n%s\n", g.to_string().c_str());
+            //~ Optimizer opt(g);
+            //~ g = opt.optimize();
+            //~ g.update_parents();
+            //~ printf("--- Optimized AST ---\n%s\n", g.dump().c_str());
+            //~ printf("--- Final output ---\n%s\n", g.to_string().c_str());
             break;
         }
     }

@@ -8,6 +8,7 @@ class Grammar : public Node {
 public:
     std::vector<Directive> directives;
     std::vector<Rule> rules;
+    std::vector<std::string> code_comments;
     std::string code;
 
     Grammar(

@@ -17,14 +17,21 @@ long Node::size() const {
 }
 
 void Node::parse_comments(Parser& p) {
-    if (p.match_comment()) {
-        comment = p.last_match;
+    //~ printf("DBG: parsing comments for %s\n", type);
+    p.skip_space();
+    while (p.match_comment()) {
+        comments.push_back(p.last_match);
+        //~ printf("DBG: got '%s'\n", comment.back().c_str());
     }
 }
 
-std::string Node::comments(std::string indent) const {
-    if (comment.empty()) return "";
-    return indent + "# " + std::regex_replace(comment, std::regex("\n"), "\n" + indent + "# ") + "\n";
+std::string Node::format_comments(std::string indent) const {
+    if (comments.empty()) return "";
+    std::string result;
+    for(int i = 0; i < comments.size(); i++) {
+        result += indent + "# " + comments[i] + "\n";
+    }
+    return result;
 }
 
 void Node::map(const std::function<bool(Node&)>& transform) {
