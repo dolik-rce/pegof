@@ -74,6 +74,44 @@ int Optimizer::single_char_character_classes() {
     return optimized;
 }
 
+int Optimizer::character_class_negations() {
+    if (Config::get<bool>("no-negation")) {
+        return 0;
+    }
+    int optimized = 0;
+    g.map([optimized](Node& node) mutable -> bool {
+        Term* t = node.as<Term>();
+        if (!t || !t->contains<CharacterClass>() || t->prefix != '!') return false;
+        CharacterClass cc = t->get<CharacterClass>();
+        cc.negation = !cc.negation;
+        t->prefix = 0;
+        t->primary = cc;
+        t->update_parents();
+        return true;
+    });
+    return optimized;
+}
+
+int Optimizer::double_negations() {
+    if (Config::get<bool>("no-negation")) {
+        return 0;
+    }
+    int optimized = 0;
+    g.map([optimized](Node& node) mutable -> bool {
+        Term* t = node.as<Term>();
+        if (!t || !t->contains<Group>() || t->prefix != '!') return false;
+        Group group = t->get<Group>();
+        if (group.expression->sequences.size() != 1 || group.expression->sequences[0].terms.size() != 1) return false;
+        Term inner_term = group.expression->sequences[0].terms[0];
+        if (inner_term.prefix != '!') return false;
+        *t = inner_term;
+        t->prefix = 0;
+        t->update_parents();
+        return true;
+    });
+    return optimized;
+}
+
 int Optimizer::remove_unnecessary_groups() {
     int optimized = 0;
     g.map([optimized](Node& node) mutable -> bool {
@@ -95,7 +133,7 @@ int Optimizer::remove_unnecessary_groups() {
             s->terms.insert(s->terms.begin()+pos, group.expression->sequences[0].terms.begin(), group.expression->sequences[0].terms.end());
             s->update_parents();
             optimized++;
-        } else if (group.expression->sequences[0].terms.size() == 1) {
+        } else if (group.expression->sequences[0].terms.size() == 1 && group.expression->sequences[0].terms[0].prefix == 0) {
             // A (B)* C -> A B* C
             //~ printf("DBG: Removing grouping from '%s'\n", group.parent->to_string().c_str());
             t->primary = group.expression->sequences[0].terms[0].primary;
@@ -152,6 +190,8 @@ Grammar Optimizer::optimize() {
         opts += inline_rules();
         opts += remove_unnecessary_groups();
         opts += single_char_character_classes();
+        opts += character_class_negations();
+        opts += double_negations();
         opts += concat_strings();
     }
     return g;
