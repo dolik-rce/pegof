@@ -55,3 +55,7 @@ Node* Alternation::operator[](int index) {
 long Alternation::size() const {
     return 1 + sequences.size();
 }
+
+bool Alternation::has_single_term() const {
+    return sequences.size() == 1 && sequences[0].has_single_term();
+}

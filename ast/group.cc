@@ -46,3 +46,7 @@ Node* Group::operator[](int index) {
 long Group::size() const {
     return 2;
 }
+
+bool Group::has_single_term() const {
+    return expression->has_single_term();
+}

@@ -94,7 +94,7 @@ int Optimizer::double_negations() {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || t->prefix != '!') return false;
         Group group = t->get<Group>();
-        if (group.expression->sequences.size() != 1 || group.expression->sequences[0].terms.size() != 1) return false;
+        if (group.has_single_term()) return false;
         Term inner_term = group.expression->sequences[0].terms[0];
         if (inner_term.prefix != '!') return false;
         *t = inner_term;
@@ -124,7 +124,7 @@ int Optimizer::remove_unnecessary_groups() {
             s->terms.insert(s->terms.begin()+pos, group.expression->sequences[0].terms.begin(), group.expression->sequences[0].terms.end());
             s->update_parents();
             optimized++;
-        } else if (group.expression->sequences[0].terms.size() == 1 && group.expression->sequences[0].terms[0].prefix == 0) {
+        } else if (group.has_single_term() && !group.expression->sequences[0].terms[0].prefix && !group.expression->sequences[0].terms[0].quantifier) {
             // A (B)* C -> A B* C
             //~ printf("DBG: Removing grouping from '%s'\n", group.parent->to_string().c_str());
             t->primary = group.expression->sequences[0].terms[0].primary;

@@ -17,4 +17,6 @@ public:
 
     virtual Node* operator[](int index);
     virtual long size() const;
+
+    bool has_single_term() const;
 };

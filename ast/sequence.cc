@@ -34,6 +34,10 @@ std::string Sequence::dump(std::string indent) const {
     return result;
 }
 
+bool Sequence::has_single_term() const {
+    return terms.size() == 1;
+}
+
 Node* Sequence::operator[](int index) {
     if (index == 0) {
         return this;
