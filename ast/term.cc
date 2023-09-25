@@ -86,8 +86,6 @@ std::string Term::dump(std::string indent) const {
 
 Node* Term::operator[](int index) {
     if (index == 0) {
-        return this;
-    } else if (index == 1) {
         if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary));
         if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary));
         if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary));
@@ -103,5 +101,5 @@ Node* Term::operator[](int index) {
 }
 
 long Term::size() const {
-    return 2;
+    return 1;
 }

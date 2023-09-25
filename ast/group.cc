@@ -34,8 +34,6 @@ std::string Group::dump(std::string indent) const {
 
 Node* Group::operator[](int index) {
     if (index == 0) {
-        return this;
-    } else if (index == 1) {
         return (Node*)expression.get();
     } else {
         printf("ERROR: index out of bounds!\n");
@@ -44,7 +42,7 @@ Node* Group::operator[](int index) {
 }
 
 long Group::size() const {
-    return 2;
+    return 1;
 }
 
 bool Group::has_single_term() const {

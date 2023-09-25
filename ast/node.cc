@@ -9,11 +9,11 @@ Node::operator bool() {
 }
 
 Node* Node::operator[](int index) {
-    return this;
+    return nullptr;
 }
 
 long Node::size() const {
-    return 1;
+    return 0;
 }
 
 void Node::parse_comments(Parser& p) {
@@ -36,14 +36,14 @@ std::string Node::format_comments(std::string indent) const {
 
 void Node::map(const std::function<bool(Node&)>& transform) {
     if (transform(*this)) return;
-    for (int i = 1; i < size(); i++) {
+    for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
         n->map(transform);
     }
 }
 
 void Node::update_parents() {
-    for (int i = 1; i < size(); i++) {
+    for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
         //~ printf("DBG: %s %p, p=%p -> %p%s\n", n->type, n, n->parent, this, n->parent == this ? " NOT CHANGED" : "");
         n->parent = this;

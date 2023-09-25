@@ -42,6 +42,18 @@ std::string Rule::dump(std::string indent) const {
     return indent + "RULE " + name + comments_info + "\n" + expression.dump(indent + "  ");
 }
 
+Node* Rule::operator[](int index) {
+    if (index == 0) {
+        return &expression;
+    } else {
+        printf("ERROR: index out of bounds!\n");
+        exit(1);
+    }
+}
+long Rule::size() const {
+    return 1;
+}
+
 bool Rule::is_terminal() {
     if (expression.sequences.size() != 1) return false;
     if (expression.sequences[0].terms.size() != 1) return false;

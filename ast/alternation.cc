@@ -42,10 +42,8 @@ std::string Alternation::dump(std::string indent) const {
 }
 
 Node* Alternation::operator[](int index) {
-    if (index == 0) {
-        return this;
-    } else if (index <= sequences.size()) {
-        return &(sequences[index - 1]);
+    if (index < sequences.size()) {
+        return &(sequences[index]);
     } else {
         printf("ERROR: index out of bounds!\n");
         exit(1);
@@ -53,7 +51,7 @@ Node* Alternation::operator[](int index) {
 }
 
 long Alternation::size() const {
-    return 1 + sequences.size();
+    return sequences.size();
 }
 
 bool Alternation::has_single_term() const {

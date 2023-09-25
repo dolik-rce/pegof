@@ -39,10 +39,8 @@ bool Sequence::has_single_term() const {
 }
 
 Node* Sequence::operator[](int index) {
-    if (index == 0) {
-        return this;
-    } else if (index <= terms.size()) {
-        return &(terms[index - 1]);
+    if (index < terms.size()) {
+        return &(terms[index]);
     } else {
         printf("ERROR: index out of bounds!\n");
         exit(1);
@@ -50,5 +48,5 @@ Node* Sequence::operator[](int index) {
 }
 
 long Sequence::size() const {
-    return 1 + terms.size();
+    return terms.size();
 }

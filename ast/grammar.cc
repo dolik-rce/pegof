@@ -82,12 +82,10 @@ std::string Grammar::dump(std::string indent) const {
 }
 
 Node* Grammar::operator[](int index) {
-    if (index == 0) {
-        return this;
-    } else if (index <= directives.size()) {
-        return &(directives[index - 1]);
-    } else if (index <= directives.size() + rules.size()) {
-        return &(rules[index - directives.size() - 1]);
+    if (index < directives.size()) {
+        return &(directives[index]);
+    } else if (index < directives.size() + rules.size()) {
+        return &(rules[index - directives.size()]);
     } else {
         printf("ERROR: index out of bounds!\n");
         exit(1);
@@ -95,5 +93,5 @@ Node* Grammar::operator[](int index) {
 }
 
 long Grammar::size() const {
-    return 1 + directives.size() + rules.size();
+    return directives.size() + rules.size();
 }
