@@ -3,6 +3,8 @@
 class Optimizer {
     Grammar& g;
 
+    int apply(const char* config, const std::function<bool(Node&, int&)>& transform);
+
     int inline_rules();
     int concat_strings();
     int normalize_character_classes();

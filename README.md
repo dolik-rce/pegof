@@ -71,6 +71,8 @@ Currently implemented optimizations:
         Do not optimize repeated tokens
     -q/--keep-quantifications
         Do not optimize quantifications
+    -g/--keep-groups
+        Do not remove unnecessary groups
     -n/--no-concat
         Do not concatenate adjacent string
     -N/--no-char-class

@@ -3,12 +3,20 @@
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
 
-int Optimizer::concat_strings() {
-    if (Config::get<bool>("no-concat")) {
+int Optimizer::apply(const char* config, const std::function<bool(Node&, int&)>& transform) {
+    if (Config::get<bool>(config)) {
         return 0;
     }
     int optimized = 0;
-    g.map([optimized](Node& node) mutable -> bool {
+    g.map([optimized, transform](Node& node) mutable -> bool {
+        return transform(node, optimized);
+    });
+    return optimized;
+}
+
+int Optimizer::concat_strings() {
+    // "A" "B" -> "AB"
+    return apply("no-concat", [](Node& node, int& optimized) -> bool {
         Sequence* s = node.as<Sequence>();
         if (!s) return false;
 
@@ -32,15 +40,10 @@ int Optimizer::concat_strings() {
         }
         return optimized;
     });
-    return optimized;
 }
 
 int Optimizer::normalize_character_classes() {
-    if (Config::get<bool>("no-char-class")) {
-        return 0;
-    }
-    int optimized = 0;
-    g.map([optimized](Node& node) mutable -> bool {
+    return apply("no-char-class", [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->content == ".") return false;
         std::string orig = cc->content;
@@ -48,15 +51,12 @@ int Optimizer::normalize_character_classes() {
         if (cc->content != orig) optimized++;
         return false; // this doesn't move any nodes, so we can always return false
     });
-    return optimized;
 }
 
 int Optimizer::single_char_character_classes() {
-    if (Config::get<bool>("no-single-char")) {
-        return 0;
-    }
-    int optimized = 0;
-    g.map([optimized](Node& node) mutable -> bool {
+    // [A] -> "A"
+    // [^B] -> !"B"
+    return apply("no-single-char", [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->content == ".") return false;
         int size = cc->content.size() + (cc->dash ? 1 : 0);
@@ -71,15 +71,12 @@ int Optimizer::single_char_character_classes() {
         optimized++;
         return true;
     });
-    return optimized;
 }
 
 int Optimizer::character_class_negations() {
-    if (Config::get<bool>("no-negation")) {
-        return 0;
-    }
-    int optimized = 0;
-    g.map([optimized](Node& node) mutable -> bool {
+    // ![A] -> [^A]
+    // ![^A] -> [A]
+    return apply("no-negation", [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<CharacterClass>() || t->prefix != '!') return false;
         CharacterClass cc = t->get<CharacterClass>();
@@ -89,15 +86,11 @@ int Optimizer::character_class_negations() {
         t->update_parents();
         return true;
     });
-    return optimized;
 }
 
 int Optimizer::double_negations() {
-    if (Config::get<bool>("no-negation")) {
-        return 0;
-    }
-    int optimized = 0;
-    g.map([optimized](Node& node) mutable -> bool {
+    // !(!A) -> A
+    return apply("no-negation", [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || t->prefix != '!') return false;
         Group group = t->get<Group>();
@@ -109,12 +102,10 @@ int Optimizer::double_negations() {
         t->update_parents();
         return true;
     });
-    return optimized;
 }
 
 int Optimizer::remove_unnecessary_groups() {
-    int optimized = 0;
-    g.map([optimized](Node& node) mutable -> bool {
+    return apply("keep-groups", [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>()) return false;
         Group group = t->get<Group>();
@@ -142,7 +133,6 @@ int Optimizer::remove_unnecessary_groups() {
         }
         return optimized;
     });
-    return optimized;
 }
 
 int Optimizer::inline_rules() {
