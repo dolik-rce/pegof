@@ -11,6 +11,7 @@ class Optimizer {
     int single_char_character_classes();
     int character_class_negations();
     int double_negations();
+    int double_quantifications();
     int remove_unnecessary_groups();
 public:
     Optimizer(Grammar& g);

@@ -94,11 +94,31 @@ int Optimizer::double_negations() {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || t->prefix != '!') return false;
         Group group = t->get<Group>();
-        if (group.has_single_term()) return false;
+        if (!group.has_single_term()) return false;
         Term inner_term = group.expression->sequences[0].terms[0];
         if (inner_term.prefix != '!') return false;
         *t = inner_term;
         t->prefix = 0;
+        t->update_parents();
+        return true;
+    });
+}
+
+int Optimizer::double_quantifications() {
+    // ___|_*_|_?_|_+_
+    //  * | * | * | *
+    //  ? | * | ? | *
+    //  + | * | * | +   e.g.: (A?)? -> A?
+    return apply("keep-quantifications", [](Node& node, int& optimized) -> bool {
+        Term* t = node.as<Term>();
+        if (!t || !t->contains<Group>() || t->quantifier == 0) return false;
+        Group group = t->get<Group>();
+        if (!group.has_single_term()) return false;
+        Term inner_term = group.expression->sequences[0].terms[0];
+        if (inner_term.quantifier == 0 || inner_term.prefix) return false;
+        int q = (inner_term.quantifier == t->quantifier) ? t->quantifier : '*';
+        t->primary = inner_term.primary;
+        t->quantifier = q;
         t->update_parents();
         return true;
     });
@@ -182,6 +202,7 @@ Grammar Optimizer::optimize() {
         opts += single_char_character_classes();
         opts += character_class_negations();
         opts += double_negations();
+        opts += double_quantifications();
         opts += concat_strings();
     }
     return g;
