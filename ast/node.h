@@ -77,7 +77,7 @@ void Node::find_all(std::vector<U*>& result, const std::function<bool(const U&)>
     if (is<U>() && predicate(*(U*)this)) {
         result.push_back((U*)(this));
     }
-    for (int i = 1; i < size(); i++) {
+    for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
         n->find_all(result, predicate);
     }

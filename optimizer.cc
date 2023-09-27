@@ -214,7 +214,7 @@ int Optimizer::inline_rules() {
         }).empty();
         if (is_recursive) continue;
 
-        std::vector<Reference*> refs = g.find_all<Reference>([rule, optimized](const Reference& node) -> bool {
+        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& node) -> bool {
             Reference* ref = node.as<Reference>();
             if (!ref) return false;
             return ref->name == rule.name;
@@ -244,7 +244,6 @@ Grammar Optimizer::optimize() {
     int opts = 1;
     int pass = 1;
     while (opts > 0) {
-        opts = 0;
         opts = normalize_character_classes();
         opts += inline_rules();
         opts += remove_unnecessary_groups();
@@ -254,7 +253,8 @@ Grammar Optimizer::optimize() {
         opts += double_quantifications();
         opts += simplify_repeats();
         opts += concat_strings();
-        //~ printf("Grammar after pass %d:\n\n", pass, g.to_string().c_str());
+        //~ printf("Grammar after pass %d (%d optimizations):\n%s\n", pass, opts, g.to_string().c_str());
+        pass++;
     }
     return g;
 }
