@@ -155,3 +155,11 @@ void CharacterClass::normalize() {
     });
     update_content();
 }
+
+bool operator==(const CharacterClass& a, const CharacterClass& b) {
+    return a.negation == b.negation && a.dash == b.dash && a.content == b.content;
+}
+
+bool operator!=(const CharacterClass& a, const CharacterClass& b) {
+    return !(a == b);
+}

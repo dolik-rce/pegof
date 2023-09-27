@@ -26,3 +26,11 @@ std::string Expand::to_string() const {
 std::string Expand::dump(std::string indent) const {
     return indent + "EXPAND " + content;
 }
+
+bool operator==(const Expand& a, const Expand& b) {
+    return a.content == b.content;
+}
+
+bool operator!=(const Expand& a, const Expand& b) {
+    return !(a == b);
+}

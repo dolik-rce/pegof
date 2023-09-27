@@ -1,3 +1,7 @@
+WARNING: Detected sequence that will never match: X+ X
+WARNING: Detected sequence that will never match: X* X
+WARNING: Detected sequence that will never match: X+ X+
+WARNING: Detected sequence that will never match: X* X+
 Z <- A1 B1 C1 A2 B2 C2 A3 B3 C3
 
 X <- "X"
@@ -6,13 +10,13 @@ A1 <- X X
 
 B1 <- X+ X
 
-C1 <- X+
+C1 <- X* X
 
 A2 <- X X+
 
 B2 <- X+ X+
 
-C2 <- X+
+C2 <- X* X+
 
 A3 <- X+
 

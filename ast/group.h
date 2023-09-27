@@ -20,3 +20,6 @@ public:
 
     bool has_single_term() const;
 };
+
+bool operator==(const Group& a, const Group& b);
+bool operator!=(const Group& a, const Group& b);

@@ -38,8 +38,13 @@ public:
 
     template<class T>
     T get() const;
+
+    bool is_greedy() const;
+    bool is_optional() const;
 };
 
+bool operator==(const Term& a, const Term& b);
+bool operator!=(const Term& a, const Term& b);
 
 template<class T>
 bool Term::contains() const {

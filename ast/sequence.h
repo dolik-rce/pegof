@@ -18,3 +18,6 @@ public:
 
     bool has_single_term() const;
 };
+
+bool operator==(const Sequence& a, const Sequence& b);
+bool operator!=(const Sequence& a, const Sequence& b);

@@ -50,3 +50,15 @@ Node* Sequence::operator[](int index) {
 long Sequence::size() const {
     return terms.size();
 }
+
+bool operator==(const Sequence& a, const Sequence& b) {
+    if (a.size() != b.size()) return false;
+    for (int i = 0; i < a.size(); i++) {
+        if (a.terms[i] != b.terms[i]) return false;
+    }
+    return true;
+}
+
+bool operator!=(const Sequence& a, const Sequence& b) {
+    return !(a == b);
+}

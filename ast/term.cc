@@ -103,3 +103,19 @@ Node* Term::operator[](int index) {
 long Term::size() const {
     return 1;
 }
+
+bool Term::is_greedy() const {
+    return quantifier == '*' || quantifier == '+';
+}
+
+bool Term::is_optional() const {
+    return quantifier == '*' || quantifier == '?';
+}
+
+bool operator==(const Term& a, const Term& b) {
+    return a.prefix == b.prefix && a.quantifier == b.quantifier && a.primary == b.primary;
+}
+
+bool operator!=(const Term& a, const Term& b) {
+    return !(a == b);
+}

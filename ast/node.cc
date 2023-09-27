@@ -4,7 +4,7 @@ Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(
     //~ printf("DBG: creating %s @%p, p:%p\n", type, this, parent);
 }
 
-Node::operator bool() {
+Node::operator bool() const {
     return valid;
 }
 

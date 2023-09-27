@@ -12,3 +12,6 @@ public:
     virtual std::string to_string() const override;
     virtual std::string dump(std::string indent = "") const override;
 };
+
+bool operator==(const Reference& a, const Reference& b);
+bool operator!=(const Reference& a, const Reference& b);

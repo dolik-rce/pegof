@@ -57,3 +57,15 @@ long Alternation::size() const {
 bool Alternation::has_single_term() const {
     return sequences.size() == 1 && sequences[0].has_single_term();
 }
+
+bool operator==(const Alternation& a, const Alternation& b) {
+    if (a.size() != b.size()) return false;
+    for (int i = 0; i < a.size(); i++) {
+        if (a.sequences[i] != b.sequences[i]) return false;
+    }
+    return true;
+}
+
+bool operator!=(const Alternation& a, const Alternation& b) {
+    return !(a == b);
+}

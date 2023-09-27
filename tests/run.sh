@@ -29,7 +29,7 @@ EOF
         mapfile -t OUTPUTS <<<"$(get_outputs "$CONF")"
         for OUTPUT in "${OUTPUTS[@]}"; do
             [ -e "${OUTPUT//.tmp/.expected}" ] || continue
-            echo "    check_file \"$OUTPUT\" \"${OUTPUT//.tmp/.expected}\""
+            echo "    check_file \"${OUTPUT//.tmp/.expected}\" \"$OUTPUT\""
         done
         echo "}"
     done

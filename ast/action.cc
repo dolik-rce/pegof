@@ -22,3 +22,11 @@ std::string Action::to_string() const {
 std::string Action::dump(std::string indent) const {
     return indent + "ACTION " + to_c_string(code);
 }
+
+bool operator==(const Action& a, const Action& b) {
+    return a.code == b.code;
+}
+
+bool operator!=(const Action& a, const Action& b) {
+    return !(a == b);
+}

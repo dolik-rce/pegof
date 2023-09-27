@@ -25,3 +25,6 @@ public:
     virtual std::string to_string() const override;
     virtual std::string dump(std::string = "") const override;
 };
+
+bool operator==(const CharacterClass& a, const CharacterClass& b);
+bool operator!=(const CharacterClass& a, const CharacterClass& b);

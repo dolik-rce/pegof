@@ -27,3 +27,10 @@ std::string String::to_string() const {
 std::string String::dump(std::string indent) const {
     return indent + "STRING " + to_c_string(content);
 }
+
+bool operator==(const String& a, const String& b) {
+    return a.content == b.content;
+}
+bool operator!=(const String& a, const String& b) {
+    return !(a == b);
+}

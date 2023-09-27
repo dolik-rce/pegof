@@ -19,7 +19,7 @@ public:
     virtual std::string to_string() const = 0;
     virtual std::string dump(std::string indent = "") const = 0;
 
-    operator bool();
+    operator bool() const;
 
     template<class U>
     bool is() const;

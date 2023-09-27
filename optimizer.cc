@@ -42,6 +42,53 @@ int Optimizer::concat_strings() {
     });
 }
 
+int Optimizer::simplify_repeats() {
+    // 1    2: *                  ?                  +                  ""
+    // *       X* X* -> X*        X* X? -> X*        X* X+ -> WARN      X* X -> WARN
+    // +       X+ X* -> X+        X+ X? -> X+        X+ X+ -> WARN      X+ X -> WARN
+    // ?       X? X* -> X*        X? X? -> X? X?     X? X+ -> X X+      X? X -> X X?
+    // ""      X  X* -> X+        X  X? -> X X?      X  X+ -> X X+      X  X -> X X
+    return apply("keep-repeats", [](Node& node, int& optimized) -> bool {
+        Sequence* s = node.as<Sequence>();
+        if (!s) return false;
+
+        for (int i = 1; i < s->terms.size(); i++) {
+            Term& t1 = s->terms[i-1];
+            Term& t2 = s->terms[i];
+            if (t1.primary != t2.primary || t1.prefix || t2.prefix) continue;
+
+            if (t1.is_greedy() && t2.is_optional()) {
+                s->terms.erase(s->terms.begin()+i);
+                s->update_parents();
+                return true;
+            } else if (t1.is_greedy() && !t2.is_optional()) {
+                fprintf(stderr, "WARNING: Detected sequence that will never match: %s %s\n", t1.to_string().c_str(), t2.to_string().c_str());
+                continue;
+            } else if (t1.quantifier == '?') {
+                switch (t2.quantifier) {
+                    case '*':
+                        s->terms.erase(s->terms.begin() + i - 1);
+                        s->update_parents();
+                        return true;
+                    case '+':
+                        t1.quantifier = 0;
+                        return true;
+                    case 0:
+                        t1.quantifier = 0;
+                        t2.quantifier = '?';
+                        return true;
+                }
+            } else if (t1.quantifier == 0 && t2.quantifier == '*') {
+                t1.quantifier = '+';
+                s->terms.erase(s->terms.begin() + i);
+                s->update_parents();
+                return true;
+            }
+        }
+        return false;
+    });
+}
+
 int Optimizer::normalize_character_classes() {
     return apply("no-char-class", [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
@@ -105,10 +152,10 @@ int Optimizer::double_negations() {
 }
 
 int Optimizer::double_quantifications() {
-    // ___|_*_|_?_|_+_
-    //  * | * | * | *
-    //  ? | * | ? | *
-    //  + | * | * | +   e.g.: (A?)? -> A?
+    // _B__|_B*_|_B?_|_B+_
+    //  A* | A* | A* | A*
+    //  A? | A* | A? | A*
+    //  A+ | A* | A* | A+   e.g.: (A?)? -> A?
     return apply("keep-quantifications", [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || t->quantifier == 0) return false;
@@ -195,7 +242,9 @@ int Optimizer::inline_rules() {
 
 Grammar Optimizer::optimize() {
     int opts = 1;
+    int pass = 1;
     while (opts > 0) {
+        opts = 0;
         opts = normalize_character_classes();
         opts += inline_rules();
         opts += remove_unnecessary_groups();
@@ -203,7 +252,9 @@ Grammar Optimizer::optimize() {
         opts += character_class_negations();
         opts += double_negations();
         opts += double_quantifications();
+        opts += simplify_repeats();
         opts += concat_strings();
+        //~ printf("Grammar after pass %d:\n\n", pass, g.to_string().c_str());
     }
     return g;
 }

@@ -41,3 +41,11 @@ std::string Reference::dump(std::string indent) const {
     result += name;
     return result;
 }
+
+bool operator==(const Reference& a, const Reference& b) {
+    return a.name == b.name && a.var == b.var;
+}
+
+bool operator!=(const Reference& a, const Reference& b) {
+    return !(a == b);
+}

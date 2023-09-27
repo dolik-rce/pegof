@@ -29,7 +29,7 @@ check_status() {
 }
 
 check_stdout() {
-    diff --strip-trailing-cr -uN <(echo "$output") --label stdout "$1"
+    diff --strip-trailing-cr -uN "$1" --label "$1" <(echo "$output") --label stdout
 }
 
 check_file() {

@@ -48,3 +48,11 @@ long Group::size() const {
 bool Group::has_single_term() const {
     return expression->has_single_term();
 }
+
+bool operator==(const Group& a, const Group& b) {
+    return a.expression == b.expression;
+}
+
+bool operator!=(const Group& a, const Group& b) {
+    return !(a == b);
+}
