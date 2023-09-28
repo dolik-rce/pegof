@@ -48,22 +48,40 @@ void Grammar::parse(Parser& p) {
     valid = true; // !rules.empty();
 }
 
+std::string join(const std::vector<std::string>& parts, const char* delimiter) {
+    std::string result;
+    for (int i = 0; i < parts.size(); i++) {
+        result += (i ? delimiter : "") + parts[i];
+    }
+    return result;
+}
+
 std::string Grammar::to_string() const {
-    std::string result = format_comments();
-    if (!result.empty()) result += "\n";
-    for (const Directive& directive : directives) {
-        result += directive.to_string() + "\n";
+    std::vector<std::string> parts;
+    //~ parts.push_back("AAAA");
+    //~ parts.push_back("BBB");
+    //~ parts.push_back("CC");
+    //~ printf("DBG: %s\n", join(parts, "\n\n").c_str());
+    std::string comments = format_comments();
+    if (comments.size()) {
+        parts.push_back(comments);
     }
-    if (!directives.empty())
-        result += "\n";
-    for (const Rule& rule : rules) {
-        result += rule.to_string();
+    for (int i = 0; i < directives.size(); i++) {
+        parts.push_back(directives[i].to_string());
     }
-    for (const std::string& comment : code_comments) {
-        result += "# " + comment + "\n";
+    for (int i = 0; i < rules.size(); i++) {
+        parts.push_back(rules[i].to_string());
+    }
+    comments = join(code_comments, "\n# ");
+    if (comments.size()) {
+        parts.push_back("# " + comments);
     }
     if (!code.empty()) {
-        result += "%%\n" + code;
+        parts.push_back("%%\n" + code);
+    }
+    std::string result = join(parts, "\n\n");
+    if (result.back() != '\n') {
+        result += "\n";
     }
     return result;
 }

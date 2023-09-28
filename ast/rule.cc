@@ -27,13 +27,13 @@ void Rule::parse(Parser& p) {
 }
 
 std::string Rule::to_string() const {
-    std::string result = format_comments() + name + " <-";
+    std::string result = format_comments() + (comments.empty() ? "" : "\n") + name + " <-";
     if (expression.sequences.size() > Config::get<int>("wrap-limit")) {
         result += "\n    ";
     } else {
         result += " ";
     }
-    result += expression.to_string() + "\n\n";
+    result += expression.to_string();
     return result;
 }
 

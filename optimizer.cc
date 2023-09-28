@@ -127,6 +127,7 @@ int Optimizer::character_class_negations() {
         Term* t = node.as<Term>();
         if (!t || !t->contains<CharacterClass>() || t->prefix != '!') return false;
         CharacterClass cc = t->get<CharacterClass>();
+        if (cc.content == ".") return false;
         cc.negation = !cc.negation;
         t->prefix = 0;
         t->primary = cc;

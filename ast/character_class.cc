@@ -126,11 +126,11 @@ std::string CharacterClass::to_string() const {
     if (content == ".") {
         return ".";
     } else {
-        std::string result;
+        std::string result = "[";
         if(negation) result += '^';
         if(dash) result += '-';
-        result += content;
-        return "[" + result + "]";
+        result += content + ']';
+        return result;
     }
 }
 

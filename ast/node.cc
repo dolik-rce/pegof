@@ -29,7 +29,7 @@ std::string Node::format_comments(std::string indent) const {
     if (comments.empty()) return "";
     std::string result;
     for(int i = 0; i < comments.size(); i++) {
-        result += indent + "# " + comments[i] + "\n";
+        result += (i ? "\n" : "") + indent + "# " + comments[i];
     }
     return result;
 }
