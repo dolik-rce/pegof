@@ -2,7 +2,11 @@ WARNING: Detected sequence that will never match: X+ X
 WARNING: Detected sequence that will never match: X* X
 WARNING: Detected sequence that will never match: X+ X+
 WARNING: Detected sequence that will never match: X* X+
-Z <- A1 B1 C1 A2 B2 C2 A3 B3 C3
+Z <-
+    A1 B1 C1 D1
+    / A2 B2 C2 D2
+    / A3 B3 C3 D3
+    / A4 B4 C4 D4
 
 X <- "X"
 
@@ -12,14 +16,28 @@ B1 <- X+ X
 
 C1 <- X* X
 
+D1 <- X X?
+
 A2 <- X X+
 
 B2 <- X+ X+
 
 C2 <- X* X+
 
+D2 <- X X+
+
 A3 <- X+
 
 B3 <- X+
 
 C3 <- X*
+
+D3 <- X*
+
+A4 <- X X?
+
+B4 <- X+
+
+C4 <- X*
+
+D4 <- X? X?
