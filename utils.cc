@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <regex>
 
 std::string read_file(const std::string& filename) {
     std::stringstream buffer;
@@ -56,4 +57,11 @@ std::string trim(const std::string& str, TrimType type) {
         start = 0;
     }
     return std::string(str.c_str() + start, end - start);
+}
+
+std::vector<std::string> split(const std::string &s, const std::string& delimiter) {
+    std::regex sep_regex(delimiter);
+    std::sregex_token_iterator iter(s.begin(), s.end(), sep_regex, -1);
+    std::sregex_token_iterator end;
+    return {iter, end};
 }

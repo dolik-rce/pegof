@@ -1,9 +1,10 @@
 #include "ast/grammar.h"
+#include "config.h"
 
 class Optimizer {
     Grammar& g;
 
-    int apply(const char* config, const std::function<bool(Node&, int&)>& transform);
+    int apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform);
 
     int inline_rules();
     int concat_strings();

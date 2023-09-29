@@ -6,6 +6,20 @@
 #include <string>
 #include <vector>
 
+enum Optimization {
+    O_NONE = 0,
+    O_NORMALIZE_CHAR_CLASS = 1,
+    O_INLINE = 2,
+    O_REMOVE_GROUP = 4,
+    O_SINGLE_CHAR_CLASS = 8,
+    O_CHAR_CLASS_NEGATION = 16,
+    O_DOUBLE_NEGATION = 32,
+    O_DOUBLE_QUANTIFICATION = 64,
+    O_REPEATS = 128,
+    O_CONCAT_STRINGS = 256,
+    O_ALL = 511
+};
+
 struct Config {
     enum OutputType {
         OT_FORMAT,
@@ -56,6 +70,7 @@ private:
     static Config* instance;
 
     std::vector<Option> args;
+    int optimizations;
 
     void usage(const std::string& error);
     void process_args(const std::vector<std::string>& arguments, const bool config_file);
@@ -65,6 +80,9 @@ private:
     int set_input(const std::string& next);
     int set_output(const std::string& next);
     int load_config(const std::string& next);
+    int parse_optimization_config(const std::string& param);
+    int parse_optimize(const std::string& param);
+    int parse_exclude(const std::string& param);
 
     Option& find_option(const std::string& optionName);
 
@@ -73,6 +91,8 @@ public:
     static const T get(std::string optionName) {
         return std::any_cast<T>(instance->find_option(optionName).value);
     }
+
+    static bool get(const Optimization& opt);
 
     Config(int argc, char **argv);
 };

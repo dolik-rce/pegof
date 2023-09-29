@@ -1,4 +1,5 @@
 #include "config.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <fstream>
@@ -6,6 +7,20 @@
 
 Config* Config::instance = NULL;
 static Config::Option UNKNOWN_OPTION(Config::OptionGroup::OG_BASIC, "", "", nullptr, "");
+
+const std::map<std::string, Optimization> opt_mapping = {
+    {"all", O_ALL},
+    {"none", O_NONE},
+    {"normalize-char-class", O_NORMALIZE_CHAR_CLASS},
+    {"inline", O_INLINE},
+    {"remove-group", O_REMOVE_GROUP},
+    {"single-char-class", O_SINGLE_CHAR_CLASS},
+    {"char-class-negation", O_CHAR_CLASS_NEGATION},
+    {"double-negation", O_DOUBLE_NEGATION},
+    {"double-quantification", O_DOUBLE_QUANTIFICATION},
+    {"repeats", O_REPEATS},
+    {"concat-strings", O_CONCAT_STRINGS}
+};
 
 void Config::usage(const std::string& error) {
     printf("PEG Formatter and Optimizer\n");
@@ -20,6 +35,11 @@ void Config::usage(const std::string& error) {
             last = opt.group;
         }
         printf("    -%s/--%s %s\n        %s\n", opt.shortName.c_str(), opt.longName.c_str(), opt.param.c_str(), opt.description.c_str());
+    }
+
+    printf("\nSupported values for --optimize and --exclude options:\n");
+    for (const auto& item : opt_mapping) {
+        printf("    %s\n", item.first.c_str());
     }
 
     if (!error.empty()) {
@@ -154,7 +174,36 @@ void Config::post_process() {
     }
 }
 
-Config::Config(int argc, char **argv) : output_type(OT_FORMAT) {
+bool Config::get(const Optimization& opt) {
+    return instance->optimizations & opt;
+}
+
+int Config::parse_optimization_config(const std::string& param) {
+    int result = O_NONE;
+    std::vector<std::string> parts = split(param);
+    for (const std::string& part : parts) {
+        auto opt = opt_mapping.find(trim(part));
+        if (opt != opt_mapping.end()) {
+            result |= opt->second;
+        } else {
+            usage("Unrecognized optimization '" + part + "'!");
+            exit(1);
+        }
+    }
+    return result;
+}
+
+int Config::parse_optimize(const std::string& param) {
+    optimizations |= parse_optimization_config(param);
+    return 1;
+}
+
+int Config::parse_exclude(const std::string& param) {
+    optimizations &= ~parse_optimization_config(param);
+    return 1;
+}
+
+Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_NONE) {
     if (instance) {
         fprintf(stderr, "Internal error, Config instance already exists!\n");
     }
@@ -172,18 +221,10 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT) {
         Option(OG_IO, "o", "output", &Config::set_output, "Output to file (should be repeated if there is more inputs)\n        Value \"-\" can be used to specify standard output\n        Must not be used together with --inplace.", "FILE"),
         Option(OG_FORMAT, "q", "quotes", QT_DOUBLE, "Switch between double and single quoted strings (defaults to double)", "single/double"),
         Option(OG_FORMAT, "w", "wrap-limit", 1, "Wrap alternations with more than N sequences (default 1)", "N"),
-        Option(OG_OPT, "O", "optimize", false, "Apply optimizations"),
-        Option(OG_OPT, "C", "keep-captures", false, "Do not discard unused captures"),
-        Option(OG_OPT, "V", "keep-variables", false, "Do not discard unused variables"),
-        Option(OG_OPT, "r", "keep-repeats", false, "Do not optimize repeated tokens"),
-        Option(OG_OPT, "q", "keep-quantifications", false, "Do not optimize quantifications"),
-        Option(OG_OPT, "g", "keep-groups", false, "Do not remove unnecessary groups"),
-        Option(OG_OPT, "n", "no-concat", false, "Do not concatenate adjacent string"),
-        Option(OG_OPT, "N", "no-char-class", false, "Do not optimize character classes"),
-        Option(OG_OPT, "s", "no-single-char", false, "Do not convert single character classes to string"),
-        Option(OG_OPT, "e", "no-negation", false, "Do not optimize negations"),
-        Option(OG_OPT, "l", "inline-limit", 10, "Maximum number of references non-terminal rule can have and still\n        be inlined (default 10)", "N"),
-        Option(OG_OPT, "L", "terminal-inline-limit", 50, "Maximum number of references terminal rule can have and still\n        be inlined (default 20)", "N"),
+        Option(OG_OPT, "O", "optimize", &Config::parse_optimize, "Comma separated list of optimizations to apply", "OPT[,...]"),
+        Option(OG_OPT, "X", "exclude", &Config::parse_exclude, "Comma separated list of optimizations that should not be applied", "OPT[,...]"),
+        Option(OG_OPT, "l", "inline-limit", 10, "Maximum number of references non-terminal rule can have and still\n        be inlined (default 10), only applied when inlining is enabled", "N"),
+        Option(OG_OPT, "L", "terminal-inline-limit", 50, "Maximum number of references terminal rule can have and still\n        be inlined (default 20), Only applied when inlining is enabled", "N"),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
     process_args(arguments, false);

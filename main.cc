@@ -29,7 +29,7 @@ void process(const std::string& input, const std::string& output, const Checker&
     Grammar g = parse(input, output, checker);
     g.update_parents();
 
-    if (Config::get<bool>("optimize")) {
+    if (Config::get(O_ALL)) {
         Optimizer opt(g);
         g = opt.optimize();
         g.update_parents();

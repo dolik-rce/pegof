@@ -22,7 +22,6 @@ Currently implemented optimizations:
  - **Removing unused variables:** Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded.
  - **Removing unused captures:** Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
  - **Removing container nodes:** When alternation, sequence, etc. contains only one child node, the child can be attached directly to the containers parent.
- - **Removing comments:** This makes it simpler to implement the other optimizations. Also, most of the comments would not make much sense in the reorganized grammar.
 
 ## Usage:
     pegof [<options>] [--] [<input_file> ...]
@@ -61,32 +60,29 @@ Currently implemented optimizations:
         Wrap alternations with more than N sequences (default 1)
 
 ### Optimization options:
-    -O/--optimize
-        Apply optimizations
-    -C/--keep-captures
-        Do not discard unused captures
-    -V/--keep-variables
-        Do not discard unused variables
-    -r/--keep-repeats
-        Do not optimize repeated tokens
-    -q/--keep-quantifications
-        Do not optimize quantifications
-    -g/--keep-groups
-        Do not remove unnecessary groups
-    -n/--no-concat
-        Do not concatenate adjacent string
-    -N/--no-char-class
-        Do not optimize character classes
-    -s/--no-single-char
-        Do not convert single character classes to string
-    -e/--no-negation
-        Do not optimize negations
+    -O/--optimize OPT[,...]
+        Comma separated list of optimizations to apply
+    -X/--exclude OPT[,...]
+        Comma separated list of optimizations that should not be applied
     -l/--inline-limit N
         Maximum number of references non-terminal rule can have and still
-        be inlined (default 10)
+        be inlined (default 10), only applied when inlining is enabled
     -L/--terminal-inline-limit N
         Maximum number of references terminal rule can have and still
-        be inlined (default 20)
+        be inlined (default 20), Only applied when inlining is enabled
+
+### Supported values for --optimize and --exclude options:
+    all
+    char-class-negation
+    concat-strings
+    double-negation
+    double-quantification
+    inline
+    none
+    normalize-char-class
+    remove-group
+    repeats
+    single-char-class
 
 ## Configuration file
 

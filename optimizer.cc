@@ -3,8 +3,8 @@
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
 
-int Optimizer::apply(const char* config, const std::function<bool(Node&, int&)>& transform) {
-    if (Config::get<bool>(config)) {
+int Optimizer::apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform) {
+    if (!Config::get(config)) {
         return 0;
     }
     int optimized = 0;
@@ -16,7 +16,7 @@ int Optimizer::apply(const char* config, const std::function<bool(Node&, int&)>&
 
 int Optimizer::concat_strings() {
     // "A" "B" -> "AB"
-    return apply("no-concat", [](Node& node, int& optimized) -> bool {
+    return apply(O_CONCAT_STRINGS, [](Node& node, int& optimized) -> bool {
         Sequence* s = node.as<Sequence>();
         if (!s) return false;
 
@@ -48,7 +48,7 @@ int Optimizer::simplify_repeats() {
     // +       X+ X* -> X+        X+ X? -> X+        X+ X+ -> WARN      X+ X -> WARN
     // ?       X? X* -> X*        X? X? -> X? X?     X? X+ -> X X+      X? X -> X X?
     // ""      X  X* -> X+        X  X? -> X X?      X  X+ -> X X+      X  X -> X X
-    return apply("keep-repeats", [](Node& node, int& optimized) -> bool {
+    return apply(O_REPEATS, [](Node& node, int& optimized) -> bool {
         Sequence* s = node.as<Sequence>();
         if (!s) return false;
 
@@ -66,17 +66,17 @@ int Optimizer::simplify_repeats() {
                 continue;
             } else if (t1.quantifier == '?') {
                 switch (t2.quantifier) {
-                    case '*':
-                        s->terms.erase(s->terms.begin() + i - 1);
-                        s->update_parents();
-                        return true;
-                    case '+':
-                        t1.quantifier = 0;
-                        return true;
-                    case 0:
-                        t1.quantifier = 0;
-                        t2.quantifier = '?';
-                        return true;
+                case '*':
+                    s->terms.erase(s->terms.begin() + i - 1);
+                    s->update_parents();
+                    return true;
+                case '+':
+                    t1.quantifier = 0;
+                    return true;
+                case 0:
+                    t1.quantifier = 0;
+                    t2.quantifier = '?';
+                    return true;
                 }
             } else if (t1.quantifier == 0 && t2.quantifier == '*') {
                 t1.quantifier = '+';
@@ -90,7 +90,7 @@ int Optimizer::simplify_repeats() {
 }
 
 int Optimizer::normalize_character_classes() {
-    return apply("no-char-class", [](Node& node, int& optimized) -> bool {
+    return apply(O_NORMALIZE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->content == ".") return false;
         std::string orig = cc->content;
@@ -103,7 +103,7 @@ int Optimizer::normalize_character_classes() {
 int Optimizer::single_char_character_classes() {
     // [A] -> "A"
     // [^B] -> !"B"
-    return apply("no-single-char", [](Node& node, int& optimized) -> bool {
+    return apply(O_SINGLE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->content == ".") return false;
         int size = cc->content.size() + (cc->dash ? 1 : 0);
@@ -123,7 +123,7 @@ int Optimizer::single_char_character_classes() {
 int Optimizer::character_class_negations() {
     // ![A] -> [^A]
     // ![^A] -> [A]
-    return apply("no-negation", [](Node& node, int& optimized) -> bool {
+    return apply(O_CHAR_CLASS_NEGATION, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<CharacterClass>() || t->prefix != '!') return false;
         CharacterClass cc = t->get<CharacterClass>();
@@ -138,7 +138,7 @@ int Optimizer::character_class_negations() {
 
 int Optimizer::double_negations() {
     // !(!A) -> A
-    return apply("no-negation", [](Node& node, int& optimized) -> bool {
+    return apply(O_DOUBLE_NEGATION, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || t->prefix != '!') return false;
         Group group = t->get<Group>();
@@ -157,7 +157,7 @@ int Optimizer::double_quantifications() {
     //  A* | A* | A* | A*
     //  A? | A* | A? | A*
     //  A+ | A* | A* | A+   e.g.: (A?)? -> A?
-    return apply("keep-quantifications", [](Node& node, int& optimized) -> bool {
+    return apply(O_DOUBLE_QUANTIFICATION, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || t->quantifier == 0) return false;
         Group group = t->get<Group>();
@@ -173,7 +173,7 @@ int Optimizer::double_quantifications() {
 }
 
 int Optimizer::remove_unnecessary_groups() {
-    return apply("keep-groups", [](Node& node, int& optimized) -> bool {
+    return apply(O_REMOVE_GROUP, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>()) return false;
         Group group = t->get<Group>();
@@ -204,6 +204,9 @@ int Optimizer::remove_unnecessary_groups() {
 }
 
 int Optimizer::inline_rules() {
+    if (!Config::get(O_INLINE)) {
+        return 0;
+    }
     int optimized = 0;
     for (int i = g.rules.size() - 1; i >= 0; i--) {
         Rule& rule = g.rules[i];
