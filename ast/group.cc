@@ -50,7 +50,7 @@ bool Group::has_single_term() const {
 }
 
 bool operator==(const Group& a, const Group& b) {
-    return a.expression == b.expression;
+    return *a.expression == *b.expression;
 }
 
 bool operator!=(const Group& a, const Group& b) {
