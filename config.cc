@@ -204,7 +204,7 @@ int Config::inc_verbosity() {
     return 0;
 }
 
-Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_NONE) {
+Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_NONE), verbosity(0) {
     if (instance) {
         error("Internal error, Config instance already exists!");
     }

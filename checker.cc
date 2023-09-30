@@ -52,8 +52,9 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
     dup2(temp_stderr, fileno(stderr));
 
     // Read the stderr from the pipe
-    const int buffer_size = 10240;
+    const int buffer_size = 102400;
     char buffer[buffer_size];
+    // TODO: fix reading when there is more data then the buffer_size
     read(pipes[0], buffer, buffer_size);
 
     errors = buffer;
