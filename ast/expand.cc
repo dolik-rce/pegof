@@ -1,7 +1,7 @@
 #include "expand.h"
 #include "log.h"
 
-Expand::Expand(const std::string& content, Node* parent) : Node("Expand", parent), content(content) {}
+Expand::Expand(int content, Node* parent) : Node("Expand", parent), content(content) {}
 Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
     parse(p);
 }
@@ -12,7 +12,7 @@ void Expand::parse(Parser& p) {
     if (!p.match('$')) {
         return;
     } else if (p.match_number()) {
-        content = p.last_match;
+        content = std::stoi(p.last_match);
     } else {
         error("expected number!");
     }
@@ -20,11 +20,11 @@ void Expand::parse(Parser& p) {
 }
 
 std::string Expand::to_string() const {
-    return "$" + content;
+    return "$" + std::to_string(content);
 }
 
 std::string Expand::dump(std::string indent) const {
-    return indent + "EXPAND " + content;
+    return indent + "EXPAND " + std::to_string(content);
 }
 
 bool operator==(const Expand& a, const Expand& b) {

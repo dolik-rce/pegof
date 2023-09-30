@@ -3,8 +3,8 @@
 
 class Expand : public Node {
 public:
-    std::string content; // TODO: shoud be number
-    Expand(const std::string& content, Node* parent);
+    int content;
+    Expand(int content, Node* parent);
     Expand(Parser& p, Node* parent);
 
     virtual void parse(Parser& p);
