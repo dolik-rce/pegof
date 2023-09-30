@@ -20,7 +20,8 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"double-negation", O_DOUBLE_NEGATION},
     {"double-quantification", O_DOUBLE_QUANTIFICATION},
     {"repeats", O_REPEATS},
-    {"concat-strings", O_CONCAT_STRINGS}
+    {"concat-strings", O_CONCAT_STRINGS},
+    {"unused-variable", O_UNUSED_VARIABLE},
 };
 
 void Config::usage(const std::string& error_msg) {

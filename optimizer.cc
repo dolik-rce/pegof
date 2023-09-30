@@ -209,6 +209,21 @@ int Optimizer::remove_unnecessary_groups() {
     });
 }
 
+int Optimizer::unused_variables() {
+    return apply(O_UNUSED_VARIABLE, [](Node& node, int& optimized) -> bool {
+        Reference* r = node.as<Reference>();
+        if (!r || r->var.empty()) return false;
+        Rule* rule = node.get_ancestor<Rule>();
+        std::vector<Action*> actions = rule->find_all<Action>([r](const Action& action) -> bool {
+            return action.contains_var(r->var);
+        });
+        if (!actions.empty()) return false;
+        log(1, "Removing unused variable reference '%s' in rule %s.", r->var.c_str(), rule->to_string().c_str());
+        r->var.clear();
+        return true;
+    });
+}
+
 int Optimizer::inline_rules() {
     if (!Config::get(O_INLINE)) {
         return 0;
@@ -266,6 +281,7 @@ Grammar Optimizer::optimize() {
         opts += double_quantifications();
         opts += simplify_repeats();
         opts += concat_strings();
+        opts += unused_variables();
         if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, g.to_string().c_str());
         pass++;
     }

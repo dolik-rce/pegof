@@ -11,7 +11,7 @@ void Action::parse(Parser& p) {
     debug("Parsing Action");
     p.skip_space();
     if (p.match_code()) {
-        code = p.last_match;
+        code = trim(p.last_match);
         valid = true;
     }
 }
@@ -22,6 +22,11 @@ std::string Action::to_string() const {
 
 std::string Action::dump(std::string indent) const {
     return indent + "ACTION " + to_c_string(code);
+}
+
+bool Action::contains_var(const std::string& name) const {
+    std::regex re(".*\\b" + name + "\\b.*");
+    return std::regex_match(code, re);
 }
 
 bool operator==(const Action& a, const Action& b) {

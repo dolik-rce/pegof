@@ -1,7 +1,9 @@
 %value "char"
 
-X <- a:A B { printf("%c\n", a); }
+X <- a:A (B / C) { printf("%c\n", a); }
 
 A <- .* { $$ = 'a'; }
 
 B <- "B" A { $$ = 'blah'; }
+
+C <- "C" (A .*) { $$ = 'blah'; }

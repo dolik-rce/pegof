@@ -6,7 +6,7 @@ cd $ROOTDIR
 
 {
     sed -n '1,/^## Usage:/ p' README.md
-    build/pegof -h | sed '
+    build/pegof -h 2>&1 | sed '
         1,/^Usage:/ d;
         /options:/ s/^/### /;
         s/ $//;

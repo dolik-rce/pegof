@@ -30,6 +30,9 @@ public:
     template<class U>
     U* get_parent() const;
 
+    template <class U>
+    U* get_ancestor() const;
+
     virtual Node* operator[](int index);
 
     virtual long size() const;
@@ -63,6 +66,16 @@ template<class U>
 U* Node::get_parent() const {
     if (!parent) return nullptr;
     return parent->as<U>();
+}
+
+template<class U>
+U* Node::get_ancestor() const {
+    if (!parent) return nullptr;
+    if (parent->is<U>()) {
+        return parent->as<U>();
+    } else {
+        return parent->get_ancestor<U>();
+    }
 }
 
 template <class U>

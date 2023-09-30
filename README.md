@@ -32,9 +32,9 @@ Currently implemented optimizations:
     -c/--conf FILE
         Use given configuration file
     -v/--verbose
-        Verbose logging to stderr
+        Verbose logging to stderr (repeat for even more verbose output)
     -d/--debug
-        Output very verbose debug info
+        Output very verbose debug info, implies max verbosity
 
 ### Input/output options:
     -f/--format
@@ -83,6 +83,7 @@ Currently implemented optimizations:
     remove-group
     repeats
     single-char-class
+    unused-variable
 
 ## Configuration file
 

@@ -12,6 +12,8 @@ public:
 
     virtual std::string to_string() const override;
     virtual std::string dump(std::string = "") const override;
+
+    bool contains_var(const std::string& name) const;
 };
 
 bool operator==(const Action& a, const Action& b);

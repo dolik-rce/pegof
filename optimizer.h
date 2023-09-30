@@ -15,6 +15,7 @@ class Optimizer {
     int double_quantifications();
     int simplify_repeats();
     int remove_unnecessary_groups();
+    int unused_variables();
 public:
     Optimizer(Grammar& g);
     Grammar optimize();
