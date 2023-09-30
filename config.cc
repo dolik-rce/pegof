@@ -1,5 +1,6 @@
 #include "config.h"
 #include "utils.h"
+#include "log.h"
 
 #include <algorithm>
 #include <fstream>
@@ -22,35 +23,35 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"concat-strings", O_CONCAT_STRINGS}
 };
 
-void Config::usage(const std::string& error) {
-    printf("PEG Formatter and Optimizer\n");
-    printf("\n");
-    printf("Usage:\n");
-    printf("    pegof [<options>] [--] [<input_file> ...]\n");
+void Config::usage(const std::string& error_msg) {
+    log(0, "PEG Formatter and Optimizer");
+    log(0, "");
+    log(0, "Usage:");
+    log(0, "    pegof [<options>] [--] [<input_file> ...]");
     const char* og_mapping[] = {"Basic", "Input/output", "Formatting", "Optimization"};
     OptionGroup last = OG_OPT;
     for (const Option& opt : args) {
         if (last != opt.group) {
-            printf("\n%s options:\n", og_mapping[opt.group]);
+            log(0, "\n%s options:", og_mapping[opt.group]);
             last = opt.group;
         }
-        printf("    -%s/--%s %s\n        %s\n", opt.shortName.c_str(), opt.longName.c_str(), opt.param.c_str(), opt.description.c_str());
+        log(0, "    -%s/--%s %s\n        %s", opt.shortName.c_str(), opt.longName.c_str(), opt.param.c_str(), opt.description.c_str());
     }
 
-    printf("\nSupported values for --optimize and --exclude options:\n");
+    log(0, "\nSupported values for --optimize and --exclude options:");
     for (const auto& item : opt_mapping) {
-        printf("    %s\n", item.first.c_str());
+        log(0, "    %s", item.first.c_str());
     }
 
-    if (!error.empty()) {
-        printf("\nERROR: %s\n", error.c_str());
+    if (!error_msg.empty()) {
+        log(0, "");
+        error("%s", error_msg.c_str());
     }
 }
 
 int Config::help() {
     usage("");
     exit(0);
-    return 0;
 }
 
 int Config::set_input(const std::string& next) {
@@ -99,7 +100,6 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
             Option& opt = find_option(arg_name);
             if (&opt == &UNKNOWN_OPTION) {
                 usage("Unknown option: '" + arg + "'\n");
-                exit(1);
             }
             std::string next(i+1 == arguments.size() || arguments[i+1][0] == '-' ? "" : arguments[i+1]);
             if (opt.value.type() == typeid(MemberFn)) {
@@ -107,7 +107,6 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
             } else if (opt.value.type() == typeid(MemberFn1)) {
                 if (next.empty()) {
                     usage(arg + " requires an argument");
-                    exit(1);
                 }
                 i += (this->*(std::any_cast<MemberFn1>(opt.value)))(next);
             } else if (opt.value.type() == typeid(OutputType)) {
@@ -115,7 +114,6 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
             } else if (opt.value.type() == typeid(QuoteType)) {
                 if (next.empty() || (next != "single" && next != "double")) {
                     usage("Option '" + arg + "' requires argument 'single' or 'double'");
-                    exit(1);
                 }
                 find_option("quotes").value = next[0] == 's' ? QT_SINGLE : QT_DOUBLE;
                 i++;
@@ -124,18 +122,15 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
             } else if (opt.value.type() == typeid(int)) {
                 if (next.empty()) {
                     usage("Option '" + arg + "' requires an integer argument");
-                    exit(1);
                 }
                 size_t s = 0;
                 opt.value = std::stoi(next, &s);
                 if (s != next.size()) {
                     usage("Option '" + arg + "' requires an integer argument, got '" + next + "'");
-                    exit(1);
                 }
                 i++;
             } else {
                 usage("Internal error!");
-                exit(3);
             }
             continue;
         }
@@ -153,11 +148,9 @@ void Config::post_process() {
     if (Config::get<bool>("inplace")) {
         if (output_type != OT_FORMAT) {
             usage("Inplace editing is only allowed when formatting code");
-            exit(1);
         }
         if (!outputs.empty()) {
             usage("Combining --inplace and --output parameters is not allowed");
-            exit(1);
         }
         outputs = inputs;
     } else if (outputs.empty()) {
@@ -170,12 +163,15 @@ void Config::post_process() {
 
     if (inputs.size() != outputs.size()) {
         usage("Number of inputs does not match number of outputs");
-        exit(1);
     }
 }
 
 bool Config::get(const Optimization& opt) {
     return instance->optimizations & opt;
+}
+
+bool Config::verbose(int level) {
+    return instance->verbosity >= level;
 }
 
 int Config::parse_optimization_config(const std::string& param) {
@@ -187,7 +183,6 @@ int Config::parse_optimization_config(const std::string& param) {
             result |= opt->second;
         } else {
             usage("Unrecognized optimization '" + part + "'!");
-            exit(1);
         }
     }
     return result;
@@ -203,19 +198,24 @@ int Config::parse_exclude(const std::string& param) {
     return 1;
 }
 
+int Config::inc_verbosity() {
+    verbosity++;
+    return 0;
+}
+
 Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_NONE) {
     if (instance) {
-        fprintf(stderr, "Internal error, Config instance already exists!\n");
+        error("Internal error, Config instance already exists!");
     }
     instance = this;
 
     args = {
         Option(OG_BASIC, "h", "help", &Config::help, "Show help (this text)"),
         Option(OG_BASIC, "c", "conf", &Config::load_config, "Use given configuration file", "FILE"),
-        Option(OG_BASIC, "v", "verbose", false, "Verbose logging to stderr"),
+        Option(OG_BASIC, "v", "verbose", &Config::inc_verbosity, "Verbose logging to stderr (repeat for even more verbose output)"),
+        Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),
         Option(OG_IO, "f", "format", OT_FORMAT, "Output formatted grammar (default)"),
         Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
-        Option(OG_IO, "d", "debug", OT_DEBUG, "Output debug info (includes AST and formatted output)"),
         Option(OG_IO, "I", "inplace", false, "Modify the input files (only when formatting)"),
         Option(OG_IO, "i", "input", &Config::set_input, "Path to file with PEG grammar, multiple paths can be given\n        Value \"-\" can be used to specify standard input\n        Mainly useful for config file\n        If no file or --input is given, read standard input.", "FILE"),
         Option(OG_IO, "o", "output", &Config::set_output, "Output to file (should be repeated if there is more inputs)\n        Value \"-\" can be used to specify standard output\n        Must not be used together with --inplace.", "FILE"),

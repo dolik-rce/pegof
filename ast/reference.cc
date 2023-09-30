@@ -1,4 +1,5 @@
 #include "reference.h"
+#include "log.h"
 
 Reference::Reference(const std::string& name, const std::string& var, Node* parent) : Node("Reference", parent), name(name), var(var) {}
 Reference::Reference(Parser& p, Node* parent) : Node("Reference", parent) {
@@ -6,15 +7,14 @@ Reference::Reference(Parser& p, Node* parent) : Node("Reference", parent) {
 }
 
 void Reference::parse(Parser& p) {
-    //~ printf("parsing  Reference\n");
+    debug("Parsing Reference");
     if (!p.match_identifier()) {
         return;
     }
     std::string p1 = p.last_match;
     if (p.match(":")) {
         if (!p.match_identifier()) {
-            printf("ERROR: expected identifier!\n");
-            exit(1);
+            error("expected identifier!\n");
         }
         std::string p2 = p.last_match;
         name = p2;

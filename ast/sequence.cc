@@ -1,4 +1,5 @@
 #include "sequence.h"
+#include "log.h"
 
 Sequence::Sequence(const std::vector<Term>& terms, Node* parent) : Node("Sequence", parent), terms(terms) {}
 Sequence::Sequence(Parser& p, Node* parent) : Node("Sequence", parent) {
@@ -6,7 +7,7 @@ Sequence::Sequence(Parser& p, Node* parent) : Node("Sequence", parent) {
 }
 
 void Sequence::parse(Parser& p) {
-    //~ printf("parsing Sequence\n");
+    debug("Parsing Sequence");
     p.skip_space();
     Term t(p, this);
     if (!t) return;
@@ -42,8 +43,7 @@ Node* Sequence::operator[](int index) {
     if (index < terms.size()) {
         return &(terms[index]);
     } else {
-        printf("ERROR: index out of bounds!\n");
-        exit(1);
+        error("index out of bounds!");
     }
 }
 

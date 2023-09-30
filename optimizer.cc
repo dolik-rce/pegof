@@ -1,5 +1,6 @@
 #include "optimizer.h"
 #include "config.h"
+#include "log.h"
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
 
@@ -27,7 +28,7 @@ int Optimizer::concat_strings() {
             if (!t.quantifier && !t.prefix && std::holds_alternative<String>(t.primary)) {
                 String* str = std::get_if<String>(&(t.primary));
                 if (prev) {
-                    //~ printf("Merging adjacent strings: %s + %s\n", str->content.c_str(), prev->content.c_str());
+                    log(1, "Merging adjacent strings: %s + %s", str->content.c_str(), prev->content.c_str());
                     str->content += prev->content;
                     s->terms.erase(s->terms.begin() + prev_index);
                     optimized++;
@@ -62,7 +63,7 @@ int Optimizer::simplify_repeats() {
                 s->update_parents();
                 return true;
             } else if (t1.is_greedy() && !t2.is_optional()) {
-                fprintf(stderr, "WARNING: Detected sequence that will never match: %s %s\n", t1.to_string().c_str(), t2.to_string().c_str());
+                warn("Detected sequence that will never match: %s %s", t1.to_string().c_str(), t2.to_string().c_str());
                 continue;
             } else if (t1.quantifier == '?') {
                 switch (t2.quantifier) {
@@ -95,7 +96,9 @@ int Optimizer::normalize_character_classes() {
         if (!cc || cc->content == ".") return false;
         std::string orig = cc->content;
         cc->normalize();
-        if (cc->content != orig) optimized++;
+        if (cc->content != orig) {
+            optimized++;
+        }
         return false; // this doesn't move any nodes, so we can always return false
     });
 }
@@ -110,7 +113,7 @@ int Optimizer::single_char_character_classes() {
         if (size != 1) return false;
         Term* parent = cc->get_parent<Term>();
         if (!parent) return false; // should never happen
-        //~ printf("Optimizing character class: %s\n", cc->dump().c_str());
+        log(1, "Optimizing character class: %s", cc->to_string().c_str());
         if (cc->negation) {
             parent->prefix = parent->prefix == '!' ? 0 : '!';
         }
@@ -128,6 +131,7 @@ int Optimizer::character_class_negations() {
         if (!t || !t->contains<CharacterClass>() || t->prefix != '!') return false;
         CharacterClass cc = t->get<CharacterClass>();
         if (cc.content == ".") return false;
+        log(1, "Simplifying character class negation: %s", t->to_string().c_str());
         cc.negation = !cc.negation;
         t->prefix = 0;
         t->primary = cc;
@@ -145,6 +149,7 @@ int Optimizer::double_negations() {
         if (!group.has_single_term()) return false;
         Term inner_term = group.expression->sequences[0].terms[0];
         if (inner_term.prefix != '!') return false;
+        log(1, "Optimizing double negation: %s", t->to_string().c_str());
         *t = inner_term;
         t->prefix = 0;
         t->update_parents();
@@ -164,6 +169,7 @@ int Optimizer::double_quantifications() {
         if (!group.has_single_term()) return false;
         Term inner_term = group.expression->sequences[0].terms[0];
         if (inner_term.quantifier == 0 || inner_term.prefix) return false;
+        log(1, "Optimizing double quantification: %s", t->to_string().c_str());
         int q = (inner_term.quantifier == t->quantifier) ? t->quantifier : '*';
         t->primary = inner_term.primary;
         t->quantifier = q;
@@ -182,7 +188,7 @@ int Optimizer::remove_unnecessary_groups() {
 
         if (!t->prefix && !t->quantifier) {
             // A (B C) D -> A B C D
-            //~ printf("DBG: Removing grouping from '%s'\n", group.parent->to_string().c_str());
+            log(1, "Removing grouping from '%s'", group.parent->to_string().c_str());
             Sequence* s = t->parent->as<Sequence>();
             int pos;
             for (pos = 0; pos < s->size(); pos++) {
@@ -194,7 +200,7 @@ int Optimizer::remove_unnecessary_groups() {
             optimized++;
         } else if (group.has_single_term() && !group.expression->sequences[0].terms[0].prefix && !group.expression->sequences[0].terms[0].quantifier) {
             // A (B)* C -> A B* C
-            //~ printf("DBG: Removing grouping from '%s'\n", group.parent->to_string().c_str());
+            log(1, "Removing grouping from %s", group.parent->to_string().c_str());
             t->primary = group.expression->sequences[0].terms[0].primary;
             t->update_parents();
             optimized++;
@@ -225,19 +231,20 @@ int Optimizer::inline_rules() {
         });
         bool is_terminal = rule.is_terminal();
         int inline_limit = Config::get<int>(is_terminal ? "terminal-inline-limit" : "inline-limit");
-        //~ printf("DBG: found %d references to rule %s, limit = %d\n", refs.size(), rule.name.c_str(), inline_limit);
+        log(2, "Found %d references to rule %s, limit = %d", refs.size(), rule.name.c_str(), inline_limit);
         if (refs.size() == 0 /* main rule */ || refs.size() > inline_limit) continue;
 
         Term src = rule.expression.sequences[0].terms[0];
+        log(1, "Inlining rule %s", rule.name.c_str());
         for (int j = 0; j < refs.size(); j++) {
             Term* dest = refs[j]->parent->as<Term>();
             Group group(*(src.parent->parent->as<Alternation>()), nullptr);
-            //~ printf("DBG: inlining \n%s\nDBG:into \n%s\n", group.dump().c_str(), dest->dump().c_str());
+            log(2, "Inlining %s into %s", group.to_string().c_str(), dest->to_string().c_str());
             dest->primary = group;
             dest->update_parents();
-            //~ printf("DBG: result: \n%s\n", dest->dump().c_str());
+            debug("Inlining result: %s", dest->to_string().c_str());
         }
-        //~ printf("DBG: removing rule %s\n", rule.name.c_str());
+        log(2, "Removing inlined rule %s", rule.name.c_str());
         g.rules.erase(g.rules.begin() + i);
         optimized++;
     }
@@ -247,7 +254,9 @@ int Optimizer::inline_rules() {
 Grammar Optimizer::optimize() {
     int opts = 1;
     int pass = 1;
+    debug("Input grammar:\n%s", g.to_string().c_str());
     while (opts > 0) {
+        log(2, "Optimization pass %d", pass);
         opts = normalize_character_classes();
         opts += inline_rules();
         opts += remove_unnecessary_groups();
@@ -257,7 +266,7 @@ Grammar Optimizer::optimize() {
         opts += double_quantifications();
         opts += simplify_repeats();
         opts += concat_strings();
-        //~ printf("Grammar after pass %d (%d optimizations):\n%s\n", pass, opts, g.to_string().c_str());
+        if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, g.to_string().c_str());
         pass++;
     }
     return g;

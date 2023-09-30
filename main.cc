@@ -4,23 +4,20 @@
 #include "optimizer.h"
 #include "config.h"
 #include "utils.h"
+#include "log.h"
 
 Grammar parse(const std::string& input, const std::string& output, const Checker& checker) {
     std::string content = read_file(input);
     if (content.empty()) {
-        //~ printf("ERROR: Failed to load grammar from %s!\n", input.empty() ? "stdin" : input.c_str());
-        exit(1);
+        error("Failed to read grammar '%s'", input.c_str());
     }
 
-    if (!checker.validate(input, content)) {
-        exit(1);
-    }
+    checker.validate(input, content);
 
     Parser peg(content);
     Grammar g(peg);
     if (!g) {
-        printf("ERROR: Failed to parse grammar!\n");
-        exit(1);
+        error("Failed to parse grammar!");
     }
     return g;
 }
@@ -36,10 +33,7 @@ void process(const std::string& input, const std::string& output, const Checker&
     }
 
     std::string result = g.to_string();
-    if (!checker.validate_string("formatted.peg", result)) {
-        printf("ERROR: Formatted grammar is invalid!\n");
-        exit(1);
-    }
+    checker.validate_string("formatted.peg", result);
     checker.stats();
     write_file(output, result);
 }
@@ -52,23 +46,13 @@ int main(int argc, char **argv) {
         const std::string& input = conf.inputs[i];
         const std::string& output = conf.outputs[i];
 
-        //~ printf("Processing '%s' -> '%s'\n", input.c_str(), output.c_str());
+        log(1, "Processing file %s, storing output to %s...", input.empty() ? "stdin" : input.c_str(), output.empty() ? "stdout" : output.c_str());
         switch (conf.output_type) {
         case Config::OT_FORMAT:
             process(input, output, checker);
             break;
         case Config::OT_AST:
             printf("%s\n", parse(input, output, checker).dump().c_str());
-            break;
-        case Config::OT_DEBUG:
-            Grammar g = parse(input, output, checker);
-            printf("--- Input AST ---\n%s\n", g.dump().c_str());
-            printf("--- Formatted ---\n%s\n", g.to_string().c_str());
-            //~ Optimizer opt(g);
-            //~ g = opt.optimize();
-            //~ g.update_parents();
-            //~ printf("--- Optimized AST ---\n%s\n", g.dump().c_str());
-            //~ printf("--- Final output ---\n%s\n", g.to_string().c_str());
             break;
         }
     }

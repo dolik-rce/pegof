@@ -1,4 +1,5 @@
 #include "expand.h"
+#include "log.h"
 
 Expand::Expand(const std::string& content, Node* parent) : Node("Expand", parent), content(content) {}
 Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
@@ -6,15 +7,14 @@ Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
 }
 
 void Expand::parse(Parser& p) {
-    //~ printf("parsing Expand\n");
+    debug("Parsing Expand");
     p.skip_space();
     if (!p.match('$')) {
         return;
     } else if (p.match_number()) {
         content = p.last_match;
     } else {
-        printf("ERROR: expected number!\n");
-        exit(0);
+        error("expected number!");
     }
     valid = true;
 }

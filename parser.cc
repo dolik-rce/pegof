@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "log.h"
 
 Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {};
 
@@ -172,7 +173,7 @@ bool Parser::match_code() {
     int level = 1;
     while (true) {
         if (is_eof()) {
-            printf("Premature EOF in code block starting @%ul\n", s.saved_pos);
+            error("Premature EOF in code block starting @%ul", s.saved_pos);
             return s.rollback();
         }
         if (

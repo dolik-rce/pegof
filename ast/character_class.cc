@@ -1,6 +1,7 @@
 #include "character_class.h"
 #include "packcc_wrapper.h"
 #include "utils.h"
+#include "log.h"
 
 #include <cstring>
 #include <sstream>
@@ -86,7 +87,7 @@ void CharacterClass::parse_content(Parser& p) {
 }
 
 void CharacterClass::parse(Parser& p) {
-    //~ printf("parsing CharacterClass\n");
+    debug("Parsing CharacterClass");
     p.skip_space();
     if (p.match('.')) {
         content = ".";

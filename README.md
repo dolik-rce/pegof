@@ -33,14 +33,14 @@ Currently implemented optimizations:
         Use given configuration file
     -v/--verbose
         Verbose logging to stderr
+    -d/--debug
+        Output very verbose debug info
 
 ### Input/output options:
     -f/--format
         Output formatted grammar (default)
     -a/--ast
         Output abstract syntax tree representation
-    -d/--debug
-        Output debug info (includes AST and formatted output)
     -I/--inplace
         Modify the input files (only when formatting)
     -i/--input FILE

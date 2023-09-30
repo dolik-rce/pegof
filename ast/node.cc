@@ -1,7 +1,8 @@
 #include "node.h"
+#include "log.h"
 
 Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(type) {
-    //~ printf("DBG: creating %s @%p, p:%p\n", type, this, parent);
+    debug("Creating %s @%p, parent: %p", type, this, parent);
 }
 
 Node::operator bool() const {
@@ -17,11 +18,11 @@ long Node::size() const {
 }
 
 void Node::parse_comments(Parser& p) {
-    //~ printf("DBG: parsing comments for %s\n", type);
+    debug("Parsing comments for node of type %s", type);
     p.skip_space();
     while (p.match_comment()) {
         comments.push_back(p.last_match);
-        //~ printf("DBG: got '%s'\n", comment.back().c_str());
+        debug("Comment: '%s'", comments.back().c_str());
     }
 }
 
@@ -45,7 +46,7 @@ void Node::map(const std::function<bool(Node&)>& transform) {
 void Node::update_parents() {
     for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
-        //~ printf("DBG: %s %p, p=%p -> %p%s\n", n->type, n, n->parent, this, n->parent == this ? " NOT CHANGED" : "");
+        //~ debug("Updating parent of %s@%p, parent: %p -> %p%s", n->type, n, n->parent, this, n->parent == this ? " (NO CHANGE)" : "");
         n->parent = this;
         n->update_parents();
     }

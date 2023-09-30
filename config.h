@@ -23,8 +23,7 @@ enum Optimization {
 struct Config {
     enum OutputType {
         OT_FORMAT,
-        OT_AST,
-        OT_DEBUG
+        OT_AST
     };
 
     enum QuoteType {
@@ -71,6 +70,7 @@ private:
 
     std::vector<Option> args;
     int optimizations;
+    int verbosity;
 
     void usage(const std::string& error);
     void process_args(const std::vector<std::string>& arguments, const bool config_file);
@@ -83,6 +83,7 @@ private:
     int parse_optimization_config(const std::string& param);
     int parse_optimize(const std::string& param);
     int parse_exclude(const std::string& param);
+    int inc_verbosity();
 
     Option& find_option(const std::string& optionName);
 
@@ -93,6 +94,7 @@ public:
     }
 
     static bool get(const Optimization& opt);
+    static bool verbose(int level);
 
     Config(int argc, char **argv);
 };

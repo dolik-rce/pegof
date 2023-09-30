@@ -1,5 +1,6 @@
 #include "rule.h"
 #include "config.h"
+#include "log.h"
 
 Rule::Rule(const std::string& name, const Alternation& expression, Node* parent) : Node("Rule", parent), name(name), expression(expression) {}
 Rule::Rule(Parser& p, Node* parent) : Node("Rule", parent), expression(this) {
@@ -7,23 +8,20 @@ Rule::Rule(Parser& p, Node* parent) : Node("Rule", parent), expression(this) {
 }
 
 void Rule::parse(Parser& p) {
-    //~ printf("parsing  Rule\n");
+    debug("Parsing Rule");
     Parser::State s = p.save_point();
     parse_comments(p);
     if (!p.match_re("(\\S+)\\s*<-")) {
-        //~ printf("doesn't look like Rule\n");
         s.rollback();
         return;
     }
     name = p.last_re_match.str(1);
     expression = Alternation(p, this);
     if (!expression) {
-        //~ printf("invalid expresion for Rule %s\n", name.c_str());
         s.rollback();
         return;
     }
     valid = true;
-    //~ printf("parsed Rule %s\n", name.c_str());
 }
 
 std::string Rule::to_string() const {
@@ -46,8 +44,7 @@ Node* Rule::operator[](int index) {
     if (index == 0) {
         return &expression;
     } else {
-        printf("ERROR: index out of bounds!\n");
-        exit(1);
+        error("index out of bounds!");
     }
 }
 long Rule::size() const {

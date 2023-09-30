@@ -1,4 +1,5 @@
 #include "term.h"
+#include "log.h"
 
 Term::Term(char prefix, char quantifier, const Primary& primary, Node* parent) : Node("Term", parent), prefix(prefix), quantifier(quantifier), primary(primary) {}
 Term::Term(Parser& p, Node* parent) : Node("Term", parent) {
@@ -16,7 +17,7 @@ bool Term::parse(Parser& p) {
 }
 
 void Term::parse(Parser& p) {
-    //~ printf("parsing  Term\n");
+    debug("Parsing Term");
     p.skip_space();
     if (p.match('!') || p.match('&')) {
         prefix = p.last_match[0];
@@ -49,8 +50,7 @@ std::string Term::to_string(const Primary& x) const {
     case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
     case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
     default:
-        printf("ERROR: unsupporrted type!\n");
-        exit(1);
+        error("unsupporrted type!");
     }
 }
 
@@ -63,8 +63,7 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
     default:
-        printf("ERROR: unsupporrted type!\n");
-        exit(1);
+        error("unsupporrted type!");
     }
 }
 
@@ -92,11 +91,9 @@ Node* Term::operator[](int index) {
         if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary));
         if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
         if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
-        printf("ERROR: unsupported type\n");
-        exit(1);
+        error("unsupported type!");
     } else {
-        printf("ERROR: index out of bounds!\n");
-        exit(1);
+        error("index out of bounds!");
     }
 }
 

@@ -1,6 +1,7 @@
 #include "checker.h"
 #include "packcc_wrapper.h"
 #include "utils.h"
+#include "log.h"
 
 #include <fstream>
 #include <sstream>
@@ -62,14 +63,13 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
 void Checker::stats() const {
     std::string code = read_file(output + ".c");
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
-    //~ printf("Resulting code has %ld bytes and %ld lines\n", code.size(), lines);
+    log(1, "Resulting code has %ld bytes and %ld lines", code.size(), lines);
 }
 
 bool Checker::validate(const std::string& input) const {
     std::string errors;
     if (!call_packcc(input, errors)) {
-        printf("ERROR: Failed to parse grammar by packcc:\n%s\n", errors.c_str());
-        return false;
+        error("Failed to parse grammar by packcc:\n%s", errors.c_str());
     }
     return true;
 }

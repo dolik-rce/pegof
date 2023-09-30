@@ -1,5 +1,6 @@
 #include "action.h"
 #include "utils.h"
+#include "log.h"
 
 Action::Action(const std::string& code, Node* parent) : Node("Action", parent), code(code) {}
 Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
@@ -7,7 +8,7 @@ Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
 }
 
 void Action::parse(Parser& p) {
-    //~ printf("parsing Action\n");
+    debug("Parsing Action");
     p.skip_space();
     if (p.match_code()) {
         code = p.last_match;

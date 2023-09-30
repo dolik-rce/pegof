@@ -1,5 +1,6 @@
 #include "group.h"
 #include "alternation.h"
+#include "log.h"
 
 Group::Group(const Alternation& expression, Node* parent) : Node("Group", parent), expression(new Alternation(expression)) {}
 Group::Group(Parser& p, Node* parent) : Node("Group", parent) {
@@ -7,7 +8,7 @@ Group::Group(Parser& p, Node* parent) : Node("Group", parent) {
 }
 
 void Group::parse(Parser& p) {
-    //~ printf("parsing  Group\n");
+    debug("Parsing Group");
     if (!p.match('(') && !p.match('<')) {
         return;
     }
@@ -36,8 +37,7 @@ Node* Group::operator[](int index) {
     if (index == 0) {
         return (Node*)expression.get();
     } else {
-        printf("ERROR: index out of bounds!\n");
-        exit(1);
+        error("index out of bounds!");
     }
 }
 

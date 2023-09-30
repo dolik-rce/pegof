@@ -1,6 +1,7 @@
 #include "alternation.h"
 #include "rule.h"
 #include "config.h"
+#include "log.h"
 
 Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent) : Node("Alternation", parent), sequences(sequences) {}
 Alternation::Alternation(Parser& p, Node* parent) : Node("Alternation", parent) {
@@ -9,6 +10,7 @@ Alternation::Alternation(Parser& p, Node* parent) : Node("Alternation", parent) 
 Alternation::Alternation(Node* parent) : Node("Alternation", parent) {}
 
 void Alternation::parse(Parser& p) {
+    debug("Parsing Alternation");
     p.skip_space();
     Sequence s = Sequence(p, this);
     if (!s) return;
@@ -17,7 +19,6 @@ void Alternation::parse(Parser& p) {
         if (!p.match("/")) {
             break;
         }
-        //~ printf("DBG: alt %s\n", p.last_match.c_str());
         s = Sequence(p, this);
     }
     valid = true;
@@ -45,8 +46,7 @@ Node* Alternation::operator[](int index) {
     if (index < sequences.size()) {
         return &(sequences[index]);
     } else {
-        printf("ERROR: index out of bounds!\n");
-        exit(1);
+        error("index out of bounds!");
     }
 }
 

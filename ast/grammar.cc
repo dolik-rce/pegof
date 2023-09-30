@@ -1,5 +1,6 @@
 #include "grammar.h"
 #include "utils.h"
+#include "log.h"
 
 Grammar::Grammar(
     const std::vector<Directive>& directives,
@@ -17,7 +18,7 @@ Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr) {
 }
 
 void Grammar::parse(Parser& p) {
-    //~ printf("parsing  Grammar\n");
+    debug("Parsing Grammar");
     parse_comments(p);
     while (true) {
         Directive d(p, this);
@@ -32,7 +33,6 @@ void Grammar::parse(Parser& p) {
         }
         while (p.match_comment()) {
             code_comments.push_back(p.last_match);
-            //~ printf("DBG: got code_comment '%s'\n", code_comments.back().c_str());
         }
         p.skip_space();
         if (p.match("%%")) {
@@ -41,11 +41,10 @@ void Grammar::parse(Parser& p) {
             break;
         }
         if (p.is_eof()) break;
-        printf("ERROR: Failed to parse grammar!\n");
-        exit(1);
+        error("Failed to parse grammar!");
     }
     update_parents();
-    valid = true; // !rules.empty();
+    valid = true;
 }
 
 std::string join(const std::vector<std::string>& parts, const char* delimiter) {
@@ -58,10 +57,6 @@ std::string join(const std::vector<std::string>& parts, const char* delimiter) {
 
 std::string Grammar::to_string() const {
     std::vector<std::string> parts;
-    //~ parts.push_back("AAAA");
-    //~ parts.push_back("BBB");
-    //~ parts.push_back("CC");
-    //~ printf("DBG: %s\n", join(parts, "\n\n").c_str());
     std::string comments = format_comments();
     if (comments.size()) {
         parts.push_back(comments);
@@ -105,8 +100,7 @@ Node* Grammar::operator[](int index) {
     } else if (index < directives.size() + rules.size()) {
         return &(rules[index - directives.size()]);
     } else {
-        printf("ERROR: index out of bounds!\n");
-        exit(1);
+        error("index out of bounds!");
     }
 }
 
