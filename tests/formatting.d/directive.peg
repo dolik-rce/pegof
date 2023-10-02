@@ -1,19 +1,21 @@
 %prefix "prefix"
-
 %value "value"
-
 %auxil "auxil"
 
 %header {
     #define TEST 1
 }
-
 %source { source }
-
 %common { common }
 
-%earlyheader { earlyheader }
-
-%earlysource { earlysource }
-
-%earlycommon { earlycommon }
+%earlyheader {
+    earlyheader
+}
+%earlysource {
+earlysource
+}
+%earlycommon {
+    earlycommon
+    multiple
+    lines
+}

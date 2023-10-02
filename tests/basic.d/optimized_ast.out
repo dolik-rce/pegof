@@ -1,6 +1,0 @@
-GRAMMAR:
-  RULE:
-    RULE_NAME: "main" line=1, col=1
-    ALTERNATION:
-      STRING: "AB" (optimized)
-      STRING: "C" line=4, col=7

@@ -1,6 +1,0 @@
-# action can be anywhere in the rule, even at the very begining
-
-X <- A / B / C
-A <- { printf("A!\n"); } "A"
-B <- "B" { printf("B!\n"); }
-C <- "C" { printf("C!\n"); } "C"

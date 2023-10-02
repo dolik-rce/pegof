@@ -33,6 +33,7 @@ void Term::parse(Parser& p) {
     ) {
         return;
     }
+    p.skip_space();
     if (p.match('?') || p.match('*') || p.match('+')) {
         quantifier = p.last_match[0];
     } else {
