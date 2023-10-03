@@ -1,6 +1,6 @@
 %value "char*"
 
-X <- A <B> <C> $2 { printf("B = %s\n", $1) }
+X <- (A) <B> <C> $2 { printf("B = %s\n", $1) }
 
 A <- "A" { $$ = "a"; }
 

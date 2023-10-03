@@ -18,7 +18,8 @@ enum Optimization {
     O_REPEATS = 128,
     O_CONCAT_STRINGS = 256,
     O_UNUSED_VARIABLE = 512,
-    O_ALL = 1023
+    O_UNUSED_CAPTURE = 1024,
+    O_ALL = 2047
 };
 
 struct Config {

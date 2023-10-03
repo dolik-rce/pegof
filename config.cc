@@ -22,6 +22,7 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"repeats", O_REPEATS},
     {"concat-strings", O_CONCAT_STRINGS},
     {"unused-variable", O_UNUSED_VARIABLE},
+    {"unused-capture", O_UNUSED_CAPTURE},
 };
 
 void Config::usage(const std::string& error_msg) {

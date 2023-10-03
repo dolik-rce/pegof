@@ -65,3 +65,7 @@ std::vector<std::string> split(const std::string &s, const std::string& delimite
     std::sregex_token_iterator end;
     return {iter, end};
 }
+
+std::string replace(const std::string& input, const std::string& re, const std::string& replace) {
+    return std::regex_replace(input, std::regex(re), replace);
+}

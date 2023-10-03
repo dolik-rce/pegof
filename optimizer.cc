@@ -1,5 +1,6 @@
 #include "optimizer.h"
 #include "config.h"
+#include "utils.h"
 #include "log.h"
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
@@ -224,6 +225,47 @@ int Optimizer::unused_variables() {
     });
 }
 
+int Optimizer::unused_captures() {
+    return apply(O_UNUSED_CAPTURE, [](Node& node, int& optimized) -> bool {
+        Rule* rule = node.as<Rule>();
+        if (!rule) return false;
+        std::vector<Group*> captures = rule->find_all<Group>([](const Group& group) -> bool {
+            return group.capture;
+        });
+        if (captures.empty()) return false;
+        std::vector<Expand*> expands = rule->find_all<Expand>();
+        std::vector<Action*> actions = rule->find_all<Action>();
+
+        for (int i = 0; i < captures.size(); i++) {
+            std::regex re(".*\\$" + std::to_string(i + 1) + "\\b.*");
+            bool used_in_source = std::any_of(actions.begin(), actions.end(), [re](const Action* action){
+                return std::regex_match(action->code, re);
+            });
+            bool used_in_expand = std::any_of(expands.begin(), expands.end(), [i](const Expand* expand){
+                return i + 1 == expand->content;
+            });
+            if (used_in_source || used_in_expand) {
+                continue;
+            }
+            log(1, "Removing unused capture '%s' in rule %s.", captures[i]->to_string().c_str(), rule->to_string().c_str());
+            captures[i]->capture = false;
+            for (int j = 0; j < expands.size(); j++) {
+                if (expands[j]->content <= i) continue;
+                log(2, "Replacing expand '$%d' -> '$%d'", expands[j]->content, expands[j]->content-1);
+                expands[j]->content--;
+            }
+            for (int j = 0; j < actions.size(); j++) {
+                for (int k = i+2; k <= captures.size(); k++) {
+                    log(2, "Replacing '$%d' -> '$%d' in action %s", k, k-1, actions[j]->to_string().c_str());
+                    actions[j]->code = replace(actions[j]->code, "\\$" + std::to_string(k) + "\\b", "$$" + std::to_string(k-1));
+                }
+            }
+            return true;
+        }
+        return false;
+    });
+}
+
 int Optimizer::inline_rules() {
     if (!Config::get(O_INLINE)) {
         return 0;
@@ -282,6 +324,7 @@ Grammar Optimizer::optimize() {
         opts += simplify_repeats();
         opts += concat_strings();
         opts += unused_variables();
+        opts += unused_captures();
         if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, g.to_string().c_str());
         pass++;
     }
