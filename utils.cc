@@ -69,3 +69,7 @@ std::vector<std::string> split(const std::string &s, const std::string& delimite
 std::string replace(const std::string& input, const std::string& re, const std::string& replace) {
     return std::regex_replace(input, std::regex(re), replace);
 }
+
+std::string left_pad(const std::string& s, int width) {
+    return std::string(width - s.size(), ' ') + s;
+}

@@ -25,6 +25,7 @@ Grammar parse(const std::string& input, const std::string& output, const Checker
 void process(const std::string& input, const std::string& output, const Checker& checker) {
     Grammar g = parse(input, output, checker);
     g.update_parents();
+    Stats in_stats = checker.stats(g);
 
     if (Config::get(O_ALL)) {
         Optimizer opt(g);
@@ -34,7 +35,12 @@ void process(const std::string& input, const std::string& output, const Checker&
 
     std::string result = g.to_string();
     checker.validate_string("formatted.peg", result);
-    checker.stats();
+
+    if (Config::get(O_ALL)) {
+        Stats out_stats = checker.stats(g);
+        log(1, "%s", out_stats.compare(in_stats).c_str());
+    }
+
     write_file(output, result);
 }
 

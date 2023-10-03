@@ -21,3 +21,4 @@ enum TrimType {
 std::string trim(const std::string& str, TrimType type = TRIM_BOTH);
 std::vector<std::string> split(const std::string &s, const std::string& delimiter = "\\s*,\\s*");
 std::string replace(const std::string& input, const std::string& re, const std::string& replace);
+std::string left_pad(const std::string& s, int width);

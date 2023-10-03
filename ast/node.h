@@ -40,7 +40,7 @@ public:
     void update_parents();
 
     template <class U>
-    std::vector<U*> find_all(const std::function<bool(const U&)>& predicate=[](const U& group) -> bool { return true; });
+    std::vector<U*> find_all(const std::function<bool(const U&)>& predicate=[](const U& node) -> bool { return true; });
 
     template <class U>
     void find_all(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);

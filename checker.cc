@@ -14,6 +14,22 @@
 
 namespace fs = std::filesystem;
 
+std::string Stats::compare(const Stats& s) const {
+    #define PAD(X) left_pad(std::to_string(X), 8)
+    #define PADP(X) left_pad(std::to_string(X * 100 / s.X) + "%", 8)
+
+    std::string result;
+    result += "         |   lines  |   bytes  |   rules  |   terms  \n";
+    result += "---------+----------+----------+----------+----------\n";
+    result += "input    | " + PAD(s.lines) + " | " + PAD(s.bytes) + " | " + PAD(s.rules) + " | " + PAD(s.terms) + "\n";
+    result += "output   | " + PAD(lines) + " | " + PAD(bytes) + " | " + PAD(rules) + " | " + PAD(terms) + "\n";
+    result += "output % | " + PADP(lines) + " | " + PADP(bytes) + " | " + PADP(rules) + " | " + PADP(terms);
+    return result;
+
+    #undef PAD
+    #undef PADP
+}
+
 Checker::Checker() {
     fs::path tmp_dir = fs::temp_directory_path() / ("pegof_" + std::to_string(time(0)));
     output = (tmp_dir / "output").native();
@@ -61,10 +77,14 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
     return result;
 }
 
-void Checker::stats() const {
+Stats Checker::stats(Grammar& g) const {
     std::string code = read_file(output + ".c");
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
-    log(1, "Resulting code has %ld bytes and %ld lines", code.size(), lines);
+    int rules = g.find_all<Rule>().size();
+    int terms = g.find_all<Term>().size();
+    log(2, "Code has %ld bytes and %ld lines", code.size(), lines);
+    log(2, "Grammar has %d rules and %d terms", rules, terms);
+    return Stats(code.size(), lines, rules, terms);
 }
 
 bool Checker::validate(const std::string& input) const {
