@@ -303,6 +303,7 @@ int Optimizer::inline_rules() {
         }
         log(2, "Removing inlined rule %s", rule.name.c_str());
         g.rules.erase(g.rules.begin() + i);
+        g.update_parents();
         optimized++;
     }
     return optimized;

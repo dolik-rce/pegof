@@ -41,6 +41,8 @@ Currently implemented optimizations:
         Output formatted grammar (default)
     -a/--ast
         Output abstract syntax tree representation
+    -p/--packcc
+        Output source files as if the grammar was passed to packcc
     -I/--inplace
         Modify the input files (only when formatting)
     -i/--input FILE
@@ -83,6 +85,7 @@ Currently implemented optimizations:
     remove-group
     repeats
     single-char-class
+    unused-capture
     unused-variable
 
 ## Configuration file

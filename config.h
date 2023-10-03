@@ -25,7 +25,8 @@ enum Optimization {
 struct Config {
     enum OutputType {
         OT_FORMAT,
-        OT_AST
+        OT_AST,
+        OT_PACKCC
     };
 
     enum QuoteType {

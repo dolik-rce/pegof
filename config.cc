@@ -218,6 +218,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),
         Option(OG_IO, "f", "format", OT_FORMAT, "Output formatted grammar (default)"),
         Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
+        Option(OG_IO, "p", "packcc", OT_PACKCC, "Output source files as if the grammar was passed to packcc"),
         Option(OG_IO, "I", "inplace", false, "Modify the input files (only when formatting)"),
         Option(OG_IO, "i", "input", &Config::set_input, "Path to file with PEG grammar, multiple paths can be given\n        Value \"-\" can be used to specify standard input\n        Mainly useful for config file\n        If no file or --input is given, read standard input.", "FILE"),
         Option(OG_IO, "o", "output", &Config::set_output, "Output to file (should be repeated if there is more inputs)\n        Value \"-\" can be used to specify standard output\n        Must not be used together with --inplace.", "FILE"),

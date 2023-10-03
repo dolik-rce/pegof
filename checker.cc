@@ -41,7 +41,8 @@ Checker::~Checker() {
     fs::remove_all(tmp);
 }
 
-bool Checker::call_packcc(const std::string& input, std::string& errors) const {
+bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
+    log(2, "Processing %s with PackCC, storing output to %s.{h,c}", input.c_str(), output.c_str());
     // Flush stderr first if you've previously printed something
     fflush(stderr);
 
@@ -77,6 +78,13 @@ bool Checker::call_packcc(const std::string& input, std::string& errors) const {
     return result;
 }
 
+bool Checker::packcc(const std::string& peg, const std::string& output) const {
+    std::string err;
+    fs::path input = fs::path(tmp) / "tmp.peg";
+    write_file(input.native(), peg);
+    return call_packcc(input.native(), output, err);
+}
+
 Stats Checker::stats(Grammar& g) const {
     std::string code = read_file(output + ".c");
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
@@ -89,7 +97,7 @@ Stats Checker::stats(Grammar& g) const {
 
 bool Checker::validate(const std::string& input) const {
     std::string errors;
-    if (!call_packcc(input, errors)) {
+    if (!call_packcc(input, output, errors)) {
         error("Failed to parse grammar by packcc:\n%s", errors.c_str());
     }
     return true;
