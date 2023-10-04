@@ -12,8 +12,10 @@ Grammar parse(const std::string& input, const Checker& checker) {
         error("Failed to read grammar '%s'", input.c_str());
     }
 
+    log(1, "Validating input grammar ...");
     checker.validate(input, content);
 
+    log(1, "Parsing grammar ...");
     Parser peg(content);
     Grammar g(peg);
     if (!g) {
@@ -23,7 +25,7 @@ Grammar parse(const std::string& input, const Checker& checker) {
 }
 
 void process(const Config::OutputType& output_type, const std::string& input, const std::string& output, const Checker& checker) {
-    log(1, "Processing file %s, storing output to %s...",
+    log(1, "Processing file %s, storing output to %s ...",
         input.empty() ? "stdin" : input.c_str(),
         output.empty() ? "stdout" : output.c_str());
 
@@ -32,28 +34,37 @@ void process(const Config::OutputType& output_type, const std::string& input, co
     Stats in_stats = checker.stats(g);
 
     if (Config::get(O_ALL)) {
+        log(1, "Optimizing grammar ...");
         Optimizer opt(g);
         g = opt.optimize();
         g.update_parents();
     }
 
-    std::string result = g.to_string();
-    checker.validate_string("formatted.peg", result);
+    std::string result;
+    if (output_type != Config::OT_AST) {
+        log(1, "Validating formatted grammar ...");
+        result = g.to_string();
+        checker.validate_string("formatted.peg", result);
+    }
 
     if (Config::get(O_ALL) && Config::verbose(1)) {
+        log(1, "Computing stats ...");
         Stats out_stats = checker.stats(g);
         log(1, "%s", out_stats.compare(in_stats).c_str());
     }
 
     switch (output_type) {
     case Config::OT_FORMAT:
+        log(1, "Writing formatted output ...");
         write_file(output, result);
         break;
     case Config::OT_AST:
+        log(1, "Writing AST ...");
         write_file(output, g.dump() + "\n");
         break;
     case Config::OT_PACKCC:
         if (output.empty()) error("Option -p/--packcc requires output to file, use -o/--output!");
+        log(1, "Processing with PackCC ...");
         checker.packcc(result, output);
         log(1, "Parser was generated in %s.{h,c}", output.c_str());
         break;
