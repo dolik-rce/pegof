@@ -21,14 +21,14 @@ void Grammar::parse(Parser& p) {
     debug("Parsing Grammar");
     parse_comments(p);
     while (true) {
-        Directive d(p, this);
-        if (d) {
-            directives.push_back(d);
-            continue;
-        }
         Rule r(p, this);
         if (r) {
             rules.push_back(r);
+            continue;
+        }
+        Directive d(p, this);
+        if (d) {
+            directives.push_back(d);
             continue;
         }
         while (p.match_comment()) {

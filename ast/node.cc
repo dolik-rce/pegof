@@ -23,6 +23,12 @@ void Node::parse_comments(Parser& p) {
     while (p.match_comment()) {
         comments.push_back(p.last_match);
         debug("Comment: '%s'", comments.back().c_str());
+        if (p.peek_re("(\\s*\\n)*\\s*#")) {
+            // it would be hard to keep the empty lines between comments,
+            // so we just replace them with empty commented lines
+            p.skip_space();
+            comments.push_back("");
+        }
     }
 }
 
@@ -30,7 +36,7 @@ std::string Node::format_comments(std::string indent) const {
     if (comments.empty()) return "";
     std::string result;
     for(int i = 0; i < comments.size(); i++) {
-        result += (i ? "\n" : "") + indent + "# " + comments[i];
+        result += (i ? "\n" : "") + indent + "#" + comments[i];
     }
     return result;
 }

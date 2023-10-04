@@ -99,14 +99,17 @@ void Parser::skip_rest_of_line(bool continuable) {
 bool Parser::match_comment() {
     //~ printf("DBG: matching comment @%d: %s\n", pos, input.substr(pos).c_str());
     std::string result;
-    if (match_re("[ \t]*#[ \t]*([^\\n]*\\n)", false)) {
+    bool matched = false;
+    if (match_re("[ \t]*#([^\\n]*\\n)", false)) {
         result = last_re_match.str(1);
+        matched = true;
     }
     if (!result.empty() && result.back() == '\n') {
         result.resize(result.size() - 1);
     }
     last_match = result;
-    return !result.empty();
+    //~ printf("DBG: result: '%s' matched: %d\n", result.c_str(), matched);
+    return matched;
 }
 
 bool Parser::match_block_comment() {
