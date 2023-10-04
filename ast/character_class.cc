@@ -36,6 +36,7 @@ static std::string to_char(int c) {
     case '\n': return R"(\n)";
     case '\t': return R"(\t)";
     case '\v': return R"(\v)";
+    case '\f': return R"(\f)";
     case '[': return R"(\[)";
     case ']': return R"(\])";
     case '^': return R"(\^)";
@@ -84,6 +85,7 @@ void CharacterClass::parse_content(Parser& p) {
         }
         tokens.push_back(result);
     }
+    update_content();
 }
 
 void CharacterClass::parse(Parser& p) {
