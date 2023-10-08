@@ -75,7 +75,7 @@ std::string Grammar::to_string() const {
         parts.push_back("%%\n" + code);
     }
     std::string result = join(parts, "\n\n");
-    if (result.back() != '\n') {
+    if (!result.empty() && result.back() != '\n') {
         result += "\n";
     }
     return result;
