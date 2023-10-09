@@ -67,11 +67,9 @@ Currently implemented optimizations:
     -X/--exclude OPT[,...]
         Comma separated list of optimizations that should not be applied
     -l/--inline-limit N
-        Maximum number of references non-terminal rule can have and still
-        be inlined (default 10), only applied when inlining is enabled
-    -L/--terminal-inline-limit N
-        Maximum number of references terminal rule can have and still
-        be inlined (default 20), Only applied when inlining is enabled
+        Minimum inlining score needed for rule to be inlined.
+        Number between 0.0 (inline everything) and 1.0 (most conservative), default is 0.2,
+        only applied when inlining is enabled
 
 ### Supported values for --optimize and --exclude options:
     all

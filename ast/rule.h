@@ -19,4 +19,8 @@ public:
     virtual long size() const;
 
     bool is_terminal();
+    bool contains_alternation();
+    bool contains_expand();
+    int count_terms();
+    int count_cc_tokens();
 };

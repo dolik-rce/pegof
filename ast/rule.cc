@@ -56,3 +56,25 @@ bool Rule::is_terminal() {
     if (expression.sequences[0].terms.size() != 1) return false;
     return true;
 }
+
+bool Rule::contains_alternation() {
+    return find_all<Alternation>([](const Alternation& alternation) -> bool {
+        return alternation.size() > 1;
+    }).size() > 0;
+}
+
+bool Rule::contains_expand() {
+    return find_all<Expand>().size() > 0;
+}
+
+int Rule::count_terms() {
+    return find_all<Term>().size();
+}
+int Rule::count_cc_tokens() {
+    std::vector<CharacterClass*> ccs = find_all<CharacterClass>([](const CharacterClass& cc) -> bool {
+        return cc.content != ".";
+    });
+    int count = 0;
+    for (CharacterClass* cc: ccs) count += cc->tokens.size();
+    return count;
+}

@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "log.h"
 
+#include <math.h>
+
 Optimizer::Optimizer(Grammar& g) : g(g) {}
 
 int Optimizer::apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform) {
@@ -266,33 +268,65 @@ int Optimizer::unused_captures() {
     });
 }
 
+static double calculate_score(int term_count, int ref_count) {
+    if (term_count == 1) return 1;
+    if (ref_count <= 1) return 1;
+    return 1.0 / sqrt(term_count * ref_count);
+}
+
 int Optimizer::inline_rules() {
     if (!Config::get(O_INLINE)) {
         return 0;
     }
+    double best_score = 0;
+    int candidate = -1;
     int optimized = 0;
-    for (int i = g.rules.size() - 1; i >= 0; i--) {
+    double min_score = Config::get<double>("inline-limit");
+    // intentionally skipping the first rule, because it is the main one, which can't be inlined anyway
+    for (int i = g.rules.size() - 1; i > 0; i--) {
         Rule& rule = g.rules[i];
-        if (rule.expression.sequences.size() > 1) continue; // do not inline rules with alternation
+        //~ if (rule.contains_alternation()) {
+        //~     log(2, "Not inlining %s: contains alternation", rule.name.c_str());
+        //~     continue;
+        //~ }
+        if (rule.contains_expand()) {
+            log(2, "Not inlining %s: contains expansions", rule.name.c_str());
+            continue;
+        }
 
         // check for direct recursion
         bool is_recursive = !rule.find_all<Reference>([rule](const Reference& node) -> bool {
             return node.name == rule.name;
         }).empty();
-        if (is_recursive) continue;
+        if (is_recursive) {
+            log(2, "Not inlining %s: rule to is recursive", rule.name.c_str());
+            continue;
+        }
 
         std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& node) -> bool {
             Reference* ref = node.as<Reference>();
             if (!ref) return false;
             return ref->name == rule.name;
         });
-        bool is_terminal = rule.is_terminal();
-        int inline_limit = Config::get<int>(is_terminal ? "terminal-inline-limit" : "inline-limit");
-        log(2, "Found %d references to rule %s, limit = %d", refs.size(), rule.name.c_str(), inline_limit);
-        if (refs.size() == 0 /* main rule */ || refs.size() > inline_limit) continue;
+
+        double score = calculate_score(rule.count_terms() + rule.count_cc_tokens(), refs.size());
+        //~ printf("DBG: %s score = %f, best = %f, refs=%d, terms=%d\n", rule.name.c_str(), score, best_score, refs.size(), rule.expression.sequences[0].size());
+
+        if (score > best_score) {
+            best_score = score;
+            candidate = i;
+        }
+    }
+    if (candidate >= 0 && best_score >= min_score) {
+        Rule& rule = g.rules[candidate];
+        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& node) -> bool {
+            Reference* ref = node.as<Reference>();
+            if (!ref) return false;
+            return ref->name == rule.name;
+        });
 
         Term src = rule.expression.sequences[0].terms[0];
-        log(1, "Inlining rule %s", rule.name.c_str());
+        log(1, "Inlining rule %s (score %f)", rule.name.c_str(), best_score);
         for (int j = 0; j < refs.size(); j++) {
             Term* dest = refs[j]->parent->as<Term>();
             Group group(*(src.parent->parent->as<Alternation>()), nullptr);
@@ -302,11 +336,11 @@ int Optimizer::inline_rules() {
             debug("Inlining result: %s", dest->to_string().c_str());
         }
         log(2, "Removing inlined rule %s", rule.name.c_str());
-        g.rules.erase(g.rules.begin() + i);
+        g.rules.erase(g.rules.begin() + candidate);
         g.update_parents();
-        optimized++;
+        return true;
     }
-    return optimized;
+    return false;
 }
 
 Grammar Optimizer::optimize() {

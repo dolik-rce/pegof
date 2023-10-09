@@ -131,6 +131,16 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
                     usage("Option '" + arg + "' requires an integer argument, got '" + next + "'");
                 }
                 i++;
+            } else if (opt.value.type() == typeid(double)) {
+                if (next.empty()) {
+                    usage("Option '" + arg + "' requires an double argument");
+                }
+                size_t s = 0;
+                opt.value = std::stod(next, &s);
+                if (s != next.size()) {
+                    usage("Option '" + arg + "' requires an double argument, got '" + next + "'");
+                }
+                i++;
             } else {
                 usage("Internal error!");
             }
@@ -226,8 +236,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_FORMAT, "w", "wrap-limit", 1, "Wrap alternations with more than N sequences (default 1)", "N"),
         Option(OG_OPT, "O", "optimize", &Config::parse_optimize, "Comma separated list of optimizations to apply", "OPT[,...]"),
         Option(OG_OPT, "X", "exclude", &Config::parse_exclude, "Comma separated list of optimizations that should not be applied", "OPT[,...]"),
-        Option(OG_OPT, "l", "inline-limit", 10, "Maximum number of references non-terminal rule can have and still\n        be inlined (default 10), only applied when inlining is enabled", "N"),
-        Option(OG_OPT, "L", "terminal-inline-limit", 50, "Maximum number of references terminal rule can have and still\n        be inlined (default 20), Only applied when inlining is enabled", "N"),
+        Option(OG_OPT, "l", "inline-limit", 0.2, "Minimum inlining score needed for rule to be inlined.\n        Number between 0.0 (inline everything) and 1.0 (most conservative), default is 0.2,\n        only applied when inlining is enabled", "N"),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
     process_args(arguments, false);
