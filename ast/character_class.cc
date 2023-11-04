@@ -90,14 +90,17 @@ void CharacterClass::parse_content(Parser& p) {
 
 void CharacterClass::parse(Parser& p) {
     debug("Parsing CharacterClass");
+    Parser::State s = p.save_point();
     p.skip_space();
     if (p.match('.')) {
         content = ".";
     } else if (p.match('[')) {
         parse_content(p);
     } else {
+        s.rollback();
         return;
     }
+    s.commit();
     valid = true;
 }
 

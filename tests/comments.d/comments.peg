@@ -1,7 +1,7 @@
 # This is grammar comment
 
 # This is rule comment for 'main'
-main <- A / B / C
+main <- A / B / C / D
 
     # This is indented comment for rule 'A'
 A <- "A"
@@ -13,6 +13,13 @@ B <- "B"
 # This is not really well placed comment for rule 'C'
 
 C <- "C"
+
+D <-
+ # This is a comment inside rule
+ "d"
+ / "D" # This is a comment at the end of rule
+ / ( "dD" # This is a comment in subsequence
+     "Dd" )
 
 # This is comment for code section (which might or might not be present)
 %%

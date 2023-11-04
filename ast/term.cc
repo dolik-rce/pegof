@@ -18,9 +18,10 @@ bool Term::parse(Parser& p) {
 
 void Term::parse(Parser& p) {
     debug("Parsing Term");
-    p.skip_space();
-    if (p.match('!') || p.match('&')) {
-        prefix = p.last_match[0];
+    Parser::State s = p.save_point();
+    parse_comments(p);
+    if (p.match_re("\\s*([!&])")) {
+        prefix = p.last_re_match.str(1)[0];
     } else {
         prefix = 0;
     }
@@ -31,14 +32,16 @@ void Term::parse(Parser& p) {
           || parse<Group>(p)
           || parse<Action>(p))
     ) {
+        s.rollback();
         return;
     }
-    p.skip_space();
-    if (p.match('?') || p.match('*') || p.match('+')) {
-        quantifier = p.last_match[0];
+    if (p.match_re("\\s*([?*+])")) {
+        quantifier = p.last_re_match.str(1)[0];
     } else {
         quantifier = 0;
     }
+    parse_comments(p, true);
+    s.commit();
     valid = true;
 }
 
@@ -77,10 +80,10 @@ std::string Term::to_string() const {
 }
 
 std::string Term::dump(std::string indent) const {
-    std::string result = indent + "TERM ";
-    if (prefix != 0) result += std::string(1, prefix);
-    if (quantifier != 0) result += std::string(1, quantifier);
-    result += "\n" + dump(primary, indent + "  ");
+    std::string result = indent + "TERM";
+    if (prefix != 0) result += " " + std::string(1, prefix);
+    if (quantifier != 0) result += " " + std::string(1, quantifier);
+    result += dump_comments() + "\n" + dump(primary, indent + "  ");
     return result;
 }
 

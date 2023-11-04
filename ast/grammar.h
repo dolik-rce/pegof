@@ -3,18 +3,18 @@
 #include "reference.h"
 #include "directive.h"
 #include "rule.h"
+#include "code.h"
 
 class Grammar : public Node {
 public:
     std::vector<Directive> directives;
     std::vector<Rule> rules;
-    std::vector<std::string> code_comments;
-    std::string code;
+    Code code;
 
     Grammar(
         const std::vector<Directive>& directives,
         const std::vector<Rule>& rules,
-        const std::string& code
+        const Code& code
     );
     Grammar(Parser& p);
     Grammar(const std::string& p);

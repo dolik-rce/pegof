@@ -9,7 +9,6 @@ Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
 
 void Action::parse(Parser& p) {
     debug("Parsing Action");
-    p.skip_space();
     if (p.match_code()) {
         code = trim(p.last_match);
         valid = true;

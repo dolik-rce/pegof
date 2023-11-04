@@ -38,14 +38,15 @@ bool Parser::is_eof() {
 }
 
 void Parser::skip_space() {
+    int start = pos;
     while (true) {
         if (isspace(input[pos])) {
             pos++;
             continue;
         }
         break;
-        //~ if (!(include_comments && match_comment())) break;
     }
+    if (pos != start) debug("Skipped whitespace: %d-%d\n", start, pos);
 }
 
 bool Parser::match(char c) {

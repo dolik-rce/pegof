@@ -14,7 +14,7 @@ add_custom_command(
     VERBATIM
 )
 
-list(APPEND sources ast/action.cc ast/alternation.cc ast/directive.cc ast/expand.cc ast/grammar.cc ast/group.cc ast/character_class.cc ast/node.cc ast/reference.cc ast/rule.cc ast/sequence.cc ast/stringnode.cc ast/term.cc config.cc checker.cc main.cc optimizer.cc packcc_wrapper.c parser.cc utils.cc)
+list(APPEND sources ast/action.cc ast/alternation.cc ast/code.cc ast/directive.cc ast/expand.cc ast/grammar.cc ast/group.cc ast/character_class.cc ast/node.cc ast/reference.cc ast/rule.cc ast/sequence.cc ast/stringnode.cc ast/term.cc config.cc checker.cc main.cc optimizer.cc packcc_wrapper.c parser.cc utils.cc)
 add_library(common INTERFACE)
 target_include_directories(common BEFORE INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(common INTERFACE cxx_std_17)

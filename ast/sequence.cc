@@ -8,14 +8,28 @@ Sequence::Sequence(Parser& p, Node* parent) : Node("Sequence", parent) {
 
 void Sequence::parse(Parser& p) {
     debug("Parsing Sequence");
+    Parser::State s = p.save_point();
+    parse_comments(p);
     p.skip_space();
     Term t(p, this);
-    if (!t) return;
+    if (!t) {
+        s.rollback();
+        return;
+    }
     while (t) {
         terms.push_back(t);
-        if (p.peek_re("\\S+\\s*<-")) break; // avoid parsing into the next rule
+        Parser::State peek = p.save_point();
+        // Avoid parsing into the next rule (including its comments)
+        parse_comments(p);
+        if (p.peek_re("\\s*\\S+\\s*<-")) {
+            peek.rollback();
+            break;
+        }
+        peek.rollback();
         t = Term(p, this);
     }
+    parse_comments(p, true);
+    s.commit();
     valid = true;
 }
 
@@ -28,7 +42,7 @@ std::string Sequence::to_string() const {
 }
 
 std::string Sequence::dump(std::string indent) const {
-    std::string result = indent + "SEQ\n";
+    std::string result = indent + "SEQ" + dump_comments() + "\n";
     for (int i = 0; i < terms.size(); i++) {
         result += terms[i].dump(indent + "  ") + "\n";
     }

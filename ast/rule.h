@@ -5,7 +5,6 @@
 class Rule : public Node {
 public:
     std::string name;
-    // replace this with actual nodes
     Alternation expression;
 
     Rule(const std::string& name, const Alternation& expression, Node* parent);

@@ -5,14 +5,14 @@
 Grammar::Grammar(
     const std::vector<Directive>& directives,
     const std::vector<Rule>& rules,
-    const std::string& code
+    const Code& code
 ) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code) {}
 
-Grammar::Grammar(Parser& p) : Node("Grammar", nullptr) {
+Grammar::Grammar(Parser& p) : Node("Grammar", nullptr), code("Code", this) {
     parse(p);
 }
 
-Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr) {
+Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr), code("Code", this) {
     Parser p(s);
     parse(p);
 }
@@ -31,16 +31,11 @@ void Grammar::parse(Parser& p) {
             directives.push_back(d);
             continue;
         }
-        while (p.match_comment()) {
-            code_comments.push_back(p.last_match);
-        }
-        p.skip_space();
-        if (p.match("%%")) {
-            p.match_re("[\\s\\S]*");
-            code = p.last_re_match.str(0);
+        code.parse(p);
+        if (code) {
             break;
         }
-        if (p.is_eof()) break;
+        debug("Grammar parsed so far:\n%s", dump().c_str());
         error("Failed to parse grammar!");
     }
     update_parents();
@@ -67,13 +62,7 @@ std::string Grammar::to_string() const {
     for (int i = 0; i < rules.size(); i++) {
         parts.push_back(rules[i].to_string());
     }
-    comments = join(code_comments, "\n# ");
-    if (comments.size()) {
-        parts.push_back("# " + comments);
-    }
-    if (!code.empty()) {
-        parts.push_back("%%\n" + code);
-    }
+    parts.push_back(code.to_string());
     std::string result = join(parts, "\n\n");
     if (!result.empty() && result.back() != '\n') {
         result += "\n";
@@ -90,7 +79,7 @@ std::string Grammar::dump(std::string indent) const {
     for (const Rule& rule : rules) {
         result += rule.dump(indent + "  ") + "\n";
     }
-    result += indent + "  CODE (" + std::to_string(code_comments.size()) + "): \"" + to_c_string(code) + "\"";
+    result += code.dump(indent + "  ") + "\n";
     return result;
 }
 

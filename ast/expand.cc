@@ -8,14 +8,17 @@ Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
 
 void Expand::parse(Parser& p) {
     debug("Parsing Expand");
+    Parser::State s = p.save_point();
     p.skip_space();
     if (!p.match('$')) {
+        s.rollback();
         return;
     } else if (p.match_number()) {
         content = std::stoi(p.last_match);
     } else {
         error("expected number!");
     }
+    s.commit();
     valid = true;
 }
 

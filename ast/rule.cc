@@ -21,6 +21,7 @@ void Rule::parse(Parser& p) {
         s.rollback();
         return;
     }
+    parse_comments(p, true);
     valid = true;
 }
 
@@ -36,8 +37,7 @@ std::string Rule::to_string() const {
 }
 
 std::string Rule::dump(std::string indent) const {
-    std::string comments_info = " (" + std::to_string(comments.size()) + " comments)";
-    return indent + "RULE " + name + comments_info + "\n" + expression.dump(indent + "  ");
+    return indent + "RULE " + name + dump_comments() + "\n" + expression.dump(indent + "  ");
 }
 
 Node* Rule::operator[](int index) {

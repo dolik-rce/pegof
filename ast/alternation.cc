@@ -11,9 +11,14 @@ Alternation::Alternation(Node* parent) : Node("Alternation", parent) {}
 
 void Alternation::parse(Parser& p) {
     debug("Parsing Alternation");
+    Parser::State sp = p.save_point();
+    parse_comments(p);
     p.skip_space();
     Sequence s = Sequence(p, this);
-    if (!s) return;
+    if (!s) {
+        sp.rollback();
+        return;
+    }
     while (s) {
         sequences.push_back(s);
         if (!p.match("/")) {
@@ -21,6 +26,8 @@ void Alternation::parse(Parser& p) {
         }
         s = Sequence(p, this);
     }
+    parse_comments(p, true);
+    sp.commit();
     valid = true;
 }
 
@@ -35,7 +42,7 @@ std::string Alternation::to_string() const {
 }
 
 std::string Alternation::dump(std::string indent) const {
-    std::string result = indent + "ALTERNATION\n";
+    std::string result = indent + "ALTERNATION" + dump_comments() + "\n";
     for (int i = 0; i < sequences.size(); i++) {
         result += sequences[i].dump(indent + "  ") + "\n";
     }

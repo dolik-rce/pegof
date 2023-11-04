@@ -14,6 +14,7 @@ public:
 
     const char* type;
     std::vector<std::string> comments;
+    std::string post_comment;
 
     virtual void parse(Parser& p) = 0;
     virtual std::string to_string() const = 0;
@@ -47,8 +48,9 @@ public:
 
     void map(const std::function<bool(Node&)>& transform);
 
-    void parse_comments(Parser& p);
+    void parse_comments(Parser& p, bool post = false);
     std::string format_comments(std::string indent = "") const;
+    std::string dump_comments() const;
 };
 
 template<class U>
