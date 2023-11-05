@@ -18,6 +18,7 @@ bool Term::parse(Parser& p) {
 
 void Term::parse(Parser& p) {
     debug("Parsing Term");
+    DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
     if (p.match_re("\\s*([!&])")) {

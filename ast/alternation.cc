@@ -11,6 +11,7 @@ Alternation::Alternation(Node* parent) : Node("Alternation", parent) {}
 
 void Alternation::parse(Parser& p) {
     debug("Parsing Alternation");
+    DebugIndent _;
     Parser::State sp = p.save_point();
     parse_comments(p);
     p.skip_space();

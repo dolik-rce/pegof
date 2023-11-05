@@ -19,6 +19,7 @@ Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr), code("Code", 
 
 void Grammar::parse(Parser& p) {
     debug("Parsing Grammar");
+    DebugIndent _;
     parse_comments(p);
     while (true) {
         Rule r(p, this);

@@ -10,6 +10,7 @@ Code::Code(Parser& p, Node* parent) : Node("Code", parent) {
 
 void Code::parse(Parser& p) {
     debug("Parsing Code");
+    DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
     p.skip_space();

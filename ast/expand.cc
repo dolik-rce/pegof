@@ -8,6 +8,7 @@ Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
 
 void Expand::parse(Parser& p) {
     debug("Parsing Expand");
+    DebugIndent _;
     Parser::State s = p.save_point();
     p.skip_space();
     if (!p.match('$')) {

@@ -9,6 +9,7 @@ Rule::Rule(Parser& p, Node* parent) : Node("Rule", parent), expression(this) {
 
 void Rule::parse(Parser& p) {
     debug("Parsing Rule");
+    DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
     if (!p.match_re("(\\S+)\\s*<-")) {

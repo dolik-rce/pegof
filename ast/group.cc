@@ -9,6 +9,7 @@ Group::Group(Parser& p, Node* parent) : Node("Group", parent) {
 
 void Group::parse(Parser& p) {
     debug("Parsing Group");
+    DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
     if (!p.match('(') && !p.match('<')) {

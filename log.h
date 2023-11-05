@@ -1,9 +1,20 @@
 #include "config.h"
 #include <stdio.h>
 
+class DebugIndent {
+    static int indent(int increment = 0);
+public:
+    DebugIndent();
+    ~DebugIndent();
+    static void inc();
+    static void dec();
+    static void print();
+};
+
 template <typename... T>
 void debug(const char* format, T... args) {
     if (Config::get<bool>("debug")) {
+        DebugIndent::print();
         fprintf(stderr, format, args...);
         fprintf(stderr, "\n");
     }

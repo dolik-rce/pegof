@@ -8,6 +8,7 @@ Reference::Reference(Parser& p, Node* parent) : Node("Reference", parent) {
 
 void Reference::parse(Parser& p) {
     debug("Parsing Reference");
+    DebugIndent _;
     if (!p.match_identifier()) {
         return;
     }

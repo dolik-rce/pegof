@@ -1,29 +1,30 @@
 #include "parser.h"
 #include "log.h"
+#include "utils.h"
 
 Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {};
 
 bool Parser::State::rollback() {
-    if (p->pos != saved_pos) log(5, "rollback %lu-%lu: %s", saved_pos, p->pos, p->input.substr(saved_pos, p->pos - saved_pos).c_str());
+    if (p->pos != saved_pos) debug("Rollback %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->input.substr(saved_pos, p->pos - saved_pos)).c_str());
     p->pos = saved_pos;
     return false;
 };
 
 bool Parser::State::commit() {
     p->last_match = p->input.substr(saved_pos, p->pos - saved_pos);
-    log(5, "matched %lu-%lu: %s", saved_pos, p->pos, p->last_match.c_str());
+    debug("Matched %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->last_match).c_str());
     return true;
 };
 
 bool Parser::State::commit(int start, int end) {
     p->last_match = p->input.substr(start, end - start);
-    log(5, "matched %lu-%lu: %s", saved_pos, p->pos, p->last_match.c_str());
+    debug("Matched %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->last_match).c_str());
     return true;
 };
 
 bool Parser::State::commit(const std::string& result) {
     p->last_match = result;
-    log(5, "matched %lu-%lu: %s", saved_pos, p->pos, p->last_match.c_str());
+    debug("Matched %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->last_match).c_str());
     return true;
 };
 
@@ -46,7 +47,7 @@ void Parser::skip_space() {
         }
         break;
     }
-    if (pos != start) debug("Skipped whitespace: %d-%d\n", start, pos);
+    if (pos != start) debug("Skipped whitespace: %d-%d", start, pos);
 }
 
 bool Parser::match(char c) {

@@ -8,6 +8,7 @@ Sequence::Sequence(Parser& p, Node* parent) : Node("Sequence", parent) {
 
 void Sequence::parse(Parser& p) {
     debug("Parsing Sequence");
+    DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
     p.skip_space();

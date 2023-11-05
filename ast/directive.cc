@@ -9,6 +9,7 @@ Directive::Directive(Parser& p, Node* parent) : Node("Directive", parent) {
 
 void Directive::parse(Parser& p) {
     debug("Parsing Directive");
+    DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
     if (p.match_re("%(earlysource|earlycommon|earlyheader|source|header|common)")) {
