@@ -25,8 +25,8 @@ public:
 
     virtual void parse(Parser& p);
 
-    std::string to_string(const Primary& x) const;
-    virtual std::string to_string() const override;
+    std::string to_string(const Primary& x, const std::string& indent) const;
+    virtual std::string to_string(std::string indent = "") const override;
     std::string dump(const Primary& x, std::string indent) const;
     virtual std::string dump(std::string indent = "") const override;
 

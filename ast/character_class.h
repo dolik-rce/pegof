@@ -22,7 +22,7 @@ public:
     virtual void normalize();
 
     virtual void parse(Parser& p);
-    virtual std::string to_string() const override;
+    virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
 };
 

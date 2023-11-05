@@ -32,12 +32,16 @@ void Alternation::parse(Parser& p) {
     valid = true;
 }
 
-std::string Alternation::to_string() const {
-    bool multiline = parent->is<Rule>() && sequences.size() > Config::get<int>("wrap-limit");
-    const char *delimiter = multiline ? "\n    / " : " / ";
-    std::string result = sequences[0].to_string();
+std::string Alternation::to_string(std::string indent) const {
+    bool multiline = sequences.size() > Config::get<int>("wrap-limit");
+    std::string delimiter = multiline ? ("\n" + indent + "/ ") : std::string(" / ");
+    std::string result;
+    if (multiline) {
+        result += indent;
+    }
+    result += sequences[0].to_string(indent + "    ");
     for (int i = 1; i < sequences.size(); i++) {
-        result += delimiter + sequences[i].to_string();
+        result += delimiter + sequences[i].to_string(indent + "    ");
     }
     return result;
 }

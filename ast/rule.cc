@@ -26,14 +26,13 @@ void Rule::parse(Parser& p) {
     valid = true;
 }
 
-std::string Rule::to_string() const {
+std::string Rule::to_string(std::string indent) const {
     std::string result = format_comments() + (comments.empty() ? "" : "\n") + name + " <-";
     if (expression.sequences.size() > Config::get<int>("wrap-limit")) {
-        result += "\n    ";
+        result += "\n" + expression.to_string("    ");
     } else {
-        result += " ";
+        result += " " + expression.to_string();
     }
-    result += expression.to_string();
     return result;
 }
 

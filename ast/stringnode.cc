@@ -17,7 +17,7 @@ void String::parse(Parser& p) {
     }
 }
 
-std::string String::to_string() const {
+std::string String::to_string(std::string indent) const {
     if (Config::get<Config::QuoteType>("quotes") == Config::QT_SINGLE) {
         return '\'' + to_c_string(content, ESCAPE_SINGLE_QUOTES) + '\'';
     } else {

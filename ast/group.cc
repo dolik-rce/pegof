@@ -32,10 +32,15 @@ void Group::parse(Parser& p) {
     valid = true;
 }
 
-std::string Group::to_string() const {
-    char start = capture ? '<' : '(';
-    char end = capture ? '>' : ')';
-    return start + expression->to_string() + end;
+std::string Group::to_string(std::string indent) const {
+    bool multiline = expression->size() > Config::get<int>("wrap-limit");
+    std::string start = capture ? "<" : "(";
+    std::string end = capture ? ">" : ")";
+    if (multiline) {
+        return start + "\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + end;
+    } else {
+        return start + expression->to_string(indent) + end;
+    }
 }
 
 std::string Group::dump(std::string indent) const {

@@ -8,11 +8,11 @@ Grammar::Grammar(
     const Code& code
 ) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code) {}
 
-Grammar::Grammar(Parser& p) : Node("Grammar", nullptr), code("Code", this) {
+Grammar::Grammar(Parser& p) : Node("Grammar", nullptr), code("", this) {
     parse(p);
 }
 
-Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr), code("Code", this) {
+Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr), code("", this) {
     Parser p(s);
     parse(p);
 }
@@ -51,7 +51,7 @@ std::string join(const std::vector<std::string>& parts, const char* delimiter) {
     return result;
 }
 
-std::string Grammar::to_string() const {
+std::string Grammar::to_string(std::string indent) const {
     std::vector<std::string> parts;
     std::string comments = format_comments();
     if (comments.size()) {
@@ -63,7 +63,9 @@ std::string Grammar::to_string() const {
     for (int i = 0; i < rules.size(); i++) {
         parts.push_back(rules[i].to_string());
     }
-    parts.push_back(code.to_string());
+    if (!code.empty()) {
+        parts.push_back(code.to_string());
+    }
     std::string result = join(parts, "\n\n");
     if (!result.empty() && result.back() != '\n') {
         result += "\n";
@@ -80,7 +82,9 @@ std::string Grammar::dump(std::string indent) const {
     for (const Rule& rule : rules) {
         result += rule.dump(indent + "  ") + "\n";
     }
-    result += code.dump(indent + "  ") + "\n";
+    if (!code.empty()) {
+        result += code.dump(indent + "  ") + "\n";
+    }
     return result;
 }
 

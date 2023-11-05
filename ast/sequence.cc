@@ -34,10 +34,10 @@ void Sequence::parse(Parser& p) {
     valid = true;
 }
 
-std::string Sequence::to_string() const {
-    std::string result = terms[0].to_string();
+std::string Sequence::to_string(std::string indent) const {
+    std::string result = terms[0].to_string(indent);
     for (int i = 1; i < terms.size(); i++) {
-        result += " " + terms[i].to_string();
+        result += " " + terms[i].to_string(indent);
     }
     return result;
 }

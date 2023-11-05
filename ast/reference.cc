@@ -27,7 +27,7 @@ void Reference::parse(Parser& p) {
     valid = true;
 }
 
-std::string Reference::to_string() const {
+std::string Reference::to_string(std::string indent) const {
     if (!var.empty()) {
         return var + ":" + name;
     }

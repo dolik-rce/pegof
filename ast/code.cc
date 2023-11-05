@@ -29,7 +29,7 @@ void Code::parse(Parser& p) {
     s.rollback();
 }
 
-std::string Code::to_string() const {
+std::string Code::to_string(std::string indent) const {
     std::string result = format_comments() + (comments.empty() ? "" : "\n");
     if (!content.empty()) result += "%%\n";
     result += content;
@@ -38,4 +38,8 @@ std::string Code::to_string() const {
 
 std::string Code::dump(std::string indent) const {
     return indent + "CODE " + dump_comments() + " \"" + to_c_string(content) + "\"";
+}
+
+bool Code::empty() const {
+    return comments.empty() && content.empty();
 }

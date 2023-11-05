@@ -1,6 +1,9 @@
 %value "char"
 
-X <- a:A (B / C) { printf("%c\n", a); }
+X <- a:A (
+    B
+    / C
+) { printf("%c\n", a); }
 
 A <- .* { $$ = 'a'; }
 

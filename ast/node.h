@@ -17,7 +17,7 @@ public:
     std::string post_comment;
 
     virtual void parse(Parser& p) = 0;
-    virtual std::string to_string() const = 0;
+    virtual std::string to_string(std::string indent = "") const = 0;
     virtual std::string dump(std::string indent = "") const = 0;
 
     operator bool() const;

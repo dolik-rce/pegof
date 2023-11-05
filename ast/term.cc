@@ -46,14 +46,14 @@ void Term::parse(Parser& p) {
     valid = true;
 }
 
-std::string Term::to_string(const Primary& x) const {
+std::string Term::to_string(const Primary& x, const std::string& indent) const {
     switch(x.index()) {
-    case 1: return std::get_if<String>(&x)->as<String>()->to_string();
-    case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string();
-    case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->to_string();
-    case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string();
-    case 5: return std::get_if<Action>(&x)->as<Action>()->to_string();
-    case 6: return std::get_if<Group>(&x)->as<Group>()->to_string();
+    case 1: return std::get_if<String>(&x)->as<String>()->to_string(indent);
+    case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string(indent);
+    case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->to_string(indent);
+    case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string(indent);
+    case 5: return std::get_if<Action>(&x)->as<Action>()->to_string(indent);
+    case 6: return std::get_if<Group>(&x)->as<Group>()->to_string(indent);
     default:
         error("unsupporrted type!");
     }
@@ -72,10 +72,10 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     }
 }
 
-std::string Term::to_string() const {
+std::string Term::to_string(std::string indent) const {
     std::string result;
     if (prefix != 0) result += std::string(1, prefix);
-    result += to_string(primary);
+    result += to_string(primary, indent);
     if (quantifier != 0) result += std::string(1, quantifier);
     return result;
 }

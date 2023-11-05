@@ -23,7 +23,7 @@ void Expand::parse(Parser& p) {
     valid = true;
 }
 
-std::string Expand::to_string() const {
+std::string Expand::to_string(std::string indent) const {
     return "$" + std::to_string(content);
 }
 

@@ -16,7 +16,7 @@ void Action::parse(Parser& p) {
     }
 }
 
-std::string Action::to_string() const {
+std::string Action::to_string(std::string indent) const {
     return "{ " + code + " }";
 }
 

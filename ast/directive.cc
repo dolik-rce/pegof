@@ -32,7 +32,7 @@ void Directive::parse(Parser& p) {
     }
 }
 
-std::string Directive::to_string() const {
+std::string Directive::to_string(std::string indent) const {
     std::string result = format_comments() + "%" + name;
     result += code ? " {"  : " \"";
 

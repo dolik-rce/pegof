@@ -129,7 +129,7 @@ void CharacterClass::update_content() {
     }
 }
 
-std::string CharacterClass::to_string() const {
+std::string CharacterClass::to_string(std::string indent) const {
     if (content == ".") {
         return ".";
     } else {
