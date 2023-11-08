@@ -1,0 +1,5 @@
+X <- "X"
+
+# Code starts here
+%%
+printf("Hello world");

@@ -1,0 +1,12 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          CHAR_CLASS 0-9
+        TERM
+          CHAR_CLASS \t\v\n
+        TERM
+          CHAR_CLASS E-b
+        TERM
+          CHAR_CLASS \u0660-\u0669

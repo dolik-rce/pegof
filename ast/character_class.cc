@@ -142,7 +142,7 @@ std::string CharacterClass::to_string(std::string indent) const {
 }
 
 std::string CharacterClass::dump(std::string indent) const {
-    return indent + "CHAR_CLASS " + to_c_string(content);
+    return indent + "CHAR_CLASS " + content;
 }
 
 void CharacterClass::normalize() {

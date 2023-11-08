@@ -1,0 +1,14 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          CAPTURE 1
+            ALTERNATION
+              SEQ
+                TERM
+                  STRING X
+
+
+        TERM
+          EXPAND 1

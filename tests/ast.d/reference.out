@@ -1,0 +1,13 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          REF Y
+
+
+  RULE Y
+    ALTERNATION
+      SEQ
+        TERM
+          STRING Y

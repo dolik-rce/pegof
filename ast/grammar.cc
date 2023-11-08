@@ -80,8 +80,11 @@ std::string Grammar::to_string(std::string indent) const {
 }
 
 std::string Grammar::dump(std::string indent) const {
-    std::string comments_info = " (" + std::to_string(comments.size()) + " comments)";
-    std::string result = indent + "GRAMMAR" + comments_info + "\n";
+    std::string result = indent + "GRAMMAR";
+    if (!comments.empty()) {
+        result += " (" + std::to_string(comments.size()) + " comments)";
+    }
+    result += "\n";
     for (const Directive& directive : directives) {
         result += directive.dump(indent + "  ") + "\n";
     }

@@ -1,0 +1,10 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          STRING double quoted
+        TERM
+          STRING single quoted
+        TERM
+          STRING \n

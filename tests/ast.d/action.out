@@ -1,0 +1,8 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          STRING X
+        TERM
+          ACTION printf(\"action!\\n\");

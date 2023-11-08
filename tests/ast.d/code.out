@@ -1,0 +1,9 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          STRING X
+
+
+  CODE  (1 comment) "printf(\"Hello world\");\n"

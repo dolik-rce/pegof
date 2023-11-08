@@ -1,0 +1,10 @@
+GRAMMAR
+  DIRECTIVE prefix (0 comments) "prefix"
+  DIRECTIVE value (0 comments) "value"
+  DIRECTIVE auxil (0 comments) "auxil"
+  DIRECTIVE header (0 comments) {#define TEST 1}
+  DIRECTIVE source (0 comments) {source}
+  DIRECTIVE common (0 comments) {common}
+  DIRECTIVE earlyheader (0 comments) {earlyheader}
+  DIRECTIVE earlysource (0 comments) {earlysource}
+  DIRECTIVE earlycommon (0 comments) {earlycommon\n    multiple\n    lines}
