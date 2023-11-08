@@ -17,30 +17,35 @@ long Node::size() const {
     return 0;
 }
 
-void Node::parse_comments(Parser& p, bool post) {
-    debug("Parsing %s for node of type %s", post ? "post-comment" : "comments", type);
-    if (post) {
-        if (p.match_re("[ \t]*#([^\\n]*)", false)) {
-            post_comment = p.last_re_match.str(1);
-            debug("Post-comment: '%s'", post_comment.c_str());
-        }
-    } else {
-        p.skip_space();
-        while (p.match_comment()) {
+void Node::parse_comments(Parser& p, bool store) {
+    debug("Parsing comments for node of type %s", type);
+    p.skip_space();
+    while (p.match_comment()) {
+        if (store) {
             std::string comment = p.last_match;
             if (comment.back() == '\n') {
                 comment.pop_back();
             }
             comments.push_back(comment);
             debug("Comment: '%s'", comment.c_str());
-            if (p.peek_re("(\\s*\\n)+\\s*\\#", false)) {
-                // it would be hard to keep the empty lines between comments,
-                // so we just replace them with empty commented lines
-                p.skip_space();
+        }
+        if (p.peek_re("(\\s*\\n)+\\s*\\#", false)) {
+            // it would be hard to keep the empty lines between comments,
+            // so we just replace them with empty commented lines
+            p.skip_space();
+            if (store) {
                 debug("Detected empty line(s) between comments\n");
                 comments.push_back("");
             }
         }
+    }
+}
+
+void Node::parse_post_comment(Parser& p) {
+    debug("Parsing post-comment for node of type %s", type);
+    if (p.match_re("[ \t]*#([^\\n]*)", false)) {
+        post_comment = p.last_re_match.str(1);
+        debug("Post-comment: '%s'", post_comment.c_str());
     }
 }
 

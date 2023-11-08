@@ -41,7 +41,7 @@ void Term::parse(Parser& p) {
     } else {
         quantifier = 0;
     }
-    parse_comments(p, true);
+    parse_post_comment(p);
     s.commit();
     valid = true;
 }

@@ -48,7 +48,8 @@ public:
 
     void map(const std::function<bool(Node&)>& transform);
 
-    void parse_comments(Parser& p, bool post = false);
+    void parse_comments(Parser& p, bool store = true);
+    void parse_post_comment(Parser& p);
     std::string format_comments(std::string indent = "") const;
     std::string dump_comments() const;
 };

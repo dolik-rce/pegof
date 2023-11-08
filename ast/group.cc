@@ -27,7 +27,7 @@ void Group::parse(Parser& p) {
         s.rollback();
         return;
     }
-    parse_comments(p, true);
+    parse_post_comment(p);
     s.commit();
     valid = true;
 }

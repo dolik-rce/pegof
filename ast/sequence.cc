@@ -20,12 +20,11 @@ void Sequence::parse(Parser& p) {
         terms.push_back(t);
         Parser::State peek = p.save_point();
         // Avoid parsing into the next rule (including its comments)
-        parse_comments(p);
+        parse_comments(p, false);
         if (p.peek_re("\\s*\\S+\\s*<-")) {
             peek.rollback();
             break;
         }
-        comments.clear(); // TODO: parse without storing
         peek.rollback();
         t = Term(p, this);
     }
