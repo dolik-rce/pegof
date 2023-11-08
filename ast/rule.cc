@@ -22,7 +22,6 @@ void Rule::parse(Parser& p) {
         s.rollback();
         return;
     }
-    parse_comments(p, true);
     valid = true;
 }
 

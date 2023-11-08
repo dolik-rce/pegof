@@ -20,7 +20,13 @@ Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr), code("", this
 void Grammar::parse(Parser& p) {
     debug("Parsing Grammar");
     DebugIndent _;
-    parse_comments(p);
+    //~ parse_comments(p);
+        debug("Parsing comments for node of type Grammar");
+        while (p.match_comment()) {
+            comments.push_back(p.last_match);
+            debug("Comment: '%s'", comments.back().c_str());
+        }
+
     while (true) {
         Rule r(p, this);
         if (r) {

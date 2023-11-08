@@ -1,0 +1,7 @@
+# This is grammar comment
+# spanning two lines
+
+# This is rule comment for 'main'
+main <- "X"
+
+# This is comment for code section (which might or might not be present)

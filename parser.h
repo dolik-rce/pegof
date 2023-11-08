@@ -50,7 +50,7 @@ public:
 
     bool peek(const char c);
     bool peek(const std::string& str);
-    bool peek_re(const std::string& r);
+    bool peek_re(const std::string& r, bool space = true);
 
     char current() const;
 };

@@ -220,9 +220,9 @@ bool Parser::peek(const std::string& str) {
     return result;
 }
 
-bool Parser::peek_re(const std::string& r) {
+bool Parser::peek_re(const std::string& r, bool space) {
     State s(this);
-    bool result = match_re(r);
+    bool result = match_re(r, space);
     s.rollback();
     return result;
 }

@@ -36,8 +36,11 @@ std::string Alternation::to_string(std::string indent) const {
     bool multiline = sequences.size() > Config::get<int>("wrap-limit");
     std::string delimiter = multiline ? ("\n" + indent + "/ ") : std::string(" / ");
     std::string result;
-    if (multiline) {
+    if (multiline && comments.empty()) {
         result += indent;
+    }
+    if (!comments.empty()) {
+        result += format_comments(indent) + "\n" + indent;
     }
     result += sequences[0].to_string(indent + "    ");
     for (int i = 1; i < sequences.size(); i++) {

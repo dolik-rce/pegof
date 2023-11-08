@@ -1,0 +1,13 @@
+main <-
+    "A"
+    # This is term comment
+    "B"
+    (
+        "D"
+        # This is multiline
+        # embedded term comment
+
+        # with extra space in between
+        "E" # This is embedded term post-comment
+    )
+    "F" # This is another post-comment on term

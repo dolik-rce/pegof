@@ -74,9 +74,15 @@ std::string Term::dump(const Primary& x, std::string indent) const {
 
 std::string Term::to_string(std::string indent) const {
     std::string result;
+    if (comments.size()) {
+        result += "\n" + format_comments(indent) + "\n" + indent;
+    }
     if (prefix != 0) result += std::string(1, prefix);
     result += to_string(primary, indent);
     if (quantifier != 0) result += std::string(1, quantifier);
+    if (!post_comment.empty()) {
+        result += " #" + post_comment + "\n" + indent.substr(0, indent.length() - 4);
+    }
     return result;
 }
 

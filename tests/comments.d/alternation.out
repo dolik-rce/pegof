@@ -1,0 +1,11 @@
+main <-
+    # This is alternation comment
+    "A"
+    / (
+        # This is multiline
+        # embedded alternation comment
+        #
+        # with extra space in between
+        "B"
+        / "C"
+    )

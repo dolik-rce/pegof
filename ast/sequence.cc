@@ -10,7 +10,6 @@ void Sequence::parse(Parser& p) {
     debug("Parsing Sequence");
     DebugIndent _;
     Parser::State s = p.save_point();
-    parse_comments(p);
     p.skip_space();
     Term t(p, this);
     if (!t) {
@@ -26,10 +25,10 @@ void Sequence::parse(Parser& p) {
             peek.rollback();
             break;
         }
+        comments.clear(); // TODO: parse without storing
         peek.rollback();
         t = Term(p, this);
     }
-    parse_comments(p, true);
     s.commit();
     valid = true;
 }
@@ -37,13 +36,13 @@ void Sequence::parse(Parser& p) {
 std::string Sequence::to_string(std::string indent) const {
     std::string result = terms[0].to_string(indent);
     for (int i = 1; i < terms.size(); i++) {
-        result += " " + terms[i].to_string(indent);
+        result += (terms[i].comments.empty() ? " " : "") + terms[i].to_string(indent);
     }
     return result;
 }
 
 std::string Sequence::dump(std::string indent) const {
-    std::string result = indent + "SEQ" + dump_comments() + "\n";
+    std::string result = indent + "SEQ\n";
     for (int i = 0; i < terms.size(); i++) {
         result += terms[i].dump(indent + "  ") + "\n";
     }

@@ -27,12 +27,17 @@ void Node::parse_comments(Parser& p, bool post) {
     } else {
         p.skip_space();
         while (p.match_comment()) {
-            comments.push_back(p.last_match);
-            debug("Comment: '%s'", comments.back().c_str());
-            if (p.peek_re("(\\s*\\n)*\\s*#")) {
+            std::string comment = p.last_match;
+            if (comment.back() == '\n') {
+                comment.pop_back();
+            }
+            comments.push_back(comment);
+            debug("Comment: '%s'", comment.c_str());
+            if (p.peek_re("(\\s*\\n)+\\s*\\#", false)) {
                 // it would be hard to keep the empty lines between comments,
                 // so we just replace them with empty commented lines
                 p.skip_space();
+                debug("Detected empty line(s) between comments\n");
                 comments.push_back("");
             }
         }
