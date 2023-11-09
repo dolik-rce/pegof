@@ -11,8 +11,11 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <cstdarg>
 
 namespace fs = std::filesystem;
+
+std::stringstream packcc_errors;
 
 std::string Stats::compare(const Stats& s) const {
     #define PAD(X) left_pad(std::to_string(X), 8)
@@ -43,17 +46,6 @@ Checker::~Checker() {
 
 bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
     log(2, "Processing %s with PackCC, storing output to %s.{h,c}", input.c_str(), output.c_str());
-    // Flush stderr first if you've previously printed something
-    fflush(stderr);
-
-    // Save stderr so it can be restored later
-    int temp_stderr;
-    temp_stderr = dup(fileno(stderr));
-
-    // Redirect stderr to a new pipe
-    int pipes[2];
-    pipe(pipes);
-    dup2(pipes[1], fileno(stderr));
 
     // Call PackCC
     options_t opts = {};
@@ -61,20 +53,10 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
     bool result = parse(ctx) && generate(ctx);
     destroy_context(ctx);
 
-    // Terminate captured output with a zero
-    write(pipes[1], "", 1);
+    // Collect errors
+    errors = packcc_errors.str();
+    packcc_errors.clear();
 
-    // Restore stderr
-    fflush(stderr);
-    dup2(temp_stderr, fileno(stderr));
-
-    // Read the stderr from the pipe
-    const int buffer_size = 102400;
-    char buffer[buffer_size];
-    // TODO: fix reading when there is more data then the buffer_size
-    read(pipes[0], buffer, buffer_size);
-
-    errors = buffer;
     return result;
 }
 
@@ -119,4 +101,26 @@ bool Checker::validate_string(const std::string& filename, const std::string& pe
 
 bool Checker::validate_file(const std::string& filename) const {
     return validate(filename);
+}
+
+extern "C" {
+int vfprintf_wrapped(FILE *stream, const char *format, va_list args) {
+    int result;
+    if (stream == stderr) {
+        char buffer[10240];
+        result = vsprintf(buffer, format, args);
+        packcc_errors << buffer;
+    } else {
+        result = vfprintf (stream, format, args);
+    }
+    return result;
+}
+
+int fprintf_wrapped(FILE *stream, const char *format, ...) {
+    va_list args;
+    va_start (args, format);
+    int result = vfprintf_wrapped(stream, format, args);
+    va_end (args);
+    return result;
+}
 }
