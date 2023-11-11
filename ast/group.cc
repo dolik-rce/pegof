@@ -12,18 +12,17 @@ void Group::parse(Parser& p) {
     DebugIndent _;
     Parser::State s = p.save_point();
     parse_comments(p);
-    if (!p.match('(') && !p.match('<')) {
+    if (!p.match('(')) {
         s.rollback();
         return;
     }
-    capture = p.last_match[0] == '<';
     expression.reset(new Alternation(p, this));
     if (!*expression) {
         s.rollback();
         return;
     }
     p.skip_space();
-    if (!p.match(capture ? '>' : ')')) {
+    if (!p.match(')')) {
         s.rollback();
         return;
     }
@@ -34,17 +33,15 @@ void Group::parse(Parser& p) {
 
 std::string Group::to_string(std::string indent) const {
     bool multiline = expression->size() > Config::get<int>("wrap-limit");
-    std::string start = capture ? "<" : "(";
-    std::string end = capture ? ">" : ")";
     if (multiline) {
-        return start + "\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + end;
+        return "(\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + ")";
     } else {
-        return start + expression->to_string(indent) + end;
+        return "(" + expression->to_string(indent) + ")";
     }
 }
 
 std::string Group::dump(std::string indent) const {
-    return indent + "GROUP" + (capture ? "capturing" : "") + dump_comments() + "\n" + expression->dump(indent + "  ");
+    return indent + "GROUP" + dump_comments() + "\n" + expression->dump(indent + "  ");
 }
 
 Node* Group::operator[](int index) {

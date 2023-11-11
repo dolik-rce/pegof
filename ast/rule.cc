@@ -22,6 +22,7 @@ void Rule::parse(Parser& p) {
         s.rollback();
         return;
     }
+    update_captures();
     valid = true;
 }
 
@@ -69,6 +70,7 @@ bool Rule::contains_expand() {
 int Rule::count_terms() {
     return find_all<Term>().size();
 }
+
 int Rule::count_cc_tokens() {
     std::vector<CharacterClass*> ccs = find_all<CharacterClass>([](const CharacterClass& cc) -> bool {
         return cc.content != ".";
@@ -76,4 +78,11 @@ int Rule::count_cc_tokens() {
     int count = 0;
     for (CharacterClass* cc: ccs) count += cc->tokens.size();
     return count;
+}
+
+void Rule::update_captures() {
+    std::vector<Capture*> captures = find_all<Capture>();
+    for (int i = 0; i < captures.size(); i++) {
+        captures[i]->num = i+1;
+    }
 }

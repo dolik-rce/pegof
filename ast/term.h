@@ -7,9 +7,10 @@
 #include "character_class.h"
 #include "expand.h"
 #include "action.h"
+#include "capture.h"
 #include "group.h"
 
-using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group>;
+using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture>;
 
 class Term : public Node {
 public:

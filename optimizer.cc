@@ -186,7 +186,6 @@ int Optimizer::remove_unnecessary_groups() {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>()) return false;
         Group group = t->get<Group>();
-        if (group.capture) return false;
         if (group.expression->sequences.size() > 1) return false;
 
         if (!t->prefix && !t->quantifier) {
@@ -231,9 +230,7 @@ int Optimizer::unused_captures() {
     return apply(O_UNUSED_CAPTURE, [](Node& node, int& optimized) -> bool {
         Rule* rule = node.as<Rule>();
         if (!rule) return false;
-        std::vector<Group*> captures = rule->find_all<Group>([](const Group& group) -> bool {
-            return group.capture;
-        });
+        std::vector<Capture*> captures = rule->find_all<Capture>();
         if (captures.empty()) return false;
         std::vector<Expand*> expands = rule->find_all<Expand>();
         std::vector<Action*> actions = rule->find_all<Action>();
@@ -250,7 +247,10 @@ int Optimizer::unused_captures() {
                 continue;
             }
             log(1, "Removing unused capture '%s' in rule %s.", captures[i]->to_string().c_str(), rule->to_string().c_str());
-            captures[i]->capture = false;
+            ;
+            Term* parent = captures[i]->get_parent<Term>();
+            parent->primary = Group(*(captures[i]->expression), nullptr);
+            parent->update_parents();
             for (int j = 0; j < expands.size(); j++) {
                 if (expands[j]->content <= i) continue;
                 log(2, "Replacing expand '$%d' -> '$%d'", expands[j]->content, expands[j]->content-1);

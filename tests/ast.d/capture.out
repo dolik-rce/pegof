@@ -1,0 +1,38 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          CAPTURE 1
+            ALTERNATION
+              SEQ
+                TERM
+                  STRING A
+
+
+        TERM
+          CAPTURE 2
+            ALTERNATION
+              SEQ
+                TERM
+                  STRING B
+                TERM
+                  STRING C
+
+
+        TERM
+          CAPTURE 3
+            ALTERNATION
+              SEQ
+                TERM
+                  STRING D
+                TERM
+                  CAPTURE 4
+                    ALTERNATION
+                      SEQ
+                        TERM
+                          STRING E
+
+
+                TERM
+                  STRING F

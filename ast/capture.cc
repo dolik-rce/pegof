@@ -1,0 +1,69 @@
+#include "capture.h"
+#include "alternation.h"
+#include "log.h"
+
+Capture::Capture(const Alternation& expression, Node* parent) : Node("Capture", parent), expression(new Alternation(expression)), num(-1) {}
+Capture::Capture(Parser& p, Node* parent) : Node("Capture", parent) {
+    parse(p);
+}
+
+void Capture::parse(Parser& p) {
+    debug("Parsing Capture");
+    DebugIndent _;
+    Parser::State s = p.save_point();
+    parse_comments(p);
+    if (!p.match('<')) {
+        s.rollback();
+        return;
+    }
+    expression.reset(new Alternation(p, this));
+    if (!*expression) {
+        s.rollback();
+        return;
+    }
+    p.skip_space();
+    if (!p.match('>')) {
+        s.rollback();
+        return;
+    }
+    parse_post_comment(p);
+    s.commit();
+    valid = true;
+}
+
+std::string Capture::to_string(std::string indent) const {
+    bool multiline = expression->size() > Config::get<int>("wrap-limit");
+    if (multiline) {
+        return "<\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + ">";
+    } else {
+        return "<" + expression->to_string(indent) + ">";
+    }
+}
+
+std::string Capture::dump(std::string indent) const {
+    return indent + "CAPTURE " + std::to_string(num) + dump_comments() + "\n" + expression->dump(indent + "  ");
+}
+
+Node* Capture::operator[](int index) {
+    if (index == 0) {
+        return (Node*)expression.get();
+    } else {
+        error("index out of bounds!");
+    }
+}
+
+long Capture::size() const {
+    return 1;
+}
+
+bool Capture::has_single_term() const {
+    return expression->has_single_term();
+}
+
+bool operator==(const Capture& a, const Capture& b) {
+    return *a.expression == *b.expression;
+}
+
+bool operator!=(const Capture& a, const Capture& b) {
+    return !(a == b);
+}

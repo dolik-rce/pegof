@@ -22,4 +22,5 @@ public:
     bool contains_expand();
     int count_terms();
     int count_cc_tokens();
+    void update_captures();
 };

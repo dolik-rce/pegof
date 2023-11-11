@@ -3,12 +3,13 @@
 
 class Alternation;
 
-class Group : public Node {
+class Capture : public Node {
 public:
     std::shared_ptr<Alternation> expression;
+    int num;
 
-    Group(const Alternation& expression, Node* parent);
-    Group(Parser& p, Node* parent);
+    Capture(const Alternation& expression, Node* parent);
+    Capture(Parser& p, Node* parent);
 
     virtual void parse(Parser& p);
     virtual std::string to_string(std::string indent = "") const override;
@@ -20,5 +21,5 @@ public:
     bool has_single_term() const;
 };
 
-bool operator==(const Group& a, const Group& b);
-bool operator!=(const Group& a, const Group& b);
+bool operator==(const Capture& a, const Capture& b);
+bool operator!=(const Capture& a, const Capture& b);
