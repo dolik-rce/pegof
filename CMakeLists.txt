@@ -39,3 +39,9 @@ add_custom_target(
     DEPENDS pegof_test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+add_custom_target(
+    uncrustify
+    ./uncrustify.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
