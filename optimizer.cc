@@ -285,21 +285,13 @@ int Optimizer::inline_rules() {
     // intentionally skipping the first rule, because it is the main one, which can't be inlined anyway
     for (int i = g.rules.size() - 1; i > 0; i--) {
         Rule& rule = g.rules[i];
-        //~ if (rule.contains_alternation()) {
-        //~     log(2, "Not inlining %s: contains alternation", rule.name.c_str());
-        //~     continue;
-        //~ }
-        if (rule.contains_expand()) {
-            log(2, "Not inlining %s: contains expansions", rule.name.c_str());
-            continue;
-        }
 
         // check for direct recursion
         bool is_recursive = !rule.find_all<Reference>([rule](const Reference& node) -> bool {
             return node.name == rule.name;
         }).empty();
         if (is_recursive) {
-            log(2, "Not inlining %s: rule to is recursive", rule.name.c_str());
+            log(2, "Not inlining %s: rule is recursive", rule.name.c_str());
             continue;
         }
 
@@ -325,17 +317,80 @@ int Optimizer::inline_rules() {
             return ref->name == rule.name;
         });
 
-        Term src = rule.expression.sequences[0].terms[0];
+        int src_captures = rule.find_all<Capture>().size();
+
         log(1, "Inlining rule %s (score %f)", rule.name.c_str(), best_score);
         for (int j = 0; j < refs.size(); j++) {
             Term* dest = refs[j]->parent->as<Term>();
-            Group group(*(src.parent->parent->as<Alternation>()), nullptr);
-            log(2, "Inlining %s into %s", group.to_string().c_str(), dest->to_string().c_str());
+            Group group(rule.expression, nullptr);
+            log(2, "  Inlining %s into %s", group.to_string().c_str(), dest->to_string().c_str());
             dest->primary = group;
             dest->update_parents();
-            debug("Inlining result: %s", dest->to_string().c_str());
+            // fix capture references in expands and actions
+            if (src_captures) {
+                Rule* dest_rule = dest->get_ancestor<Rule>();
+                int dest_captures = dest_rule->find_all<Capture>().size();
+                if (dest_captures) {
+                    // Algorithm:
+                    //   shift = how many captures is before the insertion point
+                    //   src_captures = how many captures is in the inserted group
+                    //  - first iterate over rule,
+                    //     - count captures before group (N)
+                    //     - skip the inserted group
+                    //     - increment expands and actions after the group by M
+                    //   - then iterate over the group only
+                    //     - increase expands and actions by before number found in first iteration
+                    // example: input:   <1> <2> (<1> <2> <3>) <3> <4>
+                    //          shift:            +2  +2  +2   +3  +3
+                    //          output:  <1> <2> (<3> <4> <5>) <6> <7>
+                    dest_rule->update_captures();
+                    bool after = false;
+                    int shift = 0;
+                    dest_rule->map([&](Node& node) mutable {
+                        if (&node == std::get_if<Group>(&dest->primary)) {
+                            after = true;
+                            return true;
+                        }
+                        if (!after && node.is<Capture>()) {
+                            shift++;
+                            return false;
+                        }
+                        if (after && node.is<Expand>()) {
+                            std::string prev = node.to_string();
+                            Expand *e = node.as<Expand>();
+                            e->content += src_captures;
+                            log(2, "  Update expand: %s -> %s", prev.c_str(), node.to_string().c_str());
+                        } else if (after && node.is<Action>()) {
+                            std::string prev = node.to_string();
+                            Action *a = node.as<Action>();
+                            for (int k = dest_captures; k >= 1; k--) {
+                                a->code = replace(a->code, "\\$" + std::to_string(k) + "\\b", "$$" + std::to_string(k + src_captures));
+                            }
+                            log(2, "  Update action: %s -> %s", prev.c_str(), node.to_string().c_str());
+                        }
+                        return false;
+                    });
+                    std::get_if<Group>(&dest->primary)->map([&](Node& node){
+                        if (node.is<Expand>()) {
+                            std::string prev = node.to_string();
+                            Expand *e = node.as<Expand>();
+                            e->content += shift;
+                            log(2, "  Update expand: %s -> %s", prev.c_str(), node.to_string().c_str());
+                        } else if (node.is<Action>()) {
+                            std::string prev = node.to_string();
+                            Action *a = node.as<Action>();
+                            for (int k = src_captures; k >= 1; k--) {
+                                a->code = replace(a->code, "\\$" + std::to_string(k) + "\\b", "$$" + std::to_string(k + shift));
+                            }
+                            log(2, "  Update action: %s -> %s", prev.c_str(), node.to_string().c_str());
+                        }
+                        return false;
+                    });
+                }
+            }
+            debug("  Inlining result: %s", dest->to_string().c_str());
         }
-        log(2, "Removing inlined rule %s", rule.name.c_str());
+        log(2, "  Removing inlined rule %s", rule.name.c_str());
         g.rules.erase(g.rules.begin() + candidate);
         g.update_parents();
         return true;

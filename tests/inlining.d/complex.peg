@@ -1,0 +1,5 @@
+main <- A / B / C
+
+A <- <[Aa]> { printf("A: %s\n", $1); }
+B <- <[Bb]> { printf("B: %s\n", $1); }
+C <- <[Cc]> $1 { printf("C: %s\n", $1); }

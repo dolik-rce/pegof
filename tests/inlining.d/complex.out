@@ -1,0 +1,4 @@
+main <-
+    <[Aa]> { printf("A: %s\n", $1); }
+    / <[Bb]> { printf("B: %s\n", $2); }
+    / <[Cc]> $3 { printf("C: %s\n", $3); }
