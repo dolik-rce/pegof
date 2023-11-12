@@ -17,9 +17,11 @@ namespace fs = std::filesystem;
 
 std::stringstream packcc_errors;
 
+const std::string N_A = "N/A";
+
 std::string Stats::compare(const Stats& s) const {
-    #define PAD(X) left_pad(std::to_string(X), 8)
-    #define PADP(X) left_pad(std::to_string(X * 100 / s.X) + "%", 8)
+    #define PAD(X) left_pad((X > 0) ? std::to_string(X) : N_A, 8)
+    #define PADP(X) left_pad(((s.X > 0) ? std::to_string(X * 100 / s.X) : N_A) + "%", 8)
 
     std::string result;
     result += "         |   lines  |   bytes  |   rules  |   terms  \n";
@@ -45,6 +47,11 @@ Checker::~Checker() {
 }
 
 bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
+    if (Config::get<bool>("skip-validation")) {
+        log(2, "Skipping validation due to --skip-validation");
+        return true;
+    }
+
     log(2, "Processing %s with PackCC, storing output to %s.{h,c}", input.c_str(), output.c_str());
 
     // Call PackCC

@@ -35,6 +35,8 @@ Currently implemented optimizations:
         Verbose logging to stderr (repeat for even more verbose output)
     -d/--debug
         Output very verbose debug info, implies max verbosity
+    -S/--skip-validation
+        Skip result validation (useful only for debugging purposes)
 
 ### Input/output options:
     -f/--format
