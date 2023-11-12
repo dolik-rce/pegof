@@ -8,7 +8,5 @@ GRAMMAR
               SEQ
                 TERM
                   STRING X
-
-
         TERM
           EXPAND 1

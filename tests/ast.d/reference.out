@@ -4,8 +4,6 @@ GRAMMAR
       SEQ
         TERM
           REF Y
-
-
   RULE Y
     ALTERNATION
       SEQ

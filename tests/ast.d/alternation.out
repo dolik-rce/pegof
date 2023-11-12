@@ -4,11 +4,9 @@ GRAMMAR
       SEQ
         TERM
           STRING X
-
       SEQ
         TERM
           STRING Y
-
       SEQ
         TERM
           STRING Z

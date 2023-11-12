@@ -8,8 +8,6 @@ GRAMMAR
               SEQ
                 TERM
                   STRING A
-
-
         TERM
           CAPTURE 2
             ALTERNATION
@@ -18,8 +16,6 @@ GRAMMAR
                   STRING B
                 TERM
                   STRING C
-
-
         TERM
           CAPTURE 3
             ALTERNATION
@@ -32,7 +28,5 @@ GRAMMAR
                       SEQ
                         TERM
                           STRING E
-
-
                 TERM
                   STRING F

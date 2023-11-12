@@ -43,7 +43,8 @@ std::string Sequence::to_string(std::string indent) const {
 std::string Sequence::dump(std::string indent) const {
     std::string result = indent + "SEQ\n";
     for (int i = 0; i < terms.size(); i++) {
-        result += terms[i].dump(indent + "  ") + "\n";
+        if (i > 0) result += "\n";
+        result += terms[i].dump(indent + "  ");
     }
     return result;
 }

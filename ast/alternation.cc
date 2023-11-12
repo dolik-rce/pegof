@@ -52,7 +52,8 @@ std::string Alternation::to_string(std::string indent) const {
 std::string Alternation::dump(std::string indent) const {
     std::string result = indent + "ALTERNATION" + dump_comments() + "\n";
     for (int i = 0; i < sequences.size(); i++) {
-        result += sequences[i].dump(indent + "  ") + "\n";
+        if (i > 0) result += "\n";
+        result += sequences[i].dump(indent + "  ");
     }
     return result;
 }
