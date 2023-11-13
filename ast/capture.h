@@ -2,12 +2,13 @@
 #include "ast/node.h"
 
 class Alternation;
+class Rule;
+class Group;
 
 class Capture : public Node {
-public:
     std::shared_ptr<Alternation> expression;
     int num;
-
+public:
     Capture(const Alternation& expression, Node* parent);
     Capture(Parser& p, Node* parent);
 
@@ -19,6 +20,11 @@ public:
     virtual long size() const;
 
     bool has_single_term() const;
+
+    Group convert_to_group();
+
+    friend bool operator==(const Capture& a, const Capture& b);
+    friend class Rule;
 };
 
 bool operator==(const Capture& a, const Capture& b);

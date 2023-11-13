@@ -74,6 +74,10 @@ bool Alternation::has_single_term() const {
     return sequences.size() == 1 && sequences[0].has_single_term();
 }
 
+const Sequence& Alternation::get_first_sequence() const {
+    return sequences[0];
+}
+
 bool operator==(const Alternation& a, const Alternation& b) {
     if (a.size() != b.size()) return false;
     for (int i = 0; i < a.size(); i++) {

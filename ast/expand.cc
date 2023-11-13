@@ -31,10 +31,23 @@ std::string Expand::dump(std::string indent) const {
     return indent + "EXPAND " + std::to_string(content);
 }
 
+
+void Expand::shift(int n) {
+    content += n;
+}
+
 bool operator==(const Expand& a, const Expand& b) {
     return a.content == b.content;
 }
 
 bool operator!=(const Expand& a, const Expand& b) {
     return !(a == b);
+}
+
+bool operator==(const Expand& a, const int b) {
+    return a.content == b;
+}
+
+bool operator<=(const Expand& a, const int b) {
+    return a.content <= b;
 }

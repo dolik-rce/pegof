@@ -110,3 +110,10 @@ Node* Grammar::operator[](int index) {
 long Grammar::size() const {
     return directives.size() + rules.size();
 }
+
+void Grammar::erase(Rule* rule) {
+    std::vector<Rule>::iterator it = std::find_if(rules.begin(), rules.end(), [rule](const Rule& r) {
+        return &r == rule;
+    });
+    rules.erase(it);
+}

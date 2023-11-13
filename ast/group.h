@@ -2,11 +2,12 @@
 #include "ast/node.h"
 
 class Alternation;
+class Sequence;
+class Term;
 
 class Group : public Node {
-public:
     std::shared_ptr<Alternation> expression;
-
+public:
     Group(const Alternation& expression, Node* parent);
     Group(Parser& p, Node* parent);
 
@@ -17,7 +18,12 @@ public:
     virtual Node* operator[](int index);
     virtual long size() const;
 
+    bool has_single_sequence() const;
     bool has_single_term() const;
+    const Sequence& get_first_sequence() const;
+    const Term& get_first_term() const;
+
+    friend bool operator==(const Group& a, const Group& b);
 };
 
 bool operator==(const Group& a, const Group& b);

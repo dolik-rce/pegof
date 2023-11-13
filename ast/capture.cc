@@ -60,6 +60,10 @@ bool Capture::has_single_term() const {
     return expression->has_single_term();
 }
 
+Group Capture::convert_to_group() {
+    return Group(*expression, nullptr);
+}
+
 bool operator==(const Capture& a, const Capture& b) {
     return *a.expression == *b.expression;
 }

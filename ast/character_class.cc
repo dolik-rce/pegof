@@ -106,7 +106,7 @@ void CharacterClass::parse(Parser& p) {
 }
 
 void CharacterClass::update_content() {
-    if (content == ".") return;
+    if (any_char()) return;
 
     content = "";
 
@@ -130,7 +130,7 @@ void CharacterClass::update_content() {
 }
 
 std::string CharacterClass::to_string(std::string indent) const {
-    if (content == ".") {
+    if (any_char()) {
         return ".";
     } else {
         std::string result = "[";
@@ -145,10 +145,11 @@ std::string CharacterClass::dump(std::string indent) const {
     return indent + "CHAR_CLASS " + content;
 }
 
-void CharacterClass::normalize() {
+bool CharacterClass::normalize() {
     if (tokens.empty()) {
-        return;
+        return false;
     }
+    std::string original = content;
     sort(tokens.begin(), tokens.end());
     Tokens init(1, tokens[0]);
     tokens = accumulate(tokens.begin() + 1, tokens.end(), init, [](Tokens& acc, const Token& item){
@@ -161,6 +162,32 @@ void CharacterClass::normalize() {
         return acc;
     });
     update_content();
+    return content != original;
+}
+
+void CharacterClass::flip_negation() {
+    negation = !negation;
+}
+
+bool CharacterClass::any_char() const {
+    return content == ".";
+}
+
+int CharacterClass::token_count() const {
+    return tokens.size();
+}
+
+bool CharacterClass::is_single_char() const {
+    int size = content.size() + (dash ? 1 : 0);
+    return size == 1;
+}
+
+bool CharacterClass::is_negative() const {
+    return negation;
+}
+
+String CharacterClass::convert_to_string() const {
+    return String(dash ? "-" : content, parent);
 }
 
 bool operator==(const CharacterClass& a, const CharacterClass& b) {

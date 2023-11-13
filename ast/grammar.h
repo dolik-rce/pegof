@@ -6,11 +6,10 @@
 #include "code.h"
 
 class Grammar : public Node {
-public:
     std::vector<Directive> directives;
     std::vector<Rule> rules;
     Code code;
-
+public:
     Grammar(
         const std::vector<Directive>& directives,
         const std::vector<Rule>& rules,
@@ -25,4 +24,6 @@ public:
 
     virtual Node* operator[](int index);
     virtual long size() const;
+
+    void erase(Rule* rule);
 };

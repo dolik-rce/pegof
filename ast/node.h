@@ -52,6 +52,8 @@ public:
     void parse_post_comment(Parser& p);
     std::string format_comments(std::string indent = "") const;
     std::string dump_comments() const;
+
+    friend bool operator==(const Node& a, const Node& b);
 };
 
 template<class U>
@@ -98,3 +100,6 @@ void Node::find_all(std::vector<U*>& result, const std::function<bool(const U&)>
         n->find_all(result, predicate);
     }
 }
+
+bool operator==(const Node& a, const Node& b);
+bool operator!=(const Node& a, const Node& b);

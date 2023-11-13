@@ -28,7 +28,7 @@ void Rule::parse(Parser& p) {
 
 std::string Rule::to_string(std::string indent) const {
     std::string result = format_comments() + (comments.empty() ? "" : "\n") + name + " <-";
-    if (expression.sequences.size() > Config::get<int>("wrap-limit")) {
+    if (expression.size() > Config::get<int>("wrap-limit")) {
         result += "\n" + expression.to_string("    ");
     } else {
         result += " " + expression.to_string();
@@ -51,10 +51,18 @@ long Rule::size() const {
     return 1;
 }
 
-bool Rule::is_terminal() {
-    if (expression.sequences.size() != 1) return false;
-    if (expression.sequences[0].terms.size() != 1) return false;
+const char* Rule::c_str() const {
+    return name.c_str();
+}
+
+bool Rule::is_terminal() const {
+    if (expression.size() != 1) return false;
+    if (expression.get_first_sequence().size() != 1) return false;
     return true;
+}
+
+Group Rule::convert_to_group() const {
+    return Group(expression, nullptr);
 }
 
 bool Rule::contains_alternation() {
@@ -73,10 +81,10 @@ int Rule::count_terms() {
 
 int Rule::count_cc_tokens() {
     std::vector<CharacterClass*> ccs = find_all<CharacterClass>([](const CharacterClass& cc) -> bool {
-        return cc.content != ".";
+        return cc.any_char();
     });
     int count = 0;
-    for (CharacterClass* cc: ccs) count += cc->tokens.size();
+    for (CharacterClass* cc: ccs) count += cc->token_count();
     return count;
 }
 

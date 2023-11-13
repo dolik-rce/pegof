@@ -1,4 +1,5 @@
 #include "reference.h"
+#include "rule.h"
 #include "log.h"
 
 Reference::Reference(const std::string& name, const std::string& var, Node* parent) : Node("Reference", parent), name(name), var(var) {}
@@ -41,6 +42,18 @@ std::string Reference::dump(std::string indent) const {
     }
     result += name;
     return result;
+}
+
+bool Reference::references(const Rule* rule) const {
+    return name == rule->name;
+}
+
+bool Reference::has_variable() const {
+    return !var.empty();
+}
+
+void Reference::remove_variable() {
+    return var.clear();
 }
 
 bool operator==(const Reference& a, const Reference& b) {

@@ -3,9 +3,8 @@
 #include "term.h"
 
 class Sequence : public Node {
-public:
     std::vector<Term> terms;
-
+public:
     Sequence(const std::vector<Term>& terms, Node* parent);
     Sequence(Parser& p, Node* parent);
 
@@ -16,7 +15,16 @@ public:
     virtual Node* operator[](int index);
     virtual long size() const;
 
+    Term& get(int index);
+
     bool has_single_term() const;
+    const Term& get_first_term() const;
+
+    void insert(int index, const Sequence& s);
+    void erase(Term* rule);
+    void erase(int index);
+
+    friend bool operator==(const Sequence& a, const Sequence& b);
 };
 
 bool operator==(const Sequence& a, const Sequence& b);

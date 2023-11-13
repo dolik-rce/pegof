@@ -24,26 +24,56 @@ int Optimizer::concat_strings() {
         Sequence* s = node.as<Sequence>();
         if (!s) return false;
 
-        String* prev = nullptr;
-        int prev_index;
-        for (int i = s->terms.size() - 1; i >= 0; i--) {
-            Term& t = s->terms[i];
-            if (!t.quantifier && !t.prefix && std::holds_alternative<String>(t.primary)) {
-                String* str = std::get_if<String>(&(t.primary));
-                if (prev) {
-                    log(1, "Merging adjacent strings: %s + %s", str->content.c_str(), prev->content.c_str());
-                    str->content += prev->content;
-                    s->terms.erase(s->terms.begin() + prev_index);
+        String* prev_str = nullptr;
+        Term* prev_term = nullptr;
+        for (int i = s->size() - 1; i >= 0; i--) {
+            Term& t = s->get(i);
+            if (t.is_simple() && t.contains<String>()) {
+                String& str = t.get<String>();
+                if (prev_str) {
+                    log(1, "Merging adjacent strings: %s + %s", str.c_str(), prev_str->c_str());
+                    str.append(prev_str->c_str());
+                    s->erase(prev_term);
                     optimized++;
                 }
-                prev = str;
-                prev_index = i;
+                prev_str = &str;
+                prev_term = &t;
             } else {
-                prev = nullptr;
+                prev_str = nullptr;
+                prev_term = nullptr;
             }
         }
         return optimized;
     });
+}
+
+int optimize_repeating_terms(Term& t1, Term& t2) {
+    if (t1.primary != t2.primary || t1.prefix || t2.prefix)
+        return -1; // do nothing
+    Sequence* s = t1.parent->as<Sequence>();
+
+    if (t1.is_greedy() && t2.is_optional()) {
+        return 2; // delete t2
+    } else if (t1.is_greedy() && !t2.is_optional()) {
+        warn("Detected sequence that will never match: %s %s", t1.to_string().c_str(), t2.to_string().c_str());
+        return -1; //do nothing
+    } else if (t1.quantifier == '?') {
+        switch (t2.quantifier) {
+        case '*':
+            return 1; // delete t1
+        case '+':
+            t1.quantifier = 0;
+            return 0;
+        case 0:
+            t1.quantifier = 0;
+            t2.quantifier = '?';
+            return 0;
+        }
+    } else if (t1.quantifier == 0 && t2.quantifier == '*') {
+        t1.quantifier = '+';
+        return 2;  // delete t2
+    }
+    return -1;
 }
 
 int Optimizer::simplify_repeats() {
@@ -56,38 +86,15 @@ int Optimizer::simplify_repeats() {
         Sequence* s = node.as<Sequence>();
         if (!s) return false;
 
-        for (int i = 1; i < s->terms.size(); i++) {
-            Term& t1 = s->terms[i-1];
-            Term& t2 = s->terms[i];
-            if (t1.primary != t2.primary || t1.prefix || t2.prefix) continue;
-
-            if (t1.is_greedy() && t2.is_optional()) {
-                s->terms.erase(s->terms.begin()+i);
-                s->update_parents();
-                return true;
-            } else if (t1.is_greedy() && !t2.is_optional()) {
-                warn("Detected sequence that will never match: %s %s", t1.to_string().c_str(), t2.to_string().c_str());
-                continue;
-            } else if (t1.quantifier == '?') {
-                switch (t2.quantifier) {
-                case '*':
-                    s->terms.erase(s->terms.begin() + i - 1);
-                    s->update_parents();
-                    return true;
-                case '+':
-                    t1.quantifier = 0;
-                    return true;
-                case 0:
-                    t1.quantifier = 0;
-                    t2.quantifier = '?';
-                    return true;
-                }
-            } else if (t1.quantifier == 0 && t2.quantifier == '*') {
-                t1.quantifier = '+';
-                s->terms.erase(s->terms.begin() + i);
-                s->update_parents();
-                return true;
+        for (int i = 1; i < s->size(); i++) {
+            switch (optimize_repeating_terms(s->get(i-1), s->get(i))) {
+            case -1: continue;
+            case 0: return true;
+            case 1: s->erase(i - 1); break;
+            case 2: s->erase(i); break;
             }
+            s->update_parents();
+            return true;
         }
         return false;
     });
@@ -96,10 +103,8 @@ int Optimizer::simplify_repeats() {
 int Optimizer::normalize_character_classes() {
     return apply(O_NORMALIZE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
-        if (!cc || cc->content == ".") return false;
-        std::string orig = cc->content;
-        cc->normalize();
-        if (cc->content != orig) {
+        if (!cc || cc->any_char()) return false;
+        if (cc->normalize()) {
             optimized++;
         }
         return false; // this doesn't move any nodes, so we can always return false
@@ -111,16 +116,14 @@ int Optimizer::single_char_character_classes() {
     // [^B] -> !"B"
     return apply(O_SINGLE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
-        if (!cc || cc->content == ".") return false;
-        int size = cc->content.size() + (cc->dash ? 1 : 0);
-        if (size != 1) return false;
+        if (!cc || cc->any_char() || !cc->is_single_char()) return false;
         Term* parent = cc->get_parent<Term>();
         if (!parent) return false; // should never happen
         log(1, "Optimizing character class: %s", cc->to_string().c_str());
-        if (cc->negation) {
-            parent->prefix = parent->prefix == '!' ? 0 : '!';
+        if (cc->is_negative()) {
+            parent->flip_negation();
         }
-        parent->primary = Primary(String(cc->dash ? "-" : cc->content, parent));
+        parent->set_content(cc->convert_to_string());
         optimized++;
         return true;
     });
@@ -131,13 +134,13 @@ int Optimizer::character_class_negations() {
     // ![^A] -> [A]
     return apply(O_CHAR_CLASS_NEGATION, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
-        if (!t || !t->contains<CharacterClass>() || t->prefix != '!') return false;
+        if (!t || !t->contains<CharacterClass>() || !t->is_negative()) return false;
         CharacterClass cc = t->get<CharacterClass>();
-        if (cc.content == ".") return false;
+        if (cc.any_char()) return false;
         log(1, "Simplifying character class negation: %s", t->to_string().c_str());
-        cc.negation = !cc.negation;
-        t->prefix = 0;
-        t->primary = cc;
+        cc.flip_negation();
+        t->set_prefix(0);
+        t->set_content(cc);
         t->update_parents();
         return true;
     });
@@ -147,17 +150,21 @@ int Optimizer::double_negations() {
     // !(!A) -> A
     return apply(O_DOUBLE_NEGATION, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
-        if (!t || !t->contains<Group>() || t->prefix != '!') return false;
+        if (!t || !t->contains<Group>() || !t->is_negative()) return false;
         Group group = t->get<Group>();
         if (!group.has_single_term()) return false;
-        Term inner_term = group.expression->sequences[0].terms[0];
-        if (inner_term.prefix != '!') return false;
+        Term inner_term = group.get_first_term();
+        if (!inner_term.is_negative()) return false;
         log(1, "Optimizing double negation: %s", t->to_string().c_str());
         *t = inner_term;
-        t->prefix = 0;
+        t->set_prefix(0);
         t->update_parents();
         return true;
     });
+}
+
+int optimize_double_quantifiers(const Term& outer, const Term& inner) {
+    return (inner.quantifier == outer.quantifier) ? outer.quantifier : '*';
 }
 
 int Optimizer::double_quantifications() {
@@ -167,15 +174,14 @@ int Optimizer::double_quantifications() {
     //  A+ | A* | A* | A+   e.g.: (A?)? -> A?
     return apply(O_DOUBLE_QUANTIFICATION, [](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
-        if (!t || !t->contains<Group>() || t->quantifier == 0) return false;
+        if (!t || !t->contains<Group>() || !t->is_quantified()) return false;
         Group group = t->get<Group>();
         if (!group.has_single_term()) return false;
-        Term inner_term = group.expression->sequences[0].terms[0];
-        if (inner_term.quantifier == 0 || inner_term.prefix) return false;
+        Term inner_term = group.get_first_term();
+        if (!inner_term.is_quantified() || inner_term.is_prefixed()) return false;
         log(1, "Optimizing double quantification: %s", t->to_string().c_str());
-        int q = (inner_term.quantifier == t->quantifier) ? t->quantifier : '*';
-        t->primary = inner_term.primary;
-        t->quantifier = q;
+        t->copy_content(inner_term);
+        t->set_quantifier(optimize_double_quantifiers(*t, inner_term));
         t->update_parents();
         return true;
     });
@@ -186,24 +192,24 @@ int Optimizer::remove_unnecessary_groups() {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>()) return false;
         Group group = t->get<Group>();
-        if (group.expression->sequences.size() > 1) return false;
-
-        if (!t->prefix && !t->quantifier) {
+        if (!group.has_single_sequence()) return false;
+        const Term& first_term = group.get_first_term();
+        if (t->is_simple()) {
             // A (B C) D -> A B C D
             log(1, "Removing grouping from '%s'", group.parent->to_string().c_str());
             Sequence* s = t->parent->as<Sequence>();
             int pos;
             for (pos = 0; pos < s->size(); pos++) {
-                if (&(s->terms[pos]) == t) break;
+                if (&(s->get(pos)) == t) break;
             }
-            s->terms.erase(s->terms.begin()+pos);
-            s->terms.insert(s->terms.begin()+pos, group.expression->sequences[0].terms.begin(), group.expression->sequences[0].terms.end());
+            s->erase(pos);
+            s->insert(pos, group.get_first_sequence());
             s->update_parents();
             optimized++;
-        } else if (group.has_single_term() && !group.expression->sequences[0].terms[0].prefix && !group.expression->sequences[0].terms[0].quantifier) {
+        } else if (group.has_single_term() && first_term.is_simple()) {
             // A (B)* C -> A B* C
             log(1, "Removing grouping from %s", group.parent->to_string().c_str());
-            t->primary = group.expression->sequences[0].terms[0].primary;
+            t->copy_content(first_term);
             t->update_parents();
             optimized++;
         }
@@ -214,14 +220,14 @@ int Optimizer::remove_unnecessary_groups() {
 int Optimizer::unused_variables() {
     return apply(O_UNUSED_VARIABLE, [](Node& node, int& optimized) -> bool {
         Reference* r = node.as<Reference>();
-        if (!r || r->var.empty()) return false;
+        if (!r || !r->has_variable()) return false;
         Rule* rule = node.get_ancestor<Rule>();
         std::vector<Action*> actions = rule->find_all<Action>([r](const Action& action) -> bool {
-            return action.contains_var(r->var);
+            return action.contains_reference(*r);
         });
         if (!actions.empty()) return false;
-        log(1, "Removing unused variable reference '%s' in rule %s.", r->var.c_str(), rule->to_string().c_str());
-        r->var.clear();
+        log(1, "Removing unused variable reference from '%s' in rule %s.", r->to_string().c_str(), rule->to_string().c_str());
+        r->remove_variable();
         return true;
     });
 }
@@ -236,12 +242,11 @@ int Optimizer::unused_captures() {
         std::vector<Action*> actions = rule->find_all<Action>();
 
         for (int i = 0; i < captures.size(); i++) {
-            std::regex re(".*\\$" + std::to_string(i + 1) + "\\b.*");
-            bool used_in_source = std::any_of(actions.begin(), actions.end(), [re](const Action* action){
-                return std::regex_match(action->code, re);
+            bool used_in_source = std::any_of(actions.begin(), actions.end(), [i](const Action* action){
+                return action->contains_capture(i + 1);
             });
             bool used_in_expand = std::any_of(expands.begin(), expands.end(), [i](const Expand* expand){
-                return i + 1 == expand->content;
+                return *expand == i + 1;
             });
             if (used_in_source || used_in_expand) {
                 continue;
@@ -249,17 +254,18 @@ int Optimizer::unused_captures() {
             log(1, "Removing unused capture '%s' in rule %s.", captures[i]->to_string().c_str(), rule->to_string().c_str());
             ;
             Term* parent = captures[i]->get_parent<Term>();
-            parent->primary = Group(*(captures[i]->expression), nullptr);
+            parent->set_content(captures[i]->convert_to_group());
             parent->update_parents();
             for (int j = 0; j < expands.size(); j++) {
-                if (expands[j]->content <= i) continue;
-                log(2, "Replacing expand '$%d' -> '$%d'", expands[j]->content, expands[j]->content-1);
-                expands[j]->content--;
+                if (*expands[j] <= i) continue;
+                std::string prev = expands[j]->to_string();
+                expands[j]->shift(-1);
+                log(2, "Replacing expand '%d' -> '%d'", prev.c_str(), expands[j]->to_string().c_str());
             }
             for (int j = 0; j < actions.size(); j++) {
                 for (int k = i+2; k <= captures.size(); k++) {
                     log(2, "Replacing '$%d' -> '$%d' in action %s", k, k-1, actions[j]->to_string().c_str());
-                    actions[j]->code = replace(actions[j]->code, "\\$" + std::to_string(k) + "\\b", "$$" + std::to_string(k-1));
+                    actions[j]->renumber_capture(k, k - 1);
                 }
             }
             return true;
@@ -282,27 +288,26 @@ int Optimizer::inline_rules() {
     int candidate = -1;
     int optimized = 0;
     double min_score = Config::get<double>("inline-limit");
+
+    std::vector<Rule*> rules = g.find_all<Rule>();
     // intentionally skipping the first rule, because it is the main one, which can't be inlined anyway
-    for (int i = g.rules.size() - 1; i > 0; i--) {
-        Rule& rule = g.rules[i];
+    for (int i = rules.size() - 1; i > 0; i--) {
+        Rule& rule = *rules[i];
 
         // check for direct recursion
-        bool is_recursive = !rule.find_all<Reference>([rule](const Reference& node) -> bool {
-            return node.name == rule.name;
+        bool is_recursive = !rule.find_all<Reference>([rule](const Reference& ref) -> bool {
+            return ref.references(&rule);
         }).empty();
         if (is_recursive) {
-            log(2, "Not inlining %s: rule is recursive", rule.name.c_str());
+            log(2, "Not inlining %s: rule is recursive", rule.c_str());
             continue;
         }
 
-        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& node) -> bool {
-            Reference* ref = node.as<Reference>();
-            if (!ref) return false;
-            return ref->name == rule.name;
+        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& ref) -> bool {
+            return ref.references(&rule);
         });
 
         double score = calculate_score(rule.count_terms() + rule.count_cc_tokens(), refs.size());
-        //~ printf("DBG: %s score = %f, best = %f, refs=%d, terms=%d\n", rule.name.c_str(), score, best_score, refs.size(), rule.expression.sequences[0].size());
 
         if (score > best_score) {
             best_score = score;
@@ -310,21 +315,19 @@ int Optimizer::inline_rules() {
         }
     }
     if (candidate >= 0 && best_score >= min_score) {
-        Rule& rule = g.rules[candidate];
-        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& node) -> bool {
-            Reference* ref = node.as<Reference>();
-            if (!ref) return false;
-            return ref->name == rule.name;
+        Rule& rule = *rules[candidate];
+        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& ref) -> bool {
+            return ref.references(&rule);
         });
 
         int src_captures = rule.find_all<Capture>().size();
 
-        log(1, "Inlining rule %s (score %f)", rule.name.c_str(), best_score);
+        log(1, "Inlining rule %s (score %f)", rule.c_str(), best_score);
         for (int j = 0; j < refs.size(); j++) {
             Term* dest = refs[j]->parent->as<Term>();
-            Group group(rule.expression, nullptr);
+            Group group = rule.convert_to_group();
             log(2, "  Inlining %s into %s", group.to_string().c_str(), dest->to_string().c_str());
-            dest->primary = group;
+            dest->set_content(group);
             dest->update_parents();
             // fix capture references in expands and actions
             if (src_captures) {
@@ -347,7 +350,7 @@ int Optimizer::inline_rules() {
                     bool after = false;
                     int shift = 0;
                     dest_rule->map([&](Node& node) mutable {
-                        if (&node == std::get_if<Group>(&dest->primary)) {
+                        if (&node == &dest->get<Group>()) {
                             after = true;
                             return true;
                         }
@@ -358,29 +361,29 @@ int Optimizer::inline_rules() {
                         if (after && node.is<Expand>()) {
                             std::string prev = node.to_string();
                             Expand *e = node.as<Expand>();
-                            e->content += src_captures;
+                            e->shift(src_captures);
                             log(2, "  Update expand: %s -> %s", prev.c_str(), node.to_string().c_str());
                         } else if (after && node.is<Action>()) {
                             std::string prev = node.to_string();
                             Action *a = node.as<Action>();
                             for (int k = dest_captures; k >= 1; k--) {
-                                a->code = replace(a->code, "\\$" + std::to_string(k) + "\\b", "$$" + std::to_string(k + src_captures));
+                                a->renumber_capture(k, k + src_captures);
                             }
                             log(2, "  Update action: %s -> %s", prev.c_str(), node.to_string().c_str());
                         }
                         return false;
                     });
-                    std::get_if<Group>(&dest->primary)->map([&](Node& node){
+                    dest->get<Group>().map([&](Node& node){
                         if (node.is<Expand>()) {
                             std::string prev = node.to_string();
                             Expand *e = node.as<Expand>();
-                            e->content += shift;
+                            e->shift(shift);
                             log(2, "  Update expand: %s -> %s", prev.c_str(), node.to_string().c_str());
                         } else if (node.is<Action>()) {
                             std::string prev = node.to_string();
                             Action *a = node.as<Action>();
                             for (int k = src_captures; k >= 1; k--) {
-                                a->code = replace(a->code, "\\$" + std::to_string(k) + "\\b", "$$" + std::to_string(k + shift));
+                                a->renumber_capture(k, k + shift);
                             }
                             log(2, "  Update action: %s -> %s", prev.c_str(), node.to_string().c_str());
                         }
@@ -390,8 +393,8 @@ int Optimizer::inline_rules() {
             }
             debug("  Inlining result: %s", dest->to_string().c_str());
         }
-        log(2, "  Removing inlined rule %s", rule.name.c_str());
-        g.rules.erase(g.rules.begin() + candidate);
+        log(2, "  Removing inlined rule %s", rule.c_str());
+        g.erase(&rule);
         g.update_parents();
         return true;
     }

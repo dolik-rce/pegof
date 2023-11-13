@@ -29,6 +29,14 @@ std::string String::dump(std::string indent) const {
     return indent + "STRING " + to_c_string(content);
 }
 
+const char* String::c_str() const {
+    return content.c_str();
+}
+
+void String::append(const char* str) {
+    content += str;
+}
+
 bool operator==(const String& a, const String& b) {
     return a.content == b.content;
 }

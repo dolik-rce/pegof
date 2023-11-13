@@ -2,9 +2,8 @@
 #include "ast/node.h"
 
 class Code : public Node {
-public:
     std::string content;
-
+public:
     Code(const std::string& content, Node* parent);
     Code(Parser& p, Node* parent);
 

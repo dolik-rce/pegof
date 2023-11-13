@@ -116,12 +116,55 @@ long Term::size() const {
     return 1;
 }
 
+bool Term::is_quantified() const {
+    return quantifier != 0;
+}
+bool Term::is_prefixed() const {
+    return prefix != 0;
+}
+
 bool Term::is_greedy() const {
     return quantifier == '*' || quantifier == '+';
 }
 
 bool Term::is_optional() const {
     return quantifier == '*' || quantifier == '?';
+}
+
+bool Term::is_simple() const {
+    return !prefix && !quantifier;
+}
+
+bool Term::is_negative() const {
+    return prefix == '!';
+}
+
+void Term::flip_negation() {
+    prefix = is_negative() ? 0 : '!';
+}
+
+void Term::set_prefix(int new_prefix) {
+    prefix = new_prefix;
+}
+
+void Term::set_quantifier(int new_quantifier) {
+    quantifier = new_quantifier;
+}
+
+void Term::set_content(Primary content) {
+    primary = content;
+}
+
+void Term::copy_prefix(const Term& other) {
+    prefix = other.prefix;
+}
+
+void Term::copy_quantifier(const Term& other) {
+    quantifier = other.quantifier;
+}
+
+void Term::copy_content(const Term& other) {
+    primary = other.primary;
 }
 
 bool operator==(const Term& a, const Term& b) {

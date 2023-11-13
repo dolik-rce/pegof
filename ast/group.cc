@@ -56,8 +56,20 @@ long Group::size() const {
     return 1;
 }
 
+bool Group::has_single_sequence() const {
+    return expression->size() == 1;
+}
+
 bool Group::has_single_term() const {
     return expression->has_single_term();
+}
+
+const Sequence& Group::get_first_sequence() const {
+    return expression->get_first_sequence();
+}
+
+const Term& Group::get_first_term() const {
+    return get_first_sequence().get_first_term();
 }
 
 bool operator==(const Group& a, const Group& b) {

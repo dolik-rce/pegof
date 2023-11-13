@@ -1,5 +1,6 @@
 #include "node.h"
 #include "log.h"
+#include "ast/grammar.h"
 
 Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(type) {
     debug("Creating %s @%p, parent: %p", type, this, parent);
@@ -87,4 +88,30 @@ void Node::update_parents() {
         n->parent = this;
         n->update_parents();
     }
+}
+
+#define CMP(TYPE) if (a.is<TYPE>()) { return *(TYPE*)(&a) == *(TYPE*)(&b); }
+
+bool operator==(const Node& a, const Node& b) {
+    if (a.type != b.type) return false;
+    CMP(Action);
+    CMP(Alternation);
+    CMP(Capture);
+    CMP(Code);
+    CMP(Directive);
+    CMP(Expand);
+    CMP(Grammar);
+    CMP(Group);
+    CMP(CharacterClass);
+    CMP(Reference);
+    CMP(Rule);
+    CMP(Sequence);
+    CMP(String);
+    CMP(Term);
+    return false;
+}
+#undef CMP
+
+bool operator!=(const Node& a, const Node& b) {
+    return !(a == b);
 }

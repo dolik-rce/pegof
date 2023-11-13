@@ -53,6 +53,14 @@ bool Sequence::has_single_term() const {
     return terms.size() == 1;
 }
 
+const Term& Sequence::get_first_term() const {
+    return terms[0];
+}
+
+Term& Sequence::get(int index) {
+    return terms[index];
+}
+
 Node* Sequence::operator[](int index) {
     if (index < terms.size()) {
         return &(terms[index]);
@@ -63,6 +71,21 @@ Node* Sequence::operator[](int index) {
 
 long Sequence::size() const {
     return terms.size();
+}
+
+void Sequence::insert(int index, const Sequence& s) {
+    terms.insert(terms.begin() + index, s.terms.begin(), s.terms.end());
+}
+
+void Sequence::erase(Term* term) {
+    std::vector<Term>::iterator it = std::find_if(terms.begin(), terms.end(), [term](const Term& t) {
+        return &t == term;
+    });
+    terms.erase(it);
+}
+
+void Sequence::erase(int index) {
+    terms.erase(terms.begin() + index);
 }
 
 bool operator==(const Sequence& a, const Sequence& b) {
