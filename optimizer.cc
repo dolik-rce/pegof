@@ -308,6 +308,7 @@ int Optimizer::inline_rules() {
         });
 
         double score = calculate_score(rule.count_terms() + rule.count_cc_tokens(), refs.size());
+        log(4, "Score for %s: %f", rule.c_str(), score);
 
         if (score > best_score) {
             best_score = score;

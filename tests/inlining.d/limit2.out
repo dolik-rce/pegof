@@ -1,0 +1,4 @@
+main <- "A" X "B" X "C" X "D" X "E" X "F" X "G" X "H" X "I" X "J" X
+
+# inline score for X is 1/sqrt(2 * 10) = 0.2236
+X <- ";" "\n"*
