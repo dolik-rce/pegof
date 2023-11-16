@@ -1,5 +1,5 @@
-#include "capture.h"
-#include "alternation.h"
+#include "ast/capture.h"
+#include "ast/alternation.h"
 #include "log.h"
 
 Capture::Capture(const Alternation& expression, Node* parent) : Node("Capture", parent), expression(new Alternation(expression)), num(-1) {}

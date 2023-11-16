@@ -1,6 +1,6 @@
 #pragma once
 #include "ast/node.h"
-#include "sequence.h"
+#include "ast/sequence.h"
 
 class Alternation : public Node {
     std::vector<Sequence> sequences;

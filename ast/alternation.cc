@@ -1,4 +1,4 @@
-#include "alternation.h"
+#include "ast/alternation.h"
 #include "rule.h"
 #include "config.h"
 #include "log.h"

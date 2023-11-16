@@ -1,4 +1,4 @@
-#include "directive.h"
+#include "ast/directive.h"
 #include "utils.h"
 #include "log.h"
 

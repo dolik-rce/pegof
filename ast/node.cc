@@ -1,6 +1,6 @@
-#include "node.h"
-#include "log.h"
+#include "ast/node.h"
 #include "ast/grammar.h"
+#include "log.h"
 
 Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(type) {
     debug("Creating %s @%p, parent: %p", type, this, parent);

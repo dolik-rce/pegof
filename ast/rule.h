@@ -1,6 +1,6 @@
 #pragma once
 #include "ast/node.h"
-#include "alternation.h"
+#include "ast/alternation.h"
 
 class Group;
 

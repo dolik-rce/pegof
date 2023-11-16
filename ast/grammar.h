@@ -1,9 +1,9 @@
 #pragma once
 #include "ast/node.h"
-#include "reference.h"
-#include "directive.h"
-#include "rule.h"
-#include "code.h"
+#include "ast/reference.h"
+#include "ast/directive.h"
+#include "ast/rule.h"
+#include "ast/code.h"
 
 class Grammar : public Node {
     std::vector<Directive> directives;
