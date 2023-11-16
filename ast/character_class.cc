@@ -1,4 +1,4 @@
-#include "character_class.h"
+#include "ast/character_class.h"
 #include "packcc_wrapper.h"
 #include "utils.h"
 #include "log.h"

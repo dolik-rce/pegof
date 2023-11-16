@@ -1,5 +1,5 @@
-#include "group.h"
-#include "alternation.h"
+#include "ast/group.h"
+#include "ast/alternation.h"
 #include "log.h"
 
 Group::Group(const Alternation& expression, Node* parent) : Node("Group", parent), expression(new Alternation(expression)) {}

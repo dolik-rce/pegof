@@ -1,4 +1,4 @@
-#include "expand.h"
+#include "ast/expand.h"
 #include "log.h"
 
 Expand::Expand(int content, Node* parent) : Node("Expand", parent), content(content) {}

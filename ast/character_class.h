@@ -1,6 +1,6 @@
 #pragma once
 #include "ast/node.h"
-#include "ast/stringnode.h"
+#include "ast/string.h"
 
 class CharacterClass : public Node {
     std::string content;

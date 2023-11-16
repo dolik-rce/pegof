@@ -1,5 +1,5 @@
-#include "reference.h"
-#include "rule.h"
+#include "ast/reference.h"
+#include "ast/rule.h"
 #include "log.h"
 
 Reference::Reference(const std::string& name, const std::string& var, Node* parent) : Node("Reference", parent), name(name), var(var) {}

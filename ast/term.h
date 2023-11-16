@@ -2,13 +2,13 @@
 #include <variant>
 
 #include "ast/node.h"
-#include "stringnode.h"
-#include "reference.h"
-#include "character_class.h"
-#include "expand.h"
-#include "action.h"
-#include "capture.h"
-#include "group.h"
+#include "ast/string.h"
+#include "ast/reference.h"
+#include "ast/character_class.h"
+#include "ast/expand.h"
+#include "ast/action.h"
+#include "ast/capture.h"
+#include "ast/group.h"
 
 using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture>;
 

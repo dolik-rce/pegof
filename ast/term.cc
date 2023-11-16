@@ -1,4 +1,4 @@
-#include "term.h"
+#include "ast/term.h"
 #include "log.h"
 
 Term::Term(char prefix, char quantifier, const Primary& primary, Node* parent) : Node("Term", parent), prefix(prefix), quantifier(quantifier), primary(primary) {}

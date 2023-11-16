@@ -1,4 +1,4 @@
-#include "sequence.h"
+#include "ast/sequence.h"
 #include "log.h"
 
 Sequence::Sequence(const std::vector<Term>& terms, Node* parent) : Node("Sequence", parent), terms(terms) {}

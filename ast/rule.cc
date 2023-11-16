@@ -1,4 +1,4 @@
-#include "rule.h"
+#include "ast/rule.h"
 #include "config.h"
 #include "log.h"
 
