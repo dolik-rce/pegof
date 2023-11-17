@@ -12,9 +12,10 @@ int Optimizer::apply(const Optimization& config, const std::function<bool(Node&,
         return 0;
     }
     int optimized = 0;
-    g.map([optimized, transform](Node& node) mutable -> bool {
+    g.map([&optimized, transform](Node& node) mutable -> bool {
         return transform(node, optimized);
     });
+    debug("apply returns %d", optimized);
     return optimized;
 }
 
@@ -43,7 +44,7 @@ int Optimizer::concat_strings() {
                 prev_term = nullptr;
             }
         }
-        return optimized;
+        return optimized > 0;
     });
 }
 
@@ -89,11 +90,12 @@ int Optimizer::simplify_repeats() {
         for (int i = 1; i < s->size(); i++) {
             switch (optimize_repeating_terms(s->get(i-1), s->get(i))) {
             case -1: continue;
-            case 0: return true;
+            case 0: optimized++; return true;
             case 1: s->erase(i - 1); break;
             case 2: s->erase(i); break;
             }
             s->update_parents();
+            optimized++;
             return true;
         }
         return false;
@@ -142,6 +144,7 @@ int Optimizer::character_class_negations() {
         t->set_prefix(0);
         t->set_content(cc);
         t->update_parents();
+        optimized++;
         return true;
     });
 }
@@ -159,6 +162,7 @@ int Optimizer::double_negations() {
         *t = inner_term;
         t->set_prefix(0);
         t->update_parents();
+        optimized++;
         return true;
     });
 }
@@ -183,12 +187,30 @@ int Optimizer::double_quantifications() {
         t->copy_content(inner_term);
         t->set_quantifier(optimize_double_quantifiers(*t, inner_term));
         t->update_parents();
+        optimized++;
         return true;
     });
 }
 
 int Optimizer::remove_unnecessary_groups() {
     return apply(O_REMOVE_GROUP, [](Node& node, int& optimized) -> bool {
+        Alternation* a = node.as<Alternation>();
+        if (a) {
+            for (int pos = 0; pos < a->size(); pos++) {
+                Sequence& s = a->get(pos);
+                if (!s.has_single_term()) continue;
+                Term term = s.get_first_term();
+                if (!term.is_simple() || !term.contains<Group>()) continue;
+                // A / (B / C) / D -> A / B / C / D
+                log(1, "Removing grouping from '%s'", term.to_string().c_str());
+                Group group = term.get<Group>();
+                a->erase(pos);
+                a->insert(pos, group.convert_to_alternation());
+                a->update_parents();
+                optimized++;
+                return true;
+            }
+        }
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>()) return false;
         Group group = t->get<Group>();
@@ -206,14 +228,16 @@ int Optimizer::remove_unnecessary_groups() {
             s->insert(pos, group.get_first_sequence());
             s->update_parents();
             optimized++;
+            return true;
         } else if (group.has_single_term() && first_term.is_simple()) {
             // A (B)* C -> A B* C
             log(1, "Removing grouping from %s", group.parent->to_string().c_str());
             t->copy_content(first_term);
             t->update_parents();
             optimized++;
+            return true;
         }
-        return optimized;
+        return false;
     });
 }
 
@@ -228,6 +252,7 @@ int Optimizer::unused_variables() {
         if (!actions.empty()) return false;
         log(1, "Removing unused variable reference from '%s' in rule %s.", r->to_string().c_str(), rule->to_string().c_str());
         r->remove_variable();
+        optimized++;
         return true;
     });
 }
@@ -268,6 +293,7 @@ int Optimizer::unused_captures() {
                     actions[j]->renumber_capture(k, k - 1);
                 }
             }
+            optimized++;
             return true;
         }
         return false;
@@ -397,6 +423,7 @@ int Optimizer::inline_rules() {
         log(2, "  Removing inlined rule %s", rule.c_str());
         g.erase(&rule);
         g.update_parents();
+        optimized++;
         return true;
     }
     return false;

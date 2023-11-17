@@ -73,12 +73,13 @@ std::string Node::dump_comments() const {
     return " (" + result + ")";
 }
 
-void Node::map(const std::function<bool(Node&)>& transform) {
-    if (transform(*this)) return;
+bool Node::map(const std::function<bool(Node&)>& transform) {
+    if (transform(*this)) return true;
     for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
-        n->map(transform);
+        if (n->map(transform)) return true;
     }
+    return false;
 }
 
 void Node::update_parents() {

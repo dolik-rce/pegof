@@ -22,6 +22,7 @@ public:
     bool has_single_term() const;
     const Sequence& get_first_sequence() const;
     const Term& get_first_term() const;
+    const Alternation& convert_to_alternation() const;
 
     friend bool operator==(const Group& a, const Group& b);
 };
