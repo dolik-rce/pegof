@@ -46,7 +46,7 @@ public:
     template <class U>
     void find_all(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
 
-    void map(const std::function<bool(Node&)>& transform);
+    bool map(const std::function<bool(Node&)>& transform);
 
     void parse_comments(Parser& p, bool store = true);
     void parse_post_comment(Parser& p);

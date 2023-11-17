@@ -58,6 +58,10 @@ std::string Alternation::dump(std::string indent) const {
     return result;
 }
 
+Sequence& Alternation::get(int index) {
+    return sequences[index];
+}
+
 Node* Alternation::operator[](int index) {
     if (index < sequences.size()) {
         return &(sequences[index]);
@@ -76,6 +80,14 @@ bool Alternation::has_single_term() const {
 
 const Sequence& Alternation::get_first_sequence() const {
     return sequences[0];
+}
+
+void Alternation::insert(int index, const Alternation& a) {
+    sequences.insert(sequences.begin() + index, a.sequences.begin(), a.sequences.end());
+}
+
+void Alternation::erase(int index) {
+    sequences.erase(sequences.begin() + index);
 }
 
 bool operator==(const Alternation& a, const Alternation& b) {

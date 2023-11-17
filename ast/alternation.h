@@ -13,11 +13,15 @@ public:
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string indent = "") const override;
 
+    Sequence& get(int index);
     virtual Node* operator[](int index);
     virtual long size() const;
 
     bool has_single_term() const;
     const Sequence& get_first_sequence() const;
+
+    void insert(int index, const Alternation& a);
+    void erase(int index);
 
     friend bool operator==(const Alternation& a, const Alternation& b);
 };

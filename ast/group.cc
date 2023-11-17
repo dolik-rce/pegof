@@ -72,6 +72,10 @@ const Term& Group::get_first_term() const {
     return get_first_sequence().get_first_term();
 }
 
+const Alternation& Group::convert_to_alternation() const {
+    return *expression;
+}
+
 bool operator==(const Group& a, const Group& b) {
     return *a.expression == *b.expression;
 }
