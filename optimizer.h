@@ -18,6 +18,8 @@ class Optimizer {
     int unused_variables();
     int unused_captures();
 public:
+    static void warn_once(const std::string& warning);
+
     Optimizer(Grammar& g);
     Grammar optimize();
 };

@@ -3,9 +3,18 @@
 #include "utils.h"
 #include "log.h"
 
+#include <set>
 #include <math.h>
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
+
+void Optimizer::warn_once(const std::string& warning) {
+    static std::set<std::string> warnings;
+    if (warnings.count(warning) == 0) {
+        warn("%s", warning.c_str());
+        warnings.insert(warning);
+    }
+}
 
 int Optimizer::apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform) {
     if (!Config::get(config)) {
@@ -15,7 +24,6 @@ int Optimizer::apply(const Optimization& config, const std::function<bool(Node&,
     g.map([&optimized, transform](Node& node) mutable -> bool {
         return transform(node, optimized);
     });
-    debug("apply returns %d", optimized);
     return optimized;
 }
 
@@ -56,7 +64,7 @@ int optimize_repeating_terms(Term& t1, Term& t2) {
     if (t1.is_greedy() && t2.is_optional()) {
         return 2; // delete t2
     } else if (t1.is_greedy() && !t2.is_optional()) {
-        warn("Detected sequence that will never match: %s %s", t1.to_string().c_str(), t2.to_string().c_str());
+        Optimizer::warn_once("Detected sequence that will never match: " + t1.to_string() + " " + t2.to_string());
         return -1; //do nothing
     } else if (t1.quantifier == '?') {
         switch (t2.quantifier) {
