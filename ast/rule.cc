@@ -81,7 +81,7 @@ int Rule::count_terms() {
 
 int Rule::count_cc_tokens() {
     std::vector<CharacterClass*> ccs = find_all<CharacterClass>([](const CharacterClass& cc) -> bool {
-        return cc.any_char();
+        return !cc.any_char();
     });
     int count = 0;
     for (CharacterClass* cc: ccs) count += cc->token_count();

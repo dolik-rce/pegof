@@ -44,10 +44,8 @@ file <- ("#!" [^\n\r]* _* NL+)? NL* ((
             userType __* valueArguments
             / userType
         )+ _* "]"
-        / (
-            userType __* valueArguments
-            / userType
-        )
+        / userType __* valueArguments
+        / userType
     ) _* NL*)* _* ("package" !(
         Letter
         / UnicodeDigit
@@ -168,10 +166,7 @@ typeParameter <- (
         / UnicodeDigit
     ) __*
     / (
-        "in" !(
-            Letter
-            / UnicodeDigit
-        )
+        IN
         / "out" !(
             Letter
             / UnicodeDigit
@@ -213,7 +208,7 @@ classMemberDeclarations <- ((
             ) __*)? "object" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_OBJECT); } <(__* simpleIdentifier)?> { makeKotlinTag(auxil, $1e-$1s != 0 ? $1 : "Companion", $1s, true); } (__* ":" __* (annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*))? (__* classBody)? { POP_SCOPE(auxil); }
+        ) { PUSH_KIND(auxil, K_OBJECT); } <(__* simpleIdentifier)?> { makeKotlinTag(auxil, $1e-$1s != 0 ? $1 : "Companion", $1s, true); } (__* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*)? (__* classBody)? { POP_SCOPE(auxil); }
         / declaration
     ) (_* (
             ";"
@@ -224,19 +219,17 @@ functionValueParameters <- "(" __* (functionValueParameter (__* "," __* function
 
 functionValueParameter <- (
     annotation
-    / (
-        "vararg" !(
-            Letter
-            / UnicodeDigit
-        )
-        / "noinline" !(
-            Letter
-            / UnicodeDigit
-        )
-        / "crossinline" !(
-            Letter
-            / UnicodeDigit
-        )
+    / "vararg" !(
+        Letter
+        / UnicodeDigit
+    )
+    / "noinline" !(
+        Letter
+        / UnicodeDigit
+    )
+    / "crossinline" !(
+        Letter
+        / UnicodeDigit
     )
 )* _* simpleIdentifier __* ":" __* type (__* "=" !"=" __* expression)?
 
@@ -273,19 +266,17 @@ setter <-
 
 parameterWithOptionalType <- (
     annotation
-    / (
-        "vararg" !(
-            Letter
-            / UnicodeDigit
-        )
-        / "noinline" !(
-            Letter
-            / UnicodeDigit
-        )
-        / "crossinline" !(
-            Letter
-            / UnicodeDigit
-        )
+    / "vararg" !(
+        Letter
+        / UnicodeDigit
+    )
+    / "noinline" !(
+        Letter
+        / UnicodeDigit
+    )
+    / "crossinline" !(
+        Letter
+        / UnicodeDigit
     )
 )* simpleIdentifier __* (":" __* type)?
 
@@ -297,22 +288,18 @@ type <- (
     functionType
     / nullableType
     / "(" __* type __* ")"
-    / (
-        userType
-        / "dynamic" !(
-            Letter
-            / UnicodeDigit
-        )
+    / userType
+    / "dynamic" !(
+        Letter
+        / UnicodeDigit
     )
 )
 
 nullableType <- (
-    (
-        userType
-        / "dynamic" !(
-            Letter
-            / UnicodeDigit
-        )
+    userType
+    / "dynamic" !(
+        Letter
+        / UnicodeDigit
     )
     / "(" __* type __* ")"
 ) __* (!"?:" (
@@ -321,22 +308,6 @@ nullableType <- (
     ))+
 
 userType <- simpleIdentifier (__* typeArguments)? (__* "." __* simpleIdentifier (__* typeArguments)?)*
-
-typeProjection <-
-    (
-        (
-            "in" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "out" !(
-                Letter
-                / UnicodeDigit
-            )
-        ) __*
-        / annotation
-    )* type
-    / "*"
 
 functionType <- (receiverType __* "." __*)? "(" __* (
     simpleIdentifier __* ":" __* type
@@ -352,12 +323,10 @@ receiverType <- ((
     )+ _*)? (
     nullableType
     / "(" __* type __* ")"
-    / (
-        userType
-        / "dynamic" !(
-            Letter
-            / UnicodeDigit
-        )
+    / userType
+    / "dynamic" !(
+        Letter
+        / UnicodeDigit
     )
 )
 
@@ -387,65 +356,60 @@ statement <- (
 )* (
     declaration
     / (
-        (
-            postfixUnaryExpression _* (
-                navigationSuffix
-                / typeArguments
-                / indexingSuffix
-            )
-            / postfixUnaryExpression
-            / simpleIdentifier
-            / parenthesizedDirectlyAssignableExpression
-        ) _* "=" !"=" __* expression
-        / (
-            prefixUnaryExpression
-            / parenthesizedAssignableExpression
-        ) _* (
-            "+="
-            / "-="
-            / "*="
-            / "/="
-            / "%="
-        ) __* expression
-    )
-    / (
-        "for" !(
-            Letter
-            / UnicodeDigit
-        ) __* "(" _* annotation* _* (
-            variableDeclaration
-            / multiVariableDeclaration
-        ) _ "in" !(
-            Letter
-            / UnicodeDigit
-        ) _ inside_expression _* ")" __* (
-            block
-            / statement
-        )?
-        / (
-            "while" !(
-                Letter
-                / UnicodeDigit
-            ) __* "(" _* inside_expression _* ")" __* (
-                block
-                / statement
-            )
-            / "while" !(
-                Letter
-                / UnicodeDigit
-            ) __* "(" _* expression _* ")" __* ";"
+        postfixUnaryExpression _* (
+            navigationSuffix
+            / typeArguments
+            / indexingSuffix
         )
-        / "do" !(
-            Letter
-            / UnicodeDigit
-        ) __* (
-            block
-            / statement
-        )? __* "while" !(
-            Letter
-            / UnicodeDigit
-        ) __* "(" _* expression _* ")"
+        / postfixUnaryExpression
+        / simpleIdentifier
+        / parenthesizedDirectlyAssignableExpression
+    ) _* "=" !"=" __* expression
+    / (
+        ((
+                annotation
+                / label
+                / prefixUnaryOperator __*
+            ) _*)* postfixUnaryExpression
+        / parenthesizedAssignableExpression
+    ) _* (
+        "+="
+        / "-="
+        / "*="
+        / "/="
+        / "%="
+    ) __* expression
+    / "for" !(
+        Letter
+        / UnicodeDigit
+    ) __* "(" _* annotation* _* (
+        variableDeclaration
+        / multiVariableDeclaration
+    ) _ IN _ inside_expression _* ")" __* (
+        block
+        / statement
+    )?
+    / "while" !(
+        Letter
+        / UnicodeDigit
+    ) __* "(" _* inside_expression _* ")" __* (
+        block
+        / statement
     )
+    / "while" !(
+        Letter
+        / UnicodeDigit
+    ) __* "(" _* expression _* ")" __* ";"
+    / "do" !(
+        Letter
+        / UnicodeDigit
+    ) __* (
+        block
+        / statement
+    )? __* "while" !(
+        Letter
+        / UnicodeDigit
+    ) __* "(" _* expression _* ")"
     / expression
 )
 
@@ -485,7 +449,13 @@ equality <- genericCallLikeComparison (_* (
         ) __* genericCallLikeComparison _*)* _*)*
 
 genericCallLikeComparison <- elvisExpression (
-    _* inOperator __* elvisExpression
+    _* (
+        IN
+        / "!in" !(
+            Letter
+            / UnicodeDigit
+        )
+    ) __* elvisExpression
     / _* isOperator __* type
 )* (_* callSuffix)*
 
@@ -502,48 +472,31 @@ rangeExpression <- multiplicativeExpression (_* (
             / "-"
         ) __* multiplicativeExpression)*)*
 
-multiplicativeExpression <- prefixUnaryExpression (__* (
+multiplicativeExpression <- asExpression (_* (
+        "*"
+        / "/"
+        / "%"
+    ) __* asExpression)*
+
+asExpression <- ((
+        annotation
+        / label
+        / prefixUnaryOperator __*
+    ) _*)* postfixUnaryExpression (__* (
         "as?"
         / "as" !(
             Letter
             / UnicodeDigit
         )
-    ) __* type)* (_* (
-        "*"
-        / "/"
-        / "%"
-    ) __* prefixUnaryExpression (__* (
-            "as?"
-            / "as" !(
-                Letter
-                / UnicodeDigit
-            )
-        ) __* type)*)*
-
-prefixUnaryExpression <- ((
-        annotation
-        / label
-        / (
-            "++"
-            / "--"
-            / "-"
-            / "+"
-            / (
-                "!" Hidden
-                / "!"
-            )
-        ) __*
-    ) _*)* postfixUnaryExpression
+    ) __* type)*
 
 postfixUnaryExpression <-
     primaryExpression (_* (
-            (
-                "++"
-                / "--"
-                / "!" (
-                    "!" Hidden
-                    / "!"
-                )
+            "++"
+            / "--"
+            / "!" (
+                "!" Hidden
+                / "!"
             )
             / typeArguments
             / callSuffix
@@ -567,7 +520,14 @@ parenthesizedDirectlyAssignableExpression <- "(" __* (
 ) __* ")"
 
 parenthesizedAssignableExpression <- "(" __* (
-    inside_prefixUnaryExpression
+    ((
+            annotation
+            / label
+            / prefixUnaryOperator __*
+        ) (
+            _
+            / NL
+        )*)* inside_postfixUnaryExpression
     / parenthesizedAssignableExpression
 ) __* ")"
 
@@ -590,58 +550,72 @@ callSuffix <-
     typeArguments? _* valueArguments? _* annotation* _* label? __* lambdaLiteral
     / typeArguments? _* valueArguments
 
-typeArguments <- "<" __* typeProjection (__* "," __* typeProjection)* (__* ",")? __* ">"
+typeArguments <- "<" __* (
+    (
+        (
+            IN
+            / "out" !(
+                Letter
+                / UnicodeDigit
+            )
+        ) __*
+        / annotation
+    )* type
+    / "*"
+) (__* "," __* (
+        (
+            (
+                IN
+                / "out" !(
+                    Letter
+                    / UnicodeDigit
+                )
+            ) __*
+            / annotation
+        )* type
+        / "*"
+    ))* (__* ",")? __* ">"
 
 valueArguments <-
     "(" __* ")"
-    / "(" __* annotation? __* (simpleIdentifier __* ("=" !"=") __*)? "*"? __* inside_expression (__* "," __* (annotation? __* (simpleIdentifier __* ("=" !"=") __*)? "*"? __* inside_expression))* (__* ",")? __* ")"
+    / "(" __* annotation? __* (simpleIdentifier __* "=" !"=" __*)? "*"? __* inside_expression (__* "," __* annotation? __* (simpleIdentifier __* "=" !"=" __*)? "*"? __* inside_expression)* (__* ",")? __* ")"
 
 #valueArgument <- annotation? __* (simpleIdentifier __* ASSIGNMENT __*)? MULT? __* expression
 primaryExpression <-
-    (
-        "this@" Identifier
-        / "this" !(
-            Letter
-            / UnicodeDigit
-        ) !(
-            Letter
-            / UnicodeDigit
-        )
+    "this@" Identifier
+    / "this" !(
+        Letter
+        / UnicodeDigit
+    ) !(
+        Letter
+        / UnicodeDigit
     )
-    / (
-        "super@" Identifier
-        / "super" !(
-            Letter
-            / UnicodeDigit
-        ) ("<" __* type __* ">")? ("@" simpleIdentifier)?
+    / "super@" Identifier
+    / "super" !(
+        Letter
+        / UnicodeDigit
+    ) ("<" __* type __* ">")? ("@" simpleIdentifier)?
+    / "if" !(
+        Letter
+        / UnicodeDigit
+    ) __* "(" __* expression __* ")" __* (
+        block
+        / statement
+    )? __* ";"? __* "else" !(
+        Letter
+        / UnicodeDigit
+    ) __* (
+        block
+        / statement
+        / ";"
     )
-    / (
-        "if" !(
-            Letter
-            / UnicodeDigit
-        ) __* "(" __* expression __* ")" __* (
-            block
-            / statement
-        )? __* ";"? __* "else" !(
-            Letter
-            / UnicodeDigit
-        ) __* (
-            (
-                block
-                / statement
-            )
-            / ";"
-        )
-        / "if" !(
-            Letter
-            / UnicodeDigit
-        ) __* "(" __* expression __* ")" __* (
-            (
-                block
-                / statement
-            )
-            / ";"
-        )
+    / "if" !(
+        Letter
+        / UnicodeDigit
+    ) __* "(" __* expression __* ")" __* (
+        block
+        / statement
+        / ";"
     )
     / "when" !(
         Letter
@@ -652,11 +626,23 @@ primaryExpression <-
             ) __* variableDeclaration __* "=" !"=" __*)? expression ")")? __* "{" __* ((
             (
                 expression
-                / inOperator __* expression
+                / (
+                    IN
+                    / "!in" !(
+                        Letter
+                        / UnicodeDigit
+                    )
+                ) __* expression
                 / isOperator __* type
             ) (__* "," __* (
                     expression
-                    / inOperator __* expression
+                    / (
+                        IN
+                        / "!in" !(
+                            Letter
+                            / UnicodeDigit
+                        )
+                    ) __* expression
                     / isOperator __* type
                 ))* (__* ",")? __* "->" __* (
                 block
@@ -677,37 +663,35 @@ primaryExpression <-
         (__* "catch" !(
                 Letter
                 / UnicodeDigit
-            ) __* "(" _* (annotation _*)* simpleIdentifier _* ":" _* type (__* ",")? _* ")" __* block)+ (__* ("finally" !(
-                    Letter
-                    / UnicodeDigit
-                )) __* block)?
+            ) __* "(" _* (annotation _*)* simpleIdentifier _* ":" _* type (__* ",")? _* ")" __* block)+ (__* "finally" !(
+                Letter
+                / UnicodeDigit
+            ) __* block)?
         / __* "finally" !(
             Letter
             / UnicodeDigit
         ) __* block
     )
+    / "throw" !(
+        Letter
+        / UnicodeDigit
+    ) __* expression
     / (
-        "throw" !(
-            Letter
-            / UnicodeDigit
-        ) __* expression
-        / (
-            "return@" Identifier
-            / "return" !(
-                Letter
-                / UnicodeDigit
-            )
-        ) _* expression?
-        / "continue@" Identifier
-        / "continue" !(
+        "return@" Identifier
+        / "return" !(
             Letter
             / UnicodeDigit
         )
-        / "break@" Identifier
-        / "break" !(
-            Letter
-            / UnicodeDigit
-        )
+    ) _* expression?
+    / "continue@" Identifier
+    / "continue" !(
+        Letter
+        / UnicodeDigit
+    )
+    / "break@" Identifier
+    / "break" !(
+        Letter
+        / UnicodeDigit
     )
     / "(" __* inside_expression __* ")"
     / receiverType? __* "::" __* (
@@ -717,150 +701,110 @@ primaryExpression <-
             / UnicodeDigit
         )
     )
-    / (
-        "\"\"\"" (
-            "${" __* expression __* "}"
-            / (
-                FieldIdentifier
-                / (
-                    [^"$]+
-                    / "$"
-                )
-                / (
-                    "\"\"" !"\""
-                    / "\"" !"\"\""
-                )
-            )
-            / (
-                "\"\"" !"\""
-                / "\"" !"\"\""
-            )
-        )* (
-            "\"\"\"\"\""
-            / "\"\"\"\""
-            / "\"\"\""
+    / "\"\"\"" (
+        "${" __* expression __* "}"
+        / FieldIdentifier
+        / [^"$]+
+        / "$"
+        / "\"\"" !"\""
+        / "\"" !"\"\""
+        / "\"\"" !"\""
+        / "\"" !"\"\""
+    )* (
+        "\"\"\"\"\""
+        / "\"\"\"\""
+        / "\"\"\""
+    )
+    / "\"" !"\"\"" (
+        "${" __* expression __* "}"
+        / [^"$\\]+
+        / "$"
+        / "\\" (
+            "t"
+            / "b"
+            / "r"
+            / "n"
+            / "'"
+            / "\""
+            / "\\"
+            / "$"
         )
-        / "\"" !"\"\"" (
-            "${" __* expression __* "}"
-            / (
-                (
-                    [^"$\\]+
-                    / "$"
-                )
-                / (
-                    "\\" (
-                        "t"
-                        / "b"
-                        / "r"
-                        / "n"
-                        / "'"
-                        / "\""
-                        / "\\"
-                        / "$"
-                    )
-                    / "\\u" HexDigit HexDigit HexDigit HexDigit
-                )
-                / FieldIdentifier
-            )
-        )* "\""
-    )
-    / (
-        lambdaLiteral
-        / (SUSPEND __*)? "fun" !(
+        / "\\u" HexDigit HexDigit HexDigit HexDigit
+        / FieldIdentifier
+    )* "\""
+    / lambdaLiteral
+    / (SUSPEND __*)? "fun" !(
+        Letter
+        / UnicodeDigit
+    ) { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<anonymous>", $0s, true); } (__* type __* ".")? __* "(" __* (parameterWithOptionalType (__* "," __* parameterWithOptionalType)* (__* ",")?)? __* ")" (__* ":" __* type)? (__* typeConstraints)? (__* (
+            block
+            / "=" !"=" __* expression
+        ))? { POP_SCOPE(auxil); }
+    / ("data" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<anonymous>", $0s, true); } (__* type __* ".")? __* "(" __* (parameterWithOptionalType (__* "," __* parameterWithOptionalType)* (__* ",")?)? __* ")" (__* ":" __* type)? (__* typeConstraints)? (__* (
-                block
-                / "=" !"=" __* expression
-            ))? { POP_SCOPE(auxil); }
-    )
-    / (
-        (("data" !(
-                    Letter
-                    / UnicodeDigit
-                )) __*)? "object" !(
-            Letter
-            / UnicodeDigit
-        ) __* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)* __* classBody
-        / "object" !(
-            Letter
-            / UnicodeDigit
-        ) __* classBody
-    )
-    / (
-        "[" __* inside_expression (__* "," __* inside_expression)* (__* ",")? __* "]"
-        / "[" __* "]"
-    )
+        ) __*)? "object" !(
+        Letter
+        / UnicodeDigit
+    ) __* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)* __* classBody
+    / "object" !(
+        Letter
+        / UnicodeDigit
+    ) __* classBody
+    / "[" __* inside_expression (__* "," __* inside_expression)* (__* ",")? __* "]"
+    / "[" __* "]"
     / simpleIdentifier
+    / "true"
+    / "false"
+    / "'" (
+        "\\u" HexDigit HexDigit HexDigit HexDigit
+        / "\\" (
+            "t"
+            / "b"
+            / "r"
+            / "n"
+            / "'"
+            / "\""
+            / "\\"
+            / "$"
+        )
+        / [^\n\r'\\]
+    ) "'"
+    / "null"
     / (
-        (
-            "true"
-            / "false"
-        )
-        / "'" (
-            (
-                "\\u" HexDigit HexDigit HexDigit HexDigit
-                / "\\" (
-                    "t"
-                    / "b"
-                    / "r"
-                    / "n"
-                    / "'"
-                    / "\""
-                    / "\\"
-                    / "$"
-                )
-            )
-            / [^\n\r'\\]
-        ) "'"
-        / "null"
-        / (
-            (
-                (
-                    DecDigits? "." DecDigits ([Ee] [-+]? DecDigits)?
-                    / DecDigits [Ee] [-+]? DecDigits
-                ) [Ff]
-                / DecDigits [Ff]
-            )
-            / (
-                DecDigits? "." DecDigits ([Ee] [-+]? DecDigits)?
-                / DecDigits [Ee] [-+]? DecDigits
-            )
-        )
-        / (
-            HexLiteral
-            / BinLiteral
-            / (
-                [1-9] (
-                    [0-9]
-                    / "_"
-                )*
-                / [0-9]
-            )
-        ) [Uu] [Ll]?
-        / (
-            HexLiteral
-            / BinLiteral
-            / (
-                [1-9] (
-                    [0-9]
-                    / "_"
-                )*
-                / [0-9]
-            )
-        ) [Ll]
-        / HexLiteral
+        DecDigits? "." DecDigits ([Ee] [-+]? DecDigits)?
+        / DecDigits [Ee] [-+]? DecDigits
+    ) [Ff]
+    / DecDigits [Ff]
+    / DecDigits? "." DecDigits ([Ee] [-+]? DecDigits)?
+    / DecDigits [Ee] [-+]? DecDigits
+    / (
+        HexLiteral
         / BinLiteral
-        / (
-            [1-9] (
-                [0-9]
-                / "_"
-            )*
-            / [0-9]
-        )
-    )
+        / [1-9] (
+            [0-9]
+            / "_"
+        )*
+        / [0-9]
+    ) [Uu] [Ll]?
+    / (
+        HexLiteral
+        / BinLiteral
+        / [1-9] (
+            [0-9]
+            / "_"
+        )*
+        / [0-9]
+    ) [Ll]
+    / HexLiteral
+    / BinLiteral
+    / [1-9] (
+        [0-9]
+        / "_"
+    )*
+    / [0-9]
 
-inside_expression <- inside_equality (__* "&&" __* inside_equality)* (__* "||" __* (inside_equality (__* "&&" __* inside_equality)*))*
+inside_expression <- inside_equality (__* "&&" __* inside_equality)* (__* "||" __* inside_equality (__* "&&" __* inside_equality)*)*
 
 inside_equality <- inside_comparison ((
         _
@@ -892,7 +836,13 @@ inside_genericCallLikeComparison <- inside_infixFunctionCall (__* "?:" __* insid
     (
         _
         / NL
-    )* inOperator __* inside_infixFunctionCall (__* "?:" __* inside_infixFunctionCall)*
+    )* (
+        IN
+        / "!in" !(
+            Letter
+            / UnicodeDigit
+        )
+    ) __* inside_infixFunctionCall (__* "?:" __* inside_infixFunctionCall)*
     / (
         _
         / NL
@@ -908,10 +858,10 @@ inside_infixFunctionCall <- inside_additiveExpression ((
     )* ".." __* inside_additiveExpression)* ((
         _
         / NL
-    )* simpleIdentifier __* (inside_additiveExpression ((
-                _
-                / NL
-            )* ".." __* inside_additiveExpression)*))*
+    )* simpleIdentifier __* inside_additiveExpression ((
+            _
+            / NL
+        )* ".." __* inside_additiveExpression)*)*
 
 inside_additiveExpression <- inside_asExpression ((
         _
@@ -926,53 +876,40 @@ inside_additiveExpression <- inside_asExpression ((
     )* (
         "+"
         / "-"
-    ) __* (inside_asExpression ((
-                _
-                / NL
-            )* (
-                "*"
-                / "/"
-                / "%"
-            ) __* inside_asExpression)*))*
+    ) __* inside_asExpression ((
+            _
+            / NL
+        )* (
+            "*"
+            / "/"
+            / "%"
+        ) __* inside_asExpression)*)*
 
-inside_asExpression <- inside_prefixUnaryExpression (__* (
-        "as?"
-        / ("as" !(
-                Letter
-                / UnicodeDigit
-            ))
-    ) __* type)*
-
-inside_prefixUnaryExpression <- ((
+inside_asExpression <- ((
         annotation
         / label
-        / (
-            "++"
-            / "--"
-            / "-"
-            / "+"
-            / (
-                "!" Hidden
-                / "!"
-            )
-        ) __*
+        / prefixUnaryOperator __*
     ) (
         _
         / NL
-    )*)* inside_postfixUnaryExpression
+    )*)* inside_postfixUnaryExpression (__* (
+        "as?"
+        / "as" !(
+            Letter
+            / UnicodeDigit
+        )
+    ) __* type)*
 
 inside_postfixUnaryExpression <-
     primaryExpression ((
             _
             / NL
         )* (
-            (
-                "++"
-                / "--"
-                / "!" (
-                    "!" Hidden
-                    / "!"
-                )
+            "++"
+            / "--"
+            / "!" (
+                "!" Hidden
+                / "!"
             )
             / typeArguments
             / callSuffix
@@ -993,16 +930,6 @@ lambdaLiteral <-
                 / multiVariableDeclaration (__* ":" __* type)?
             ))* (__* ",")?)? __* "->" __* statements __* "}" { POP_SCOPE(auxil); }
 
-inOperator <-
-    "in" !(
-        Letter
-        / UnicodeDigit
-    )
-    / "!in" !(
-        Letter
-        / UnicodeDigit
-    )
-
 isOperator <-
     "is" !(
         Letter
@@ -1013,162 +940,152 @@ isOperator <-
         / UnicodeDigit
     )
 
+prefixUnaryOperator <-
+    "++"
+    / "--"
+    / "-"
+    / "+"
+    / "!" Hidden
+    / "!"
+
 # // SECTION: modifiers
 modifiers <- (
     annotation
     / (
-        (
-            "enum" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "sealed" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "annotation" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "data" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "inner" !(
-                Letter
-                / UnicodeDigit
-            )
+        "enum" !(
+            Letter
+            / UnicodeDigit
         )
-        / (
-            "override" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "lateinit" !(
-                Letter
-                / UnicodeDigit
-            )
+        / "sealed" !(
+            Letter
+            / UnicodeDigit
         )
-        / (
-            "public" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "private" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "internal" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "protected" !(
-                Letter
-                / UnicodeDigit
-            )
+        / "annotation" !(
+            Letter
+            / UnicodeDigit
         )
-        / (
-            "tailrec" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "operator" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "infix" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "inline" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "external" !(
-                Letter
-                / UnicodeDigit
-            )
-            / SUSPEND
+        / "data" !(
+            Letter
+            / UnicodeDigit
         )
+        / "inner" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "override" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "lateinit" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "public" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "private" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "internal" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "protected" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "tailrec" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "operator" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "infix" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "inline" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "external" !(
+            Letter
+            / UnicodeDigit
+        )
+        / SUSPEND
         / "const" !(
             Letter
             / UnicodeDigit
         )
-        / (
-            "abstract" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "final" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "open" !(
-                Letter
-                / UnicodeDigit
-            )
+        / "abstract" !(
+            Letter
+            / UnicodeDigit
         )
-        / (
-            "vararg" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "noinline" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "crossinline" !(
-                Letter
-                / UnicodeDigit
-            )
+        / "final" !(
+            Letter
+            / UnicodeDigit
         )
-        / (
-            "expect" !(
-                Letter
-                / UnicodeDigit
-            )
-            / "actual" !(
-                Letter
-                / UnicodeDigit
-            )
+        / "open" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "vararg" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "noinline" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "crossinline" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "expect" !(
+            Letter
+            / UnicodeDigit
+        )
+        / "actual" !(
+            Letter
+            / UnicodeDigit
         )
     ) __*
 )+
 
 # // SECTION: annotations
 annotation <- (
-    (
-        annotationUseSiteTarget __* (
-            userType __* valueArguments
-            / userType
-        )
-        / (
-            "@"
-            / (
-                Hidden
-                / NL
-            ) "@"
-        ) (
-            userType __* valueArguments
-            / userType
-        )
+    annotationUseSiteTarget __* (
+        userType __* valueArguments
+        / userType
     )
     / (
-        annotationUseSiteTarget __* "[" (
-            userType __* valueArguments
-            / userType
-        )+ "]"
+        "@"
         / (
-            "@"
-            / (
-                Hidden
-                / NL
-            ) "@"
-        ) "[" (
-            userType __* valueArguments
-            / userType
-        )+ "]"
+            Hidden
+            / NL
+        ) "@"
+    ) (
+        userType __* valueArguments
+        / userType
     )
+    / annotationUseSiteTarget __* "[" (
+        userType __* valueArguments
+        / userType
+    )+ "]"
+    / (
+        "@"
+        / (
+            Hidden
+            / NL
+        ) "@"
+    ) "[" (
+        userType __* valueArguments
+        / userType
+    )+ "]"
 ) __*
 
 annotationUseSiteTarget <- (
@@ -1215,18 +1132,18 @@ annotationUseSiteTarget <- (
 # // SECTION: identifiers
 simpleIdentifier <-
     !((
-            ("as" !(
-                    Letter
-                    / UnicodeDigit
-                ))
+            "as" !(
+                Letter
+                / UnicodeDigit
+            )
             / "break" !(
                 Letter
                 / UnicodeDigit
             )
-            / ("class" !(
-                    Letter
-                    / UnicodeDigit
-                ))
+            / "class" !(
+                Letter
+                / UnicodeDigit
+            )
             / "continue" !(
                 Letter
                 / UnicodeDigit
@@ -1243,18 +1160,15 @@ simpleIdentifier <-
                 Letter
                 / UnicodeDigit
             )
-            / ("fun" !(
-                    Letter
-                    / UnicodeDigit
-                ))
+            / "fun" !(
+                Letter
+                / UnicodeDigit
+            )
             / "if" !(
                 Letter
                 / UnicodeDigit
             )
-            / ("in" !(
-                    Letter
-                    / UnicodeDigit
-                ))
+            / IN
             / "interface" !(
                 Letter
                 / UnicodeDigit
@@ -1264,10 +1178,10 @@ simpleIdentifier <-
                 / UnicodeDigit
             )
             / "null"
-            / ("object" !(
-                    Letter
-                    / UnicodeDigit
-                ))
+            / "object" !(
+                Letter
+                / UnicodeDigit
+            )
             / "package" !(
                 Letter
                 / UnicodeDigit
@@ -1300,10 +1214,10 @@ simpleIdentifier <-
                 Letter
                 / UnicodeDigit
             )
-            / ("val" !(
-                    Letter
-                    / UnicodeDigit
-                ))
+            / "val" !(
+                Letter
+                / UnicodeDigit
+            )
             / "var" !(
                 Letter
                 / UnicodeDigit
@@ -1312,14 +1226,12 @@ simpleIdentifier <-
                 Letter
                 / UnicodeDigit
             )
-            / ("while" !(
-                    Letter
-                    / UnicodeDigit
-                ))
-            / (
-                "true"
-                / "false"
+            / "while" !(
+                Letter
+                / UnicodeDigit
             )
+            / "true"
+            / "false"
         ) !(
             Letter
             / "_"
@@ -1518,6 +1430,11 @@ Hidden <-
     DelimitedComment
     / "//" [^\n\r]*
     / [\t\f ]
+
+IN <- "in" !(
+    Letter
+    / UnicodeDigit
+)
 
 SUSPEND <- "suspend" !(
     Letter
