@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <string.h>
 
 Config* Config::instance = NULL;
 static Config::Option UNKNOWN_OPTION(Config::OptionGroup::OG_BASIC, "", "", nullptr, "");
@@ -25,6 +26,22 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"unused-capture", O_UNUSED_CAPTURE},
 };
 
+const std::map<Optimization, const char*> opt_descriptions = {
+    {O_ALL, {"All optimizations: Shorthand option for combination of all available optimizations."}},
+    {O_NONE, {"No optimizations: Shorthand option for no optimizations."}},
+    {O_INLINE, {"Rule inlining: Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser."}},
+    {O_NORMALIZE_CHAR_CLASS, {"Character class optimization: Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`."}},
+    {O_REMOVE_GROUP, {"Remove unnecessary groups: Some parenthesis can be safely removed without changeing the meaning of the grammar. E.g.: `A (B C) D` becomes `A B C D` or `X (Y)* Z` becomes `X Y* Z`."}},
+    {O_SINGLE_CHAR_CLASS, {"Convert single character classes to strings: The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\\n]` to `\"\\n\"` or `[^ ]` to `!\" \"`."}},
+    {O_CHAR_CLASS_NEGATION, {"Simplify negation of character classes: Negation of character classes can be written as negative character class (e.g. `![\\n]` -> `[^\\n]`)."}},
+    {O_DOUBLE_NEGATION, {"Removing double negations: Negation of negation can be ignored, because it results in the original term (e.g. `!(!TERM)` -> `TERM`)."}},
+    {O_DOUBLE_QUANTIFICATION, {"Removing double quantifications: If a single term is quantified twice, it is always possible to convert this into a single potfix operator with equel meaning (e.g. `(X+)?` -> `X*`)."}},
+    {O_REPEATS, {"Removing unnecessary repeats: Joins repeated rules to single quantity. E.g. \"A A*\" -> \"A+\", \"B* B*\" -> \"B*\" etc."}},
+    {O_CONCAT_STRINGS, {"String concatenation: Join adjacent string nodes into one. E.g. `\"A\" \"B\"` becomes `\"AB\"`."}},
+    {O_UNUSED_VARIABLE, {"Removing unused variables: Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded."}},
+    {O_UNUSED_CAPTURE, {"Removing unused captures: Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded."}}
+};
+
 void Config::usage(const std::string& error_msg) {
     log(0, "PEG Formatter and Optimizer");
     log(0, "");
@@ -43,12 +60,34 @@ void Config::usage(const std::string& error_msg) {
     log(0, "\nSupported values for --optimize and --exclude options:");
     for (const auto& item : opt_mapping) {
         log(0, "    %s", item.first.c_str());
+        log(0, "        %s", replace(opt_descriptions.at(item.second), "`", "").c_str());
     }
 
     if (!error_msg.empty()) {
         log(0, "");
         error("%s", error_msg.c_str());
     }
+}
+
+void Config::usage_markdown() {
+    log(0, "### Usage:");
+    log(0, "`pegof [<options>] [--] [<input_file> ...]`");
+    const char* og_mapping[] = {"Basic", "Input/output", "Formatting", "Optimization"};
+    OptionGroup last = OG_OPT;
+    for (const Option& opt : args) {
+        if (last != opt.group) {
+            log(0, "\n### %s options:", og_mapping[opt.group]);
+            last = opt.group;
+        }
+        log(0, "`-%s/--%s %s` %s\n", opt.shortName.c_str(), opt.longName.c_str(), opt.param.c_str(), opt.description.c_str());
+    }
+
+    log(0, "### Supported values for --optimize and --exclude options:");
+    for (const auto& item : opt_mapping) {
+        const char* description = opt_descriptions.at(item.second);
+        log(0, "- `%s` %s\n", item.first.c_str(), description);
+    }
+    log(0, "");
 }
 
 int Config::help() {
@@ -240,6 +279,10 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_OPT, "l", "inline-limit", 0.2, "Minimum inlining score needed for rule to be inlined.\n        Number between 0.0 (inline everything) and 1.0 (most conservative), default is 0.2,\n        only applied when inlining is enabled", "N"),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
+    if (argc == 2 && strcmp(argv[1], "--usage-markdown") == 0) {
+        usage_markdown();
+        exit(0);
+    }
     process_args(arguments, false);
     post_process();
 }

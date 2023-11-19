@@ -6,12 +6,7 @@ cd $ROOTDIR
 
 {
     sed -n '1,/^## Usage:/ p' README.md
-    build/pegof -h 2>&1 | sed '
-        1,/^Usage:/ d;
-        /options:/ s/^/### /;
-        s/ $//;
-    '
-    echo
+    build/pegof --usage-markdown 2>&1
     sed -n '/## Configuration file/,$ p' README.md
 
 } > _README.md
