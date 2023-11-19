@@ -82,6 +82,12 @@ bool Node::map(const std::function<bool(Node&)>& transform) {
     return false;
 }
 
+bool Node::is_descendant_of(Node* n) const {
+    if (!parent) return false;
+    if (parent == n) return true;
+    return parent->is_descendant_of(n);
+}
+
 void Node::update_parents() {
     for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
