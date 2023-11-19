@@ -76,6 +76,7 @@ private:
     int verbosity;
 
     void usage(const std::string& error);
+    void usage_markdown();
     void process_args(const std::vector<std::string>& arguments, const bool config_file);
     void post_process();
 
