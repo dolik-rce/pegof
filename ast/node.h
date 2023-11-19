@@ -34,6 +34,8 @@ public:
     template <class U>
     U* get_ancestor() const;
 
+    bool is_descendant_of(Node* n) const;
+
     virtual Node* operator[](int index);
 
     virtual long size() const;

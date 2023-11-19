@@ -385,9 +385,9 @@ int Optimizer::inline_rules() {
                     bool after = false;
                     int shift = 0;
                     dest_rule->map([&](Node& node) mutable {
-                        if (&node == &dest->get<Group>()) {
+                        if (node.is_descendant_of(dest)) {
                             after = true;
-                            return true;
+                            return false;
                         }
                         if (!after && node.is<Capture>()) {
                             shift++;
