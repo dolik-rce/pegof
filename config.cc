@@ -72,7 +72,6 @@ void Config::usage(const std::string& error_msg) {
 }
 
 void Config::usage_markdown() {
-    log(0, "### Usage:");
     log(0, "`pegof [<options>] [--] [<input_file> ...]`");
     const char* og_mapping[] = {"Basic", "Input/output", "Formatting", "Optimization"};
     OptionGroup last = OG_OPT;
@@ -81,7 +80,8 @@ void Config::usage_markdown() {
             log(0, "\n### %s options:", og_mapping[opt.group]);
             last = opt.group;
         }
-        log(0, "`-%s/--%s %s` %s\n", opt.shortName.c_str(), opt.longName.c_str(), opt.param.c_str(), opt.description.c_str());
+        log(0, "`-%s/--%s%s%s` %s\n", opt.shortName.c_str(), opt.longName.c_str(),
+            opt.param.empty() ? "" : " ", opt.param.c_str(), opt.description.c_str());
     }
 
     log(0, "### Supported values for --optimize and --exclude options:");
