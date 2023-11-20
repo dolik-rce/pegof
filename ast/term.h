@@ -46,6 +46,9 @@ public:
     bool is_simple() const;
     bool is_negative() const;
 
+    bool same_prefix(const Term& t);
+    bool same_quantifier(const Term& t);
+
     void flip_negation();
     void set_prefix(int new_prefix);
     void set_quantifier(int new_quantifier);

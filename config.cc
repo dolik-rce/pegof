@@ -22,6 +22,7 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"double-quantification", O_DOUBLE_QUANTIFICATION},
     {"repeats", O_REPEATS},
     {"concat-strings", O_CONCAT_STRINGS},
+    {"concat-char-classes", O_CONCAT_CHAR_CLASSES},
     {"unused-variable", O_UNUSED_VARIABLE},
     {"unused-capture", O_UNUSED_CAPTURE},
 };
@@ -38,6 +39,7 @@ const std::map<Optimization, const char*> opt_descriptions = {
     {O_DOUBLE_QUANTIFICATION, {"Removing double quantifications: If a single term is quantified twice, it is always possible to convert this into a single potfix operator with equel meaning (e.g. `(X+)?` -> `X*`)."}},
     {O_REPEATS, {"Removing unnecessary repeats: Joins repeated rules to single quantity. E.g. \"A A*\" -> \"A+\", \"B* B*\" -> \"B*\" etc."}},
     {O_CONCAT_STRINGS, {"String concatenation: Join adjacent string nodes into one. E.g. `\"A\" \"B\"` becomes `\"AB\"`."}},
+    {O_CONCAT_CHAR_CLASSES, {"Character class concatenation: Join adjacent character classes in alternations into one. E.g. `[AB] / [CD]` becomes `[ABCD]`."}},
     {O_UNUSED_VARIABLE, {"Removing unused variables: Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded."}},
     {O_UNUSED_CAPTURE, {"Removing unused captures: Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded."}}
 };

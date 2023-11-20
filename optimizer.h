@@ -8,6 +8,7 @@ class Optimizer {
 
     int inline_rules();
     int concat_strings();
+    int concat_character_classes();
     int normalize_character_classes();
     int single_char_character_classes();
     int character_class_negations();

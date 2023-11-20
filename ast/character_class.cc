@@ -73,6 +73,12 @@ void CharacterClass::parse_content(Parser& p) {
         p.match_any();
     }
     content = unescape(content);
+    tokenize();
+    update_content();
+}
+
+void CharacterClass::tokenize() {
+    tokens.clear();
     int pos = 0;
     while (pos < content.size()) {
         Token result;
@@ -85,7 +91,6 @@ void CharacterClass::parse_content(Parser& p) {
         }
         tokens.push_back(result);
     }
-    update_content();
 }
 
 void CharacterClass::parse(Parser& p) {
@@ -188,6 +193,13 @@ bool CharacterClass::is_negative() const {
 
 String CharacterClass::convert_to_string() const {
     return String(dash ? "-" : content, parent);
+}
+
+void CharacterClass::merge(const CharacterClass& cc) {
+    dash |= cc.dash;
+    content += cc.content;
+    tokenize();
+    update_content();
 }
 
 bool operator==(const CharacterClass& a, const CharacterClass& b) {

@@ -57,6 +57,10 @@ const Term& Sequence::get_first_term() const {
     return terms[0];
 }
 
+Term& Sequence::get_first_term() {
+    return terms[0];
+}
+
 Term& Sequence::get(int index) {
     return terms[index];
 }

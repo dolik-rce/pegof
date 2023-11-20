@@ -65,6 +65,8 @@ as much as possible.
 
 - `char-class-negation` Simplify negation of character classes: Negation of character classes can be written as negative character class (e.g. `![\n]` -> `[^\n]`).
 
+- `concat-char-classes` Character class concatenation: Join adjacent character classes in alternations into one. E.g. `[AB] / [CD]` becomes `[ABCD]`.
+
 - `concat-strings` String concatenation: Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.
 
 - `double-negation` Removing double negations: Negation of negation can be ignored, because it results in the original term (e.g. `!(!TERM)` -> `TERM`).

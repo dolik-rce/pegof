@@ -1,0 +1,15 @@
+main <- A B C D E F
+
+A <- [a-dc-f]
+
+B <- ![A-FCD]
+
+C <- [0-56-9]*
+
+D <-
+    [XY]
+    / [Z]*
+
+E <- [-pqrstu]
+
+F <- [^I-KM-O]
