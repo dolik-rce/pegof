@@ -13,6 +13,7 @@ class CharacterClass : public Node {
     Tokens tokens;
 
     void parse_content(Parser& p);
+    void tokenize();
     void update_content();
 public:
     CharacterClass(const std::string& content, Node* parent);
@@ -27,6 +28,7 @@ public:
     bool is_negative() const;
 
     String convert_to_string() const;
+    void merge(const CharacterClass& cc);
 
     virtual void parse(Parser& p);
     virtual std::string to_string(std::string indent = "") const override;

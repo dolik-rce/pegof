@@ -155,6 +155,14 @@ void Term::set_content(Primary content) {
     primary = content;
 }
 
+bool Term::same_prefix(const Term& t) {
+    return prefix == t.prefix;
+}
+
+bool Term::same_quantifier(const Term& t) {
+    return quantifier == t.quantifier;
+}
+
 void Term::copy_prefix(const Term& other) {
     prefix = other.prefix;
 }

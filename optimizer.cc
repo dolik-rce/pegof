@@ -56,6 +56,36 @@ int Optimizer::concat_strings() {
     });
 }
 
+int Optimizer::concat_character_classes() {
+    // [AB] / [CD] -> [ABCD]
+    return apply(O_CONCAT_CHAR_CLASSES, [](Node& node, int& optimized) -> bool {
+        Alternation* a = node.as<Alternation>();
+        if (!a) return false;
+
+        Term* prev_term = nullptr;
+        for (int i = a->size() - 1; i >= 0; i--) {
+            Sequence& s = a->get(i);
+            Term& t = s.get_first_term();
+            if (s.has_single_term() && t.contains<CharacterClass>()) {
+                if (prev_term && prev_term->same_prefix(t) && prev_term->same_quantifier(t)) {
+                    CharacterClass& cc1 = t.get<CharacterClass>();
+                    CharacterClass& cc2 = prev_term->get<CharacterClass>();
+                    if (cc1.is_negative() == cc2.is_negative() && !cc1.any_char() && !cc1.any_char()) {
+                        log(1, "Merging character classes: %s + %s", t.to_string().c_str(), prev_term->to_string().c_str());
+                        cc1.merge(cc2);
+                        a->erase(i+1);
+                        optimized++;
+                    }
+                }
+                prev_term = &t;
+            } else {
+                prev_term = nullptr;
+            }
+        }
+        return optimized > 0;
+    });
+}
+
 int optimize_repeating_terms(Term& t1, Term& t2) {
     if (t1.primary != t2.primary || t1.prefix || t2.prefix)
         return -1; // do nothing
@@ -452,6 +482,7 @@ Grammar Optimizer::optimize() {
         opts += double_quantifications();
         opts += simplify_repeats();
         opts += concat_strings();
+        opts += concat_character_classes();
         opts += unused_variables();
         opts += unused_captures();
         if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, g.to_string().c_str());

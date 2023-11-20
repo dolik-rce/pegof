@@ -19,6 +19,7 @@ public:
 
     bool has_single_term() const;
     const Term& get_first_term() const;
+    Term& get_first_term();
 
     void insert(int index, const Sequence& s);
     void erase(Term* rule);
