@@ -51,7 +51,7 @@ main() {
     export TESTDIR="$(cd "$(dirname "$0")" && pwd)"
     export ROOTDIR="$TESTDIR/.."
     export BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-    export PEGOF="$BUILDDIR/pegof_test"
+    export PEGOF="${PEGOF:-$BUILDDIR/pegof_test}"
     cd "$TESTDIR"
 
     clean

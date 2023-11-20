@@ -5,35 +5,34 @@ Supports any grammar supported by [PackCC](https://github.com/arithy/packcc) par
 
 ## How it works
 
-Pegof parses peg grammar from input file (using PackCC generated parser) and extracts it's AST.
+Pegof parses peg grammar from input file and extracts it's [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree).
 Then, based on the command it either just prints it out in nice and consistent format or directly as AST.
 It can also perform multi-pass optimization process that goes through the AST and tries to simplify it
-as much as possible.
+as much as possible to reduce number of rules and terms.
 
 ## Usage:
-### Usage:
 `pegof [<options>] [--] [<input_file> ...]`
 
 ### Basic options:
-`-h/--help ` Show help (this text)
+`-h/--help` Show help (this text)
 
 `-c/--conf FILE` Use given configuration file
 
-`-v/--verbose ` Verbose logging to stderr (repeat for even more verbose output)
+`-v/--verbose` Verbose logging to stderr (repeat for even more verbose output)
 
-`-d/--debug ` Output very verbose debug info, implies max verbosity
+`-d/--debug` Output very verbose debug info, implies max verbosity
 
-`-S/--skip-validation ` Skip result validation (useful only for debugging purposes)
+`-S/--skip-validation` Skip result validation (useful only for debugging purposes)
 
 
 ### Input/output options:
-`-f/--format ` Output formatted grammar (default)
+`-f/--format` Output formatted grammar (default)
 
-`-a/--ast ` Output abstract syntax tree representation
+`-a/--ast` Output abstract syntax tree representation
 
-`-p/--packcc ` Output source files as if the grammar was passed to packcc
+`-p/--packcc` Output source files as if the grammar was passed to packcc
 
-`-I/--inplace ` Modify the input files (only when formatting)
+`-I/--inplace` Modify the input files (only when formatting)
 
 `-i/--input FILE` Path to file with PEG grammar, multiple paths can be given
         Value "-" can be used to specify standard input
@@ -113,18 +112,11 @@ wrap-limit 1
 
 This application was written with readability and maintainability in mind. Speed of execution is not a focus.
 Some of very big grammars (e.g. for [Kotlin language](https://github.com/universal-ctags/ctags/blob/master/peg/kotlin.peg))
-can take up to 1s to process.
+can take few minutes to process.
 
-### Error recovery
+### Unicode support
 
-If the input file contains invalid grammar, pegof only prints `Syntax error`, without any indication of what is wrong.
-Workaround is to run the file through PackCC directly, this will produce much more informative message stating what
-happened and also on which line and column in the input file to look. If the PackCC processes the file without error
-then you've found an error in pegof and bug report would be appreciated.
-
-## Unicode support
-
-This tool is currently lacking proper unicode support in many places. It is planned to be added later.
+This tool is currently lacking proper unicode support in many places. It might be added later.
 
 ## Building
 
@@ -133,7 +125,7 @@ Pegof uses cmake, so to build it just run:
 ```sh
 mkdir build
 cd build
-cmake -DPACKCC=/path/to/packcc ..
+cmake ..
 make
 make test # optional, but recommended
 ```
@@ -143,6 +135,4 @@ Building on non-linux platforms has not been tested and might require some modif
 ## Acknowledgment
 
 Big thanks go to [Arihiro Yoshida](https://github.com/arithy), author of [PackCC](https://github.com/arithy/packcc)
-for maintaining the great and very useful tool and also for providing
-[an example how to write a simple AST builder](https://github.com/arithy/packcc/tree/master/examples/ast-tinyc),
-which was used as a base for pegof.
+for maintaining the great and very useful tool.
