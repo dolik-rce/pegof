@@ -371,6 +371,11 @@ int Optimizer::inline_rules() {
             return ref.references(&rule);
         });
 
+        if (std::any_of(refs.begin(), refs.end(), [](Reference* r){ return r->has_variable(); })) {
+            log(2, "Not inlining %s: rule is used with variables", rule.c_str());
+            continue;
+        }
+
         double score = calculate_score(rule.count_terms() + rule.count_cc_tokens(), refs.size());
         log(4, "Score for %s: %f", rule.c_str(), score);
 
