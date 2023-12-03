@@ -17,7 +17,7 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"inline", O_INLINE},
     {"remove-group", O_REMOVE_GROUP},
     {"single-char-class", O_SINGLE_CHAR_CLASS},
-    {"char-class-negation", O_CHAR_CLASS_NEGATION},
+    //~ {"char-class-negation", O_CHAR_CLASS_NEGATION},
     {"double-negation", O_DOUBLE_NEGATION},
     {"double-quantification", O_DOUBLE_QUANTIFICATION},
     {"repeats", O_REPEATS},
@@ -34,7 +34,7 @@ const std::map<Optimization, const char*> opt_descriptions = {
     {O_NORMALIZE_CHAR_CLASS, {"Character class optimization: Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`."}},
     {O_REMOVE_GROUP, {"Remove unnecessary groups: Some parenthesis can be safely removed without changeing the meaning of the grammar. E.g.: `A (B C) D` becomes `A B C D` or `X (Y)* Z` becomes `X Y* Z`."}},
     {O_SINGLE_CHAR_CLASS, {"Convert single character classes to strings: The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\\n]` to `\"\\n\"` or `[^ ]` to `!\" \"`."}},
-    {O_CHAR_CLASS_NEGATION, {"Simplify negation of character classes: Negation of character classes can be written as negative character class (e.g. `![\\n]` -> `[^\\n]`)."}},
+    //~ {O_CHAR_CLASS_NEGATION, {"Simplify negation of character classes: Negation of character classes can be written as negative character class (e.g. `![\\n]` -> `[^\\n]`)."}},
     {O_DOUBLE_NEGATION, {"Removing double negations: Negation of negation can be ignored, because it results in the original term (e.g. `!(!TERM)` -> `TERM`)."}},
     {O_DOUBLE_QUANTIFICATION, {"Removing double quantifications: If a single term is quantified twice, it is always possible to convert this into a single potfix operator with equel meaning (e.g. `(X+)?` -> `X*`)."}},
     {O_REPEATS, {"Removing unnecessary repeats: Joins repeated rules to single quantity. E.g. \"A A*\" -> \"A+\", \"B* B*\" -> \"B*\" etc."}},
@@ -162,6 +162,12 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
                 i++;
             } else if (opt.value.type() == typeid(bool)) {
                 opt.value = !std::any_cast<bool>(opt.value);
+            } else if (opt.value.type() == typeid(std::string)) {
+                if (next.empty()) {
+                    usage("Option '" + arg + "' requires an argument");
+                }
+                opt.value = next;
+                i++;
             } else if (opt.value.type() == typeid(int)) {
                 if (next.empty()) {
                     usage("Option '" + arg + "' requires an integer argument");
@@ -224,7 +230,7 @@ bool Config::get(const Optimization& opt) {
 }
 
 bool Config::verbose(int level) {
-    return instance->verbosity >= level;
+    return instance->verbosity >= level || get<bool>("debug");
 }
 
 int Config::parse_optimization_config(const std::string& param) {
@@ -268,6 +274,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_BASIC, "v", "verbose", &Config::inc_verbosity, "Verbose logging to stderr (repeat for even more verbose output)"),
         Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),
         Option(OG_BASIC, "S", "skip-validation", false, "Skip result validation (useful only for debugging purposes)"),
+        Option(OG_BASIC, "b", "benchmark", std::string(), "Benchmarking script, see documentation for details", "SCRIPT"),
         Option(OG_IO, "f", "format", OT_FORMAT, "Output formatted grammar (default)"),
         Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
         Option(OG_IO, "p", "packcc", OT_PACKCC, "Output source files as if the grammar was passed to packcc"),

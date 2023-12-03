@@ -62,8 +62,6 @@ as much as possible to reduce number of rules and terms.
 ### Supported values for --optimize and --exclude options:
 - `all` All optimizations: Shorthand option for combination of all available optimizations.
 
-- `char-class-negation` Simplify negation of character classes: Negation of character classes can be written as negative character class (e.g. `![\n]` -> `[^\n]`).
-
 - `concat-char-classes` Character class concatenation: Join adjacent character classes in alternations into one. E.g. `[AB] / [CD]` becomes `[ABCD]`.
 
 - `concat-strings` String concatenation: Join adjacent string nodes into one. E.g. `"A" "B"` becomes `"AB"`.

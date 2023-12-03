@@ -169,23 +169,24 @@ int Optimizer::single_char_character_classes() {
     });
 }
 
-int Optimizer::character_class_negations() {
-    // ![A] -> [^A]
-    // ![^A] -> [A]
-    return apply(O_CHAR_CLASS_NEGATION, [](Node& node, int& optimized) -> bool {
-        Term* t = node.as<Term>();
-        if (!t || !t->contains<CharacterClass>() || !t->is_negative()) return false;
-        CharacterClass cc = t->get<CharacterClass>();
-        if (cc.any_char()) return false;
-        log(1, "Simplifying character class negation: %s", t->to_string().c_str());
-        cc.flip_negation();
-        t->set_prefix(0);
-        t->set_content(cc);
-        t->update_parents();
-        optimized++;
-        return true;
-    });
-}
+// THIS IS WRONG: '[^xy]' is equal to '![xy] .', not just ![xy]
+//~ int Optimizer::character_class_negations() {
+//~     // ![A] -> [^A]
+//~     // ![^A] -> [A]
+//~     return apply(O_CHAR_CLASS_NEGATION, [](Node& node, int& optimized) -> bool {
+//~         Term* t = node.as<Term>();
+//~         if (!t || !t->contains<CharacterClass>() || !t->is_negative()) return false;
+//~         CharacterClass cc = t->get<CharacterClass>();
+//~         if (cc.any_char()) return false;
+//~         log(1, "Simplifying character class negation: %s", t->to_string().c_str());
+//~         cc.flip_negation();
+//~         t->set_prefix(0);
+//~         t->set_content(cc);
+//~         t->update_parents();
+//~         optimized++;
+//~         return true;
+//~     });
+//~ }
 
 int Optimizer::double_negations() {
     // !(!A) -> A
@@ -371,7 +372,9 @@ int Optimizer::inline_rules() {
             return ref.references(&rule);
         });
 
-        if (std::any_of(refs.begin(), refs.end(), [](Reference* r){ return r->has_variable(); })) {
+        if (std::any_of(refs.begin(), refs.end(), [](Reference* r){
+            return r->has_variable();
+        })) {
             log(2, "Not inlining %s: rule is used with variables", rule.c_str());
             continue;
         }
@@ -482,7 +485,7 @@ Grammar Optimizer::optimize() {
         opts += inline_rules();
         opts += remove_unnecessary_groups();
         opts += single_char_character_classes();
-        opts += character_class_negations();
+        //~ opts += character_class_negations();
         opts += double_negations();
         opts += double_quantifications();
         opts += simplify_repeats();
