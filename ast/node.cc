@@ -24,7 +24,7 @@ void Node::parse_comments(Parser& p, bool store) {
     while (p.match_comment()) {
         if (store) {
             std::string comment = p.last_match;
-            if (comment.back() == '\n') {
+            if (!comment.empty() && comment.back() == '\n') {
                 comment.pop_back();
             }
             comments.push_back(comment);

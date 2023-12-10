@@ -22,7 +22,7 @@ void debug(const char* format, T... args) {
 
 template <typename... T>
 void log(int level, const char* format, T... args) {
-    if (Config::verbose(level) || Config::get<bool>("debug")) {
+    if (Config::verbose(level)) {
         fprintf(stderr, format, args...);
         fprintf(stderr, "\n");
     }

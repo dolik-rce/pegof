@@ -1,4 +1,4 @@
-# PegOF
+# Pegof
 
 [PEG](https://en.wikipedia.org/wiki/Parsing_expression_grammar) grammar optimizer and formatter.
 Supports any grammar supported by [PackCC](https://github.com/arithy/packcc) parser generator.
@@ -23,6 +23,8 @@ as much as possible to reduce number of rules and terms.
 `-d/--debug` Output very verbose debug info, implies max verbosity
 
 `-S/--skip-validation` Skip result validation (useful only for debugging purposes)
+
+`-b/--benchmark SCRIPT` Benchmarking script, see documentation for details
 
 
 ### Input/output options:
@@ -103,6 +105,34 @@ double-quotes
 inline-limit 10
 wrap-limit 1
 ```
+
+## Benchmarking
+
+Pegof makes it simple to measure how the optimizations affect the size and speed of the final code.
+When the parameter `--benchmark` is passed, it's argument will be used as benchmarking script.
+The benchmark is done twice - first when the input grammar is parsed and second time when
+all the optimizations are done, so the results can be easily compared.
+
+The actual script is called with two parameters:
+```
+<benchmark_script> [setup|benchmark|teardown] <basename>
+```
+ - `setup`: when called with this argument, the script should set up the environment for the benchmark (e.g.: compile the code, prepare input data)
+ - `benchmark`: this phase is the only one actually measured, so it should only do the actual parsing
+ - `teardown`: is passed to clean-up after the benchmark (e.g. delete the compiled files or input data)
+ - `<basename>` is always the basepath to sources generated from the grammar
+
+To get a better idea how to implement such script, see [examples/benchmark_c.sh](/examples/benchmark_c.sh).
+It can be used like this:
+```bash
+pegof --optimize all --benchmark examples/benchmark_c.sh --output /dev/null examples/c.peg
+```
+The output will look somwhat like this:
+```text
+
+```
+
+
 
 ## Known issues
 

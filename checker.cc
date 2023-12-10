@@ -8,6 +8,7 @@
 #include <iostream>
 #include <filesystem>
 #include <algorithm>
+#include <chrono>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -24,11 +25,19 @@ std::string Stats::compare(const Stats& s) const {
     #define PADP(X) left_pad(((s.X > 0) ? std::to_string(X * 100 / s.X) : N_A) + "%", 8)
 
     std::string result;
-    result += "         |   lines  |   bytes  |   rules  |   terms  \n";
-    result += "---------+----------+----------+----------+----------\n";
-    result += "input    | " + PAD(s.lines) + " | " + PAD(s.bytes) + " | " + PAD(s.rules) + " | " + PAD(s.terms) + "\n";
-    result += "output   | " + PAD(lines) + " | " + PAD(bytes) + " | " + PAD(rules) + " | " + PAD(terms) + "\n";
-    result += "output % | " + PADP(lines) + " | " + PADP(bytes) + " | " + PADP(rules) + " | " + PADP(terms);
+    if (duration > 0) {
+        result += "         |   lines  |   bytes  |   rules  |   terms  | duration \n";
+        result += "---------+----------+----------+----------+----------+----------\n";
+        result += "input    | " + PAD(s.lines) + " | " + PAD(s.bytes) + " | " + PAD(s.rules) + " | " + PAD(s.terms) + " | " + PAD(s.duration) + "\n";
+        result += "output   | " + PAD(lines) + " | " + PAD(bytes) + " | " + PAD(rules) + " | " + PAD(terms) + " | " + PAD(duration) + "\n";
+        result += "output % | " + PADP(lines) + " | " + PADP(bytes) + " | " + PADP(rules) + " | " + PADP(terms) + " | " + PADP(duration);
+    } else {
+        result += "         |   lines  |   bytes  |   rules  |   terms  \n";
+        result += "---------+----------+----------+----------+----------\n";
+        result += "input    | " + PAD(s.lines) + " | " + PAD(s.bytes) + " | " + PAD(s.rules) + " | " + PAD(s.terms) + "\n";
+        result += "output   | " + PAD(lines) + " | " + PAD(bytes) + " | " + PAD(rules) + " | " + PAD(terms) + "\n";
+        result += "output % | " + PADP(lines) + " | " + PADP(bytes) + " | " + PADP(rules) + " | " + PADP(terms);
+    }
     return result;
 
     #undef PAD
@@ -79,9 +88,10 @@ Stats Checker::stats(Grammar& g) const {
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
     int rules = g.find_all<Rule>().size();
     int terms = g.find_all<Term>().size();
+    int duration = benchmark();
     log(2, "Code has %ld bytes and %ld lines", code.size(), lines);
     log(2, "Grammar has %d rules and %d terms", rules, terms);
-    return Stats(code.size(), lines, rules, terms);
+    return Stats(code.size(), lines, rules, terms, duration);
 }
 
 bool Checker::validate(const std::string& input) const {
@@ -108,6 +118,35 @@ bool Checker::validate_string(const std::string& filename, const std::string& pe
 
 bool Checker::validate_file(const std::string& filename) const {
     return validate(filename);
+}
+
+int Checker::benchmark() const {
+    std::string script = Config::get<std::string>("benchmark");
+    if (script.empty() || !Config::verbose(1)) {
+        return 0;
+    }
+
+    int exit_code;
+    log(1, "Setting up benchmark environment.");
+    exit_code = system((script + " setup " + output).c_str());
+    if (exit_code != 0) {
+        error("Benchmark setup failed! (exit_code=%d)", exit_code);
+    }
+
+    log(1, "Running benchmark.");
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    exit_code = system((script + " benchmark " + output).c_str());
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    if (exit_code != 0) {
+        error("Benchmark script failed! (exit_code=%d)", exit_code);
+    }
+
+    log(1, "Tearing down benchmark environment.");
+    exit_code = system((script + " teardown " + output).c_str());
+    if (exit_code != 0) {
+        error("Benchmark teardown failed! (exit_code=%d)", exit_code);
+    }
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 }
 
 extern "C" {
