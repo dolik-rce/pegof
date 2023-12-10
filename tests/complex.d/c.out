@@ -1,0 +1,525 @@
+#===========================================================================
+#
+#  Parsing Expression Grammar of C for Mouse 1.1 - 1.5.
+#  Based on standard ISO/IEC 9899.1999:TC2, without preprocessor.
+#  Requires semantics class to process Typedefs.
+#
+#---------------------------------------------------------------------------
+#
+#  Copyright (C) 2007, 2009, 2010 by Roman R Redziejowski (www.romanredz.se).
+#
+#  The author gives unlimited permission to copy and distribute
+#  this file, with or without modifications, as long as this notice
+#  is preserved, and any changes are properly documented.
+#
+#  This file is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#---------------------------------------------------------------------------
+#
+#  Latest update 2010-11-19
+#
+#---------------------------------------------------------------------------
+#
+#  Modifications to the standard grammar:
+#
+#    Defined # as start of line comment.
+#    Added FunctionSpecifier "_stdcall".
+#    Added TypeQualifier "__declspec()".
+#    Added TypeSpecifier "__attribute__()".
+#    The scope of TypedefNames is not implemented.
+#
+#---------------------------------------------------------------------------
+#
+#  Implementation of typedefs.
+#
+#  A TypedefName is an Identifier that has been declared as such
+#  by a previous typedef declaration. It can be used as TypeSpecifier
+#  in DeclarationSpecifiers and SpecifierQualifierList.
+#  Recognizing it as such is essential for correct parsing.
+#  In other contexts, TypedefName is treated as an ordinary Identifier.
+#
+#  According to 6.7.2, comment 2, of the Standard, TypedefName can appear
+#  in DeclarationSpecifiers or SpecifierQualifierList at most once,
+#  and then as the only TypeSpecifier. To make sure that an Identifer
+#  is recognized as TypedefName only in these contexts, definitions
+#  of these items are changed as follows:
+#
+#  - TypedefName is removed as an alternative of TypeSpecifier.
+#
+#  - DeclarationSpecifiers and SpecifierQualifierList are redefined
+#    to allow either single TypedefName or one or more TypeSpecifiers.
+#
+#  The semantics class, via semantic actions, maintains a table of TypedefNames.
+#
+#  The rule defining TypedefName as Identifier has a semantic action
+#  that returns true iff the Identifier is in the table.
+#  That means TypedefName is accepted iff it is in the table.
+#
+#  According to 6.7.7, comment 3, of the Standard,
+#  in a Declaration whose StorageClassSpecifier is TYPEDEF,
+#  each Declarator defines an Identifier to be a TypedefName.
+#  These Identifiers are entered into the table as follows.
+#
+#  - Each Identifier has itself as semantic value.
+#
+#  - Each DirectDeclarator starts with either Identifier
+#    or Declarator in parentheses.
+#    Its semantic value is either that Identifier,
+#    or the Identifier obtained as semantic value of that Declarator.
+#
+#  - Each Declarator has as semantic value the Identifier
+#    appearing in its DirectDeclarator,
+#
+#  - Each InitDeclarator has as semantic value the Identifier
+#    appearing in its Declarator.
+#
+#  - InitDeclaratorList has as semantic value
+#    the list of Identifiers appearing in its InitDeclarators.
+#
+#  - DeclarationSpecifiers has semantic value "typedef"
+#    if any of the specifiers is "typedef" or null otherwise.
+#
+#  - Declaration has a semantic action that enters Identifiers
+#    delivered by InitDeclaratorList into typedef table
+#    if DeclarationSpecifiers indicate "typedef".
+#
+#
+#---------------------------------------------------------------------------
+#
+#  Change log
+#    2009-07-13 Posted on Internet.
+#    2010-11-19 Removed superfluous '?' after 'Spacing'.
+#
+#
+#---------------------------------------------------------------------------
+#
+#    2013-02-21 Modified to work with github.com/pointlander/peg
+#    2023-12-03 Modified to work with PackCC (https://github.com/arithy/packcc)
+#
+#===========================================================================
+
+#-------------------------------------------------------------------------
+#  A.2.4  External definitions
+#-------------------------------------------------------------------------
+#
+#package main
+#
+#type C Peg {
+#
+#}
+TranslationUnit <- Spacing (
+    DeclarationSpecifiers Declarator Declaration* "{" Spacing (
+        Declaration
+        / Statement
+    )* "}" Spacing
+    / Declaration
+    / ";" Spacing
+)* !.
+
+#-------------------------------------------------------------------------
+#  A.2.2  Declarations
+#-------------------------------------------------------------------------
+Declaration <- DeclarationSpecifiers (Declarator ("=" !"=" Spacing Initializer)? #{}
+     (COMMA Declarator ("=" !"=" Spacing Initializer)? #{}
+        )* #{}
+    )? ";" Spacing
+
+DeclarationSpecifiers <-
+    (
+        StorageClassSpecifier
+        / TypeQualifier
+        / "inline" !IdChar Spacing
+        / "_stdcall" !IdChar Spacing
+    )* Identifier #{&TypedefName}
+     (
+        StorageClassSpecifier
+        / TypeQualifier
+        / "inline" !IdChar Spacing
+        / "_stdcall" !IdChar Spacing
+    )*
+    / (
+        StorageClassSpecifier
+        / TypeSpecifier
+        / TypeQualifier
+        / "inline" !IdChar Spacing
+        / "_stdcall" !IdChar Spacing
+    )+ #{DeclarationSpecifiers}
+    
+
+StorageClassSpecifier <-
+    "typedef" !IdChar Spacing
+    / "extern" !IdChar Spacing
+    / "static" !IdChar Spacing
+    / "auto" !IdChar Spacing
+    / "register" !IdChar Spacing
+    / "__attribute__" !IdChar Spacing LPAR LPAR (!RPAR .)* RPAR RPAR
+
+TypeSpecifier <-
+    "void" !IdChar Spacing
+    / "char" !IdChar Spacing
+    / "short" !IdChar Spacing
+    / "int" !IdChar Spacing
+    / "long" !IdChar Spacing
+    / "float" !IdChar Spacing
+    / "double" !IdChar Spacing
+    / "signed" !IdChar Spacing
+    / "unsigned" !IdChar Spacing
+    / "_Bool" !IdChar Spacing
+    / "_Complex" !IdChar Spacing
+    / (
+        "struct" !IdChar Spacing
+        / "union" !IdChar Spacing
+    ) (
+        Identifier? "{" Spacing (((
+                    TypeQualifier* Identifier #{&TypedefName}
+                     TypeQualifier*
+                    / (
+                        TypeSpecifier
+                        / TypeQualifier
+                    )+
+                ) ((
+                        Declarator? ":" !">" Spacing ConditionalExpression
+                        / Declarator
+                    ) (COMMA (
+                            Declarator? ":" !">" Spacing ConditionalExpression
+                            / Declarator
+                        ))*)?)? ";" Spacing)* "}" Spacing
+        / Identifier
+    )
+    / "enum" !IdChar Spacing (
+        Identifier? "{" Spacing Identifier ("=" !"=" Spacing ConditionalExpression)? (COMMA Identifier ("=" !"=" Spacing ConditionalExpression)?)* COMMA? "}" Spacing
+        / Identifier
+    )
+
+TypeQualifier <-
+    "const" !IdChar Spacing
+    / "restrict" !IdChar Spacing
+    / "volatile" !IdChar Spacing
+    / "__declspec" !IdChar Spacing LPAR Identifier RPAR
+
+Declarator <- ("*" !"=" Spacing TypeQualifier*)* (
+    Identifier
+    / LPAR Declarator RPAR
+) (
+    "[" Spacing TypeQualifier* AssignmentExpression? "]" Spacing
+    / "[" Spacing "static" !IdChar Spacing TypeQualifier* AssignmentExpression "]" Spacing
+    / "[" Spacing TypeQualifier+ "static" !IdChar Spacing AssignmentExpression "]" Spacing
+    / "[" Spacing TypeQualifier* "*" !"=" Spacing "]" Spacing
+    / LPAR ParameterTypeList RPAR
+    / LPAR (Identifier (COMMA Identifier)*)? RPAR
+)* #{}
+
+
+ParameterTypeList <- DeclarationSpecifiers (
+    Declarator
+    / AbstractDeclarator
+)? (COMMA DeclarationSpecifiers (
+        Declarator
+        / AbstractDeclarator
+    )?)* (COMMA "..." Spacing)?
+
+AbstractDeclarator <-
+    ("*" !"=" Spacing TypeQualifier*)* (
+        LPAR AbstractDeclarator RPAR
+        / "[" Spacing (
+            AssignmentExpression
+            / "*" !"=" Spacing
+        )? "]" Spacing
+        / LPAR ParameterTypeList? RPAR
+    ) (
+        "[" Spacing (
+            AssignmentExpression
+            / "*" !"=" Spacing
+        )? "]" Spacing
+        / LPAR ParameterTypeList? RPAR
+    )*
+    / ("*" !"=" Spacing TypeQualifier*)+
+
+Initializer <-
+    AssignmentExpression
+    / "{" Spacing Designation? Initializer (COMMA Designation? Initializer)* COMMA? "}" Spacing
+
+Designation <- (
+    "[" Spacing ConditionalExpression "]" Spacing
+    / "." Spacing Identifier
+)+ "=" !"=" Spacing
+
+#-------------------------------------------------------------------------
+#  A.2.3  Statements
+#-------------------------------------------------------------------------
+Statement <-
+    Identifier ":" !">" Spacing Statement
+    / "case" !IdChar Spacing ConditionalExpression ":" !">" Spacing Statement
+    / "default" !IdChar Spacing ":" !">" Spacing Statement
+    / "{" Spacing (
+        Declaration
+        / Statement
+    )* "}" Spacing
+    / Expression? ";" Spacing
+    / "if" !IdChar Spacing LPAR Expression RPAR Statement ("else" !IdChar Spacing Statement)?
+    / "switch" !IdChar Spacing LPAR Expression RPAR Statement
+    / "while" !IdChar Spacing LPAR Expression RPAR Statement
+    / "do" !IdChar Spacing Statement "while" !IdChar Spacing LPAR Expression RPAR ";" Spacing
+    / "for" !IdChar Spacing LPAR Expression? ";" Spacing Expression? ";" Spacing Expression? RPAR Statement
+    / "for" !IdChar Spacing LPAR Declaration Expression? ";" Spacing Expression? RPAR Statement
+    / "goto" !IdChar Spacing Identifier ";" Spacing
+    / "continue" !IdChar Spacing ";" Spacing
+    / "break" !IdChar Spacing ";" Spacing
+    / "return" !IdChar Spacing Expression? ";" Spacing
+
+UnaryExpression <-
+    (
+        "L"? ("\"" (
+                Escape
+                / ![\n"\\] .
+            )* "\"" Spacing)+
+        / (
+            (
+                [0-9]* "." [0-9]+
+                / [0-9]+ "."
+            ) ([Ee] [-+]? [0-9]+)?
+            / [0-9]+ [Ee] [-+]? [0-9]+
+            / (
+                "0x"
+                / "0X"
+            ) (
+                HexDigit* "." HexDigit+
+                / HexDigit+ "."
+            ) ([Pp] [-+]? [0-9]+)?
+            / (
+                "0x"
+                / "0X"
+            ) HexDigit+ [Pp] [-+]? [0-9]+
+        ) [FLfl]? Spacing
+        / (
+            [1-9] [0-9]*
+            / (
+                "0x"
+                / "0X"
+            ) HexDigit+
+            / "0" [0-7]*
+        ) (
+            [Uu] (
+                "ll"
+                / "LL"
+                / [Ll]
+            )?
+            / (
+                "ll"
+                / "LL"
+                / [Ll]
+            ) [Uu]?
+        )? Spacing
+        / Identifier
+        / "L"? "'" (
+            Escape
+            / ![\n'\\] .
+        )* "'" Spacing
+        / Identifier
+        / LPAR Expression RPAR
+        / LPAR (
+            TypeQualifier* Identifier #{&TypedefName}
+             TypeQualifier*
+            / (
+                TypeSpecifier
+                / TypeQualifier
+            )+
+        ) AbstractDeclarator? RPAR "{" Spacing Designation? Initializer (COMMA Designation? Initializer)* COMMA? "}" Spacing
+    ) (
+        "[" Spacing Expression "]" Spacing
+        / LPAR (AssignmentExpression (COMMA AssignmentExpression)*)? RPAR
+        / "." Spacing Identifier
+        / "->" Spacing Identifier
+        / "++" Spacing
+        / "--" Spacing
+    )*
+    / "++" Spacing UnaryExpression
+    / "--" Spacing UnaryExpression
+    / (
+        "&" !"&" Spacing
+        / "*" !"=" Spacing
+        / "+" ![+=] Spacing
+        / "-" ![-=>] Spacing
+        / "~" Spacing
+        / "!" !"=" Spacing
+    ) CastExpression
+    / "sizeof" !IdChar Spacing (
+        UnaryExpression
+        / LPAR (
+            TypeQualifier* Identifier #{&TypedefName}
+             TypeQualifier*
+            / (
+                TypeSpecifier
+                / TypeQualifier
+            )+
+        ) AbstractDeclarator? RPAR
+    )
+
+CastExpression <-
+    LPAR (
+        TypeQualifier* Identifier #{&TypedefName}
+         TypeQualifier*
+        / (
+            TypeSpecifier
+            / TypeQualifier
+        )+
+    ) AbstractDeclarator? RPAR CastExpression
+    / UnaryExpression
+
+MultiplicativeExpression <- CastExpression ((
+        "*" !"=" Spacing
+        / "/" !"=" Spacing
+        / "%" ![=>] Spacing
+    ) CastExpression)*
+
+AdditiveExpression <- MultiplicativeExpression ((
+        "+" ![+=] Spacing
+        / "-" ![-=>] Spacing
+    ) MultiplicativeExpression)*
+
+RelationalExpression <- AdditiveExpression ((
+        "<<" !"=" Spacing
+        / ">>" !"=" Spacing
+    ) AdditiveExpression)* ((
+        "<=" Spacing
+        / ">=" Spacing
+        / "<" !"=" Spacing
+        / ">" !"=" Spacing
+    ) AdditiveExpression ((
+            "<<" !"=" Spacing
+            / ">>" !"=" Spacing
+        ) AdditiveExpression)*)*
+
+EqualityExpression <- RelationalExpression ((
+        "==" Spacing
+        / "!=" Spacing
+    ) RelationalExpression)*
+
+ExclusiveORExpression <- EqualityExpression ("&" !"&" Spacing EqualityExpression)* ("^" !"=" Spacing EqualityExpression ("&" !"&" Spacing EqualityExpression)*)*
+
+LogicalANDExpression <- ExclusiveORExpression ("|" !"=" Spacing ExclusiveORExpression)* ("&&" Spacing ExclusiveORExpression ("|" !"=" Spacing ExclusiveORExpression)*)*
+
+ConditionalExpression <- LogicalANDExpression ("||" Spacing LogicalANDExpression)* ("?" Spacing Expression ":" !">" Spacing LogicalANDExpression ("||" Spacing LogicalANDExpression)*)*
+
+AssignmentExpression <-
+    UnaryExpression (
+        "=" !"=" Spacing
+        / "*=" Spacing
+        / "/=" Spacing
+        / "%=" Spacing
+        / "+=" Spacing
+        / "-=" Spacing
+        / "<<=" Spacing
+        / ">>=" Spacing
+        / "&=" Spacing
+        / "^=" Spacing
+        / "|=" Spacing
+    ) AssignmentExpression
+    / ConditionalExpression
+
+Expression <- AssignmentExpression (COMMA AssignmentExpression)*
+
+#-------------------------------------------------------------------------
+#  A.1.1  Lexical elements
+#  Tokens are: Keyword, Identifier, Constant, StringLiteral, Punctuator.
+#  Tokens are separated by Spacing.
+#-------------------------------------------------------------------------
+Spacing <- (
+    [\t\n\r ] # 7.4.1.10 [\u000B\u000C]
+    
+    / "/*" (!"*/" .)* "*/" # 6.4.9
+    
+    / "//" (!"\n" .)* # 6.4.9
+    
+    / "#" (!"\n" .)* # Treat pragma as comment
+    
+)*
+
+#-------------------------------------------------------------------------
+#  A.1.3  Identifiers
+#  The standard does not explicitly state that identifiers must be
+#  distinct from keywords, but it seems so.
+#-------------------------------------------------------------------------
+Identifier <- !((
+        "auto"
+        / "break"
+        / "case"
+        / "char"
+        / "const"
+        / "continue"
+        / "default"
+        / "double"
+        / "do"
+        / "else"
+        / "enum"
+        / "extern"
+        / "float"
+        / "for"
+        / "goto"
+        / "if"
+        / "int"
+        / "inline"
+        / "long"
+        / "register"
+        / "restrict"
+        / "return"
+        / "short"
+        / "signed"
+        / "sizeof"
+        / "static"
+        / "struct"
+        / "switch"
+        / "typedef"
+        / "union"
+        / "unsigned"
+        / "void"
+        / "volatile"
+        / "while"
+        / "_Bool"
+        / "_Complex"
+        / "_Imaginary"
+        / "_stdcall"
+        / "__declspec"
+        / "__attribute__"
+    ) !IdChar) (
+    [A-Za-z]
+    / "_"
+    / UniversalCharacter
+) IdChar* Spacing #{}
+
+
+IdChar <-
+    [0-9A-Za-z]
+    / "_"
+    / UniversalCharacter
+
+#-------------------------------------------------------------------------
+#  A.1.4  Universal character names
+#-------------------------------------------------------------------------
+UniversalCharacter <-
+    "\\u" HexDigit HexDigit HexDigit HexDigit
+    / "\\U" HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
+
+HexDigit <- [-0-9A-Fa-f]
+
+Escape <-
+    "\\" ["%'?\\abfnrtv]
+    / "\\" [0-7] [0-7]? [0-7]?
+    / "\\x" HexDigit+
+    / UniversalCharacter
+
+LPAR <- "(" Spacing
+
+RPAR <- ")" Spacing
+
+COMMA <- "," Spacing
+
+%%
+int main() {
+    pcc_context_t *ctx = pcc_create(NULL);
+    while (pcc_parse(ctx, NULL));
+    pcc_destroy(ctx);
+    return 0;
+}
