@@ -257,7 +257,7 @@ int Optimizer::remove_unnecessary_groups() {
         const Term& first_term = group.get_first_term();
         if (t->is_simple()) {
             // A (B C) D -> A B C D
-            log(1, "Removing grouping from '%s'", group.parent->to_string().c_str());
+            log(1, "Removing grouping from '%s'", t->to_string().c_str());
             Sequence* s = t->parent->as<Sequence>();
             int pos;
             for (pos = 0; pos < s->size(); pos++) {
@@ -270,7 +270,7 @@ int Optimizer::remove_unnecessary_groups() {
             return true;
         } else if (group.has_single_term() && first_term.is_simple()) {
             // A (B)* C -> A B* C
-            log(1, "Removing grouping from %s", group.parent->to_string().c_str());
+            log(1, "Removing grouping from %s", t->to_string().c_str());
             t->copy_content(first_term);
             t->update_parents();
             optimized++;
