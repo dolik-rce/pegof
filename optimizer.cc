@@ -153,16 +153,12 @@ int Optimizer::normalize_character_classes() {
 
 int Optimizer::single_char_character_classes() {
     // [A] -> "A"
-    // [^B] -> !"B"
     return apply(O_SINGLE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
-        if (!cc || cc->any_char() || !cc->is_single_char()) return false;
+        if (!cc || cc->any_char() || cc->is_negative() || !cc->is_single_char()) return false;
         Term* parent = cc->get_parent<Term>();
         if (!parent) return false; // should never happen
         log(1, "Optimizing character class: %s", cc->to_string().c_str());
-        if (cc->is_negative()) {
-            parent->flip_negation();
-        }
         parent->set_content(cc->convert_to_string());
         optimized++;
         return true;

@@ -33,7 +33,7 @@ const std::map<Optimization, const char*> opt_descriptions = {
     {O_INLINE, {"Rule inlining: Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser."}},
     {O_NORMALIZE_CHAR_CLASS, {"Character class optimization: Normalize character classes to avoid duplicities and use ranges where possible. E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`."}},
     {O_REMOVE_GROUP, {"Remove unnecessary groups: Some parenthesis can be safely removed without changeing the meaning of the grammar. E.g.: `A (B C) D` becomes `A B C D` or `X (Y)* Z` becomes `X Y* Z`."}},
-    {O_SINGLE_CHAR_CLASS, {"Convert single character classes to strings: The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\\n]` to `\"\\n\"` or `[^ ]` to `!\" \"`."}},
+    {O_SINGLE_CHAR_CLASS, {"Convert single character classes to strings: The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\\n]` to `\"\\n\"`."}},
     //~ {O_CHAR_CLASS_NEGATION, {"Simplify negation of character classes: Negation of character classes can be written as negative character class (e.g. `![\\n]` -> `[^\\n]`)."}},
     {O_DOUBLE_NEGATION, {"Removing double negations: Negation of negation can be ignored, because it results in the original term (e.g. `!(!TERM)` -> `TERM`)."}},
     {O_DOUBLE_QUANTIFICATION, {"Removing double quantifications: If a single term is quantified twice, it is always possible to convert this into a single potfix operator with equel meaning (e.g. `(X+)?` -> `X*`)."}},

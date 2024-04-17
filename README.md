@@ -86,7 +86,7 @@ as much as possible to reduce number of rules and terms.
 
 - `repeats` Removing unnecessary repeats: Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
 
-- `single-char-class` Convert single character classes to strings: The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\n]` to `"\n"` or `[^ ]` to `!" "`.
+- `single-char-class` Convert single character classes to strings: The code generated for strings is simpler than that generated for character classes. So we can convert for example `[\n]` to `"\n"`.
 
 - `unused-capture` Removing unused captures: Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded.
 
