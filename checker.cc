@@ -64,7 +64,13 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
     log(2, "Processing %s with PackCC, storing output to %s.{h,c}", input.c_str(), output.c_str());
 
     // Call PackCC
-    options_t opts = {};
+    std::vector<std::string> options = split(Config::get<std::string>("packcc-options"));
+    options_t opts = {
+        (contains(options, "ascii") || contains(options, "a")) ? TRUE : FALSE,
+        (contains(options, "lines") || contains(options, "l")) ? TRUE : FALSE,
+        (contains(options, "debug") || contains(options, "d")) ? TRUE : FALSE
+    };
+
     void *const ctx = create_context(input.c_str(), output.c_str(), &opts);
     bool result = parse(ctx) && generate(ctx);
     destroy_context(ctx);

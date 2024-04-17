@@ -66,6 +66,13 @@ std::vector<std::string> split(const std::string &s, const std::string& delimite
     return {iter, end};
 }
 
+bool contains(std::vector<std::string> values, std::string x) {
+    for (std::string& v: values) {
+        if (v == x) return true;
+    }
+    return false;
+}
+
 std::string replace(const std::string& input, const std::string& re, const std::string& replace) {
     return std::regex_replace(input, std::regex(re), replace);
 }
