@@ -131,11 +131,21 @@ It can be used like this:
 ```bash
 pegof --optimize all --benchmark examples/benchmark_c.sh --output /dev/null examples/c.peg
 ```
-The output will look somwhat like this:
+The output will look somewhat like this:
 ```text
-
+         |      lines |      bytes |      rules |      terms |   duration |     memory
+---------+------------+------------+------------+------------+------------+-----------
+input    |       9761 |     393629 |        187 |        823 |        470 |     929792
+output   |       8367 |     338514 |         32 |        863 |        129 |     328704
+output % |        85% |        85% |        17% |       104% |        27% |        35%
 ```
-
+Meaning of those columns:
+- `lines`: number of lines in the generated C code
+- `bytes`: length of the generated C code in bytes
+- `rules`: number of rules in the grammar
+- `terms`: number of terms in the grammar
+- `duration`: how long the banchmark ran in milliseconds
+- `memory`: peak resident set memory in kB (only measured if GNU Time or BusyBox are installed)
 
 
 ## Known issues

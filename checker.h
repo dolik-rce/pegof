@@ -7,8 +7,10 @@ class Stats {
     int rules;
     int terms;
     int duration;
+    int memory;
 public:
-    Stats(int bytes, int lines, int rules, int terms, int duration) : bytes(bytes), lines(lines), rules(rules), terms(terms), duration(duration) {};
+    Stats(int bytes, int lines, int rules, int terms, int duration, int memory)
+        : bytes(bytes), lines(lines), rules(rules), terms(terms), duration(duration), memory(memory) {};
     std::string compare(const Stats& s) const;
 };
 
@@ -17,7 +19,7 @@ class Checker {
     std::string output;
     bool call_packcc(const std::string& input, const std::string& output, std::string& stderr) const;
     bool validate(const std::string& input) const;
-    int benchmark() const;
+    void benchmark(int& duration, int& memory) const;
 public:
     Checker();
     ~Checker();

@@ -18,30 +18,25 @@ namespace fs = std::filesystem;
 
 std::stringstream packcc_errors;
 
-const std::string N_A = "N/A";
+const std::string EMPTY = "";
+const int COL_WIDTH = 10;
 
 std::string Stats::compare(const Stats& s) const {
-    #define PAD(X) left_pad((X > 0) ? std::to_string(X) : N_A, 8)
-    #define PADP(X) left_pad(((s.X > 0) ? std::to_string(X * 100 / s.X) : N_A) + "%", 8)
-
     std::string result;
-    if (duration > 0) {
-        result += "         |   lines  |   bytes  |   rules  |   terms  | duration \n";
-        result += "---------+----------+----------+----------+----------+----------\n";
-        result += "input    | " + PAD(s.lines) + " | " + PAD(s.bytes) + " | " + PAD(s.rules) + " | " + PAD(s.terms) + " | " + PAD(s.duration) + "\n";
-        result += "output   | " + PAD(lines) + " | " + PAD(bytes) + " | " + PAD(rules) + " | " + PAD(terms) + " | " + PAD(duration) + "\n";
-        result += "output % | " + PADP(lines) + " | " + PADP(bytes) + " | " + PADP(rules) + " | " + PADP(terms) + " | " + PADP(duration);
-    } else {
-        result += "         |   lines  |   bytes  |   rules  |   terms  \n";
-        result += "---------+----------+----------+----------+----------\n";
-        result += "input    | " + PAD(s.lines) + " | " + PAD(s.bytes) + " | " + PAD(s.rules) + " | " + PAD(s.terms) + "\n";
-        result += "output   | " + PAD(lines) + " | " + PAD(bytes) + " | " + PAD(rules) + " | " + PAD(terms) + "\n";
-        result += "output % | " + PADP(lines) + " | " + PADP(bytes) + " | " + PADP(rules) + " | " + PADP(terms);
-    }
+    #define COL(X) ((X > 0) ? (" | " + left_pad(#X, COL_WIDTH)) : EMPTY)
+    result += "        " + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory) + "\n";
+    #undef COL
+    #define COL(X) ((X > 0) ? "-+-----------" : EMPTY)
+    result += "--------" + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory) + "\n";
+    #undef COL
+    #define COL(X) ((X > 0) ? (" | " + left_pad(std::to_string(X), COL_WIDTH)) : EMPTY)
+    result += "input   " + COL(s.lines) + COL(s.bytes) + COL(s.rules) + COL(s.terms) + COL(s.duration) + COL(s.memory) + "\n";
+    result += "output  " + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory) + "\n";
+    #undef COL
+    #define COL(X) ((X > 0) ? (" | " + left_pad(std::to_string(X * 100 / s.X) + "%", COL_WIDTH)) : EMPTY)
+    result += "output %" + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory);
+    #undef COL
     return result;
-
-    #undef PAD
-    #undef PADP
 }
 
 Checker::Checker() {
@@ -94,10 +89,12 @@ Stats Checker::stats(Grammar& g) const {
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
     int rules = g.find_all<Rule>().size();
     int terms = g.find_all<Term>().size();
-    int duration = benchmark();
+    int duration = 0;
+    int memory = 0;
+    benchmark(duration, memory);
     log(2, "Code has %ld bytes and %ld lines", code.size(), lines);
     log(2, "Grammar has %d rules and %d terms", rules, terms);
-    return Stats(code.size(), lines, rules, terms, duration);
+    return Stats(code.size(), lines, rules, terms, duration, memory);
 }
 
 bool Checker::validate(const std::string& input) const {
@@ -126,10 +123,10 @@ bool Checker::validate_file(const std::string& filename) const {
     return validate(filename);
 }
 
-int Checker::benchmark() const {
+void Checker::benchmark(int& duration, int& memory) const {
     std::string script = Config::get<std::string>("benchmark");
-    if (script.empty() || !Config::verbose(1)) {
-        return 0;
+    if (script.empty()) {
+        return;
     }
 
     int exit_code;
@@ -139,11 +136,20 @@ int Checker::benchmark() const {
         error("Benchmark setup failed! (exit_code=%d)", exit_code);
     }
 
+    std::string out = tmp + "/benchmark.out";
+    std::string time;
+    if (system("which /usr/bin/time 2> /dev/null > /dev/null") == 0) {
+        time = "/usr/bin/time -f \"\\n%M\" ";
+    }
+    std::string cmd = time + script + " benchmark " + output + " > " + out + " 2>&1";
+
     log(1, "Running benchmark.");
+    log(4, "Benchmark command: %s", cmd.c_str());
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    exit_code = system((script + " benchmark " + output).c_str());
+    exit_code = system(cmd.c_str());
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     if (exit_code != 0) {
+        error("%s\n", read_file(out).c_str());
         error("Benchmark script failed! (exit_code=%d)", exit_code);
     }
 
@@ -152,7 +158,11 @@ int Checker::benchmark() const {
     if (exit_code != 0) {
         error("Benchmark teardown failed! (exit_code=%d)", exit_code);
     }
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+    if (time.size()) {
+        std::vector<std::string> lines = split(read_file(out), "\n");
+        memory = stoi(lines.back());
+    }
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 }
 
 extern "C" {
