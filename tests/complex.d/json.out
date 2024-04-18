@@ -1,0 +1,49 @@
+%prefix "json"
+
+file <- _ (
+    object
+    / "[" (
+        value ("," value)*
+        / _
+    ) "]"
+) _
+
+object <- "{" (
+    _ "\"" (
+        "\\\""
+        / [^"]
+    )* "\"" _ ":" value ("," _ "\"" (
+            "\\\""
+            / [^"]
+        )* "\"" _ ":" value)*
+    / _
+) "}"
+
+value <- _ (
+    object
+    / "[" (
+        value ("," value)*
+        / _
+    ) "]"
+    / "false"
+    / "true"
+    / "-"? (
+        "0"
+        / [1-9] [0-9]*
+    ) ("." [0-9]+)? ([Ee] [-+]? [0-9]+)?
+    / "\"" (
+        "\\\""
+        / [^"]
+    )* "\""
+    / "null"
+) _
+
+_ <- [\t\n\r ]*
+
+%%
+int main() {
+    json_context_t *ctx = json_create(NULL);
+    while (json_parse(ctx, NULL));
+    json_destroy(ctx);
+    return 0;
+}

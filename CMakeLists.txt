@@ -36,7 +36,7 @@ add_custom_command(
 add_custom_target(
     test
     ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} tests/run.sh
-    DEPENDS pegof_test
+    DEPENDS pegof pegof_test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
