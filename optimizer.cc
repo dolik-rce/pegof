@@ -71,7 +71,7 @@ int Optimizer::concat_character_classes() {
                     CharacterClass& cc1 = t.get<CharacterClass>();
                     CharacterClass& cc2 = prev_term->get<CharacterClass>();
                     if (cc1.is_negative() == cc2.is_negative() && !cc1.any_char() && !cc1.any_char()) {
-                        log(1, "Merging character classes: %s + %s", t.to_string().c_str(), prev_term->to_string().c_str());
+                        log(1, "Merging character classes: %s + %s", t.c_str(), prev_term->c_str());
                         cc1.merge(cc2);
                         a->erase(i+1);
                         optimized++;
@@ -97,7 +97,7 @@ int optimize_repeating_terms(Term& t1, Term& t2) {
         Alternation* a = s->parent->as<Alternation>();
         // TODO: implement recursive erase, to avoid this ugly if
         if (a->size() > 1) {
-            log(1, "Removing %s from %s", s->to_string().c_str(), a->to_string().c_str());
+            log(1, "Removing %s from %s", s->c_str(), a->c_str());
             a->erase(s);
             return 0;
         } else {
@@ -166,7 +166,7 @@ int Optimizer::single_char_character_classes() {
         if (!cc || cc->any_char() || cc->is_negative() || !cc->is_single_char()) return false;
         Term* parent = cc->get_parent<Term>();
         if (!parent) return false; // should never happen
-        log(1, "Optimizing character class: %s", cc->to_string().c_str());
+        log(1, "Optimizing character class: %s", cc->c_str());
         parent->set_content(cc->convert_to_string());
         optimized++;
         return true;
@@ -182,7 +182,7 @@ int Optimizer::single_char_character_classes() {
 //~         if (!t || !t->contains<CharacterClass>() || !t->is_negative()) return false;
 //~         CharacterClass cc = t->get<CharacterClass>();
 //~         if (cc.any_char()) return false;
-//~         log(1, "Simplifying character class negation: %s", t->to_string().c_str());
+//~         log(1, "Simplifying character class negation: %s", t->c_str());
 //~         cc.flip_negation();
 //~         t->set_prefix(0);
 //~         t->set_content(cc);
@@ -201,7 +201,7 @@ int Optimizer::double_negations() {
         if (!group.has_single_term()) return false;
         Term inner_term = group.get_first_term();
         if (!inner_term.is_negative()) return false;
-        log(1, "Optimizing double negation: %s", t->to_string().c_str());
+        log(1, "Optimizing double negation: %s", t->c_str());
         *t = inner_term;
         t->set_prefix(0);
         t->update_parents();
@@ -226,7 +226,7 @@ int Optimizer::double_quantifications() {
         if (!group.has_single_term()) return false;
         Term inner_term = group.get_first_term();
         if (!inner_term.is_quantified() || inner_term.is_prefixed()) return false;
-        log(1, "Optimizing double quantification: %s", t->to_string().c_str());
+        log(1, "Optimizing double quantification: %s", t->c_str());
         t->copy_content(inner_term);
         t->set_quantifier(optimize_double_quantifiers(*t, inner_term));
         t->update_parents();
@@ -245,7 +245,7 @@ int Optimizer::remove_unnecessary_groups() {
                 Term term = s.get_first_term();
                 if (!term.is_simple() || !term.contains<Group>()) continue;
                 // A / (B / C) / D -> A / B / C / D
-                log(1, "Removing grouping from '%s'", term.to_string().c_str());
+                log(1, "Removing grouping from '%s'", term.c_str());
                 Group group = term.get<Group>();
                 a->erase(pos);
                 a->insert(pos, group.convert_to_alternation());
@@ -261,7 +261,7 @@ int Optimizer::remove_unnecessary_groups() {
         const Term& first_term = group.get_first_term();
         if (t->is_simple()) {
             // A (B C) D -> A B C D
-            log(1, "Removing grouping from '%s'", t->to_string().c_str());
+            log(1, "Removing grouping from '%s'", t->c_str());
             Sequence* s = t->parent->as<Sequence>();
             int pos;
             for (pos = 0; pos < s->size(); pos++) {
@@ -274,7 +274,7 @@ int Optimizer::remove_unnecessary_groups() {
             return true;
         } else if (group.has_single_term() && first_term.is_simple()) {
             // A (B)* C -> A B* C
-            log(1, "Removing grouping from %s", t->to_string().c_str());
+            log(1, "Removing grouping from %s", t->c_str());
             t->copy_content(first_term);
             t->update_parents();
             optimized++;
@@ -293,7 +293,7 @@ int Optimizer::unused_variables() {
             return action.contains_reference(*r);
         });
         if (!actions.empty()) return false;
-        log(1, "Removing unused variable reference from '%s' in rule %s.", r->to_string().c_str(), rule->to_string().c_str());
+        log(1, "Removing unused variable reference from '%s' in rule %s.", r->c_str(), rule->c_str());
         r->remove_variable();
         optimized++;
         return true;
@@ -319,7 +319,7 @@ int Optimizer::unused_captures() {
             if (used_in_source || used_in_expand) {
                 continue;
             }
-            log(1, "Removing unused capture '%s' in rule %s.", captures[i]->to_string().c_str(), rule->to_string().c_str());
+            log(1, "Removing unused capture '%s' in rule %s.", captures[i]->c_str(), rule->c_str());
             ;
             Term* parent = captures[i]->get_parent<Term>();
             parent->set_content(captures[i]->convert_to_group());
@@ -328,11 +328,11 @@ int Optimizer::unused_captures() {
                 if (*expands[j] <= i) continue;
                 std::string prev = expands[j]->to_string();
                 expands[j]->shift(-1);
-                log(2, "Replacing expand '%d' -> '%d'", prev.c_str(), expands[j]->to_string().c_str());
+                log(2, "Replacing expand '%d' -> '%d'", prev.c_str(), expands[j]->c_str());
             }
             for (int j = 0; j < actions.size(); j++) {
                 for (int k = i+2; k <= captures.size(); k++) {
-                    log(2, "Replacing '$%d' -> '$%d' in action %s", k, k-1, actions[j]->to_string().c_str());
+                    log(2, "Replacing '$%d' -> '$%d' in action %s", k, k-1, actions[j]->c_str());
                     actions[j]->renumber_capture(k, k - 1);
                 }
             }
@@ -403,7 +403,7 @@ int Optimizer::inline_rules() {
         for (int j = 0; j < refs.size(); j++) {
             Term* dest = refs[j]->parent->as<Term>();
             Group group = rule.convert_to_group();
-            log(2, "  Inlining %s into %s", group.to_string().c_str(), dest->to_string().c_str());
+            log(2, "  Inlining %s into %s", group.c_str(), dest->c_str());
             dest->set_content(group);
             dest->update_parents();
             // fix capture references in expands and actions
@@ -439,14 +439,14 @@ int Optimizer::inline_rules() {
                             std::string prev = node.to_string();
                             Expand *e = node.as<Expand>();
                             e->shift(src_captures);
-                            log(2, "  Update expand: %s -> %s", prev.c_str(), node.to_string().c_str());
+                            log(2, "  Update expand: %s -> %s", prev.c_str(), node.c_str());
                         } else if (after && node.is<Action>()) {
                             std::string prev = node.to_string();
                             Action *a = node.as<Action>();
                             for (int k = dest_captures; k >= 1; k--) {
                                 a->renumber_capture(k, k + src_captures);
                             }
-                            log(2, "  Update action: %s -> %s", prev.c_str(), node.to_string().c_str());
+                            log(2, "  Update action: %s -> %s", prev.c_str(), node.c_str());
                         }
                         return false;
                     });
@@ -455,20 +455,20 @@ int Optimizer::inline_rules() {
                             std::string prev = node.to_string();
                             Expand *e = node.as<Expand>();
                             e->shift(shift);
-                            log(2, "  Update expand: %s -> %s", prev.c_str(), node.to_string().c_str());
+                            log(2, "  Update expand: %s -> %s", prev.c_str(), node.c_str());
                         } else if (node.is<Action>()) {
                             std::string prev = node.to_string();
                             Action *a = node.as<Action>();
                             for (int k = src_captures; k >= 1; k--) {
                                 a->renumber_capture(k, k + shift);
                             }
-                            log(2, "  Update action: %s -> %s", prev.c_str(), node.to_string().c_str());
+                            log(2, "  Update action: %s -> %s", prev.c_str(), node.c_str());
                         }
                         return false;
                     });
                 }
             }
-            debug("  Inlining result: %s", dest->to_string().c_str());
+            debug("  Inlining result: %s", dest->c_str());
         }
         log(2, "  Removing inlined rule %s", rule.c_str());
         g.erase(&rule);
@@ -482,7 +482,7 @@ int Optimizer::inline_rules() {
 Grammar Optimizer::optimize() {
     int opts = 1;
     int pass = 1;
-    debug("Input grammar:\n%s", g.to_string().c_str());
+    debug("Input grammar:\n%s", g.c_str());
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
         opts = normalize_character_classes();
@@ -497,7 +497,7 @@ Grammar Optimizer::optimize() {
         opts += concat_character_classes();
         opts += unused_variables();
         opts += unused_captures();
-        if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, g.to_string().c_str());
+        if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, g.c_str());
         pass++;
     }
     return g;
