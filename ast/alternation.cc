@@ -90,6 +90,15 @@ void Alternation::erase(int index) {
     sequences.erase(sequences.begin() + index);
 }
 
+void Alternation::erase(Sequence* s) {
+    for (int i = 0; i < sequences.size(); i++) {
+        if (*s == sequences[i]) {
+            sequences.erase(sequences.begin() + i);
+            return;
+        }
+    }
+}
+
 bool operator==(const Alternation& a, const Alternation& b) {
     if (a.size() != b.size()) return false;
     for (int i = 0; i < a.size(); i++) {

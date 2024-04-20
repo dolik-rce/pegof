@@ -94,8 +94,16 @@ int optimize_repeating_terms(Term& t1, Term& t2) {
     if (t1.is_greedy() && t2.is_optional()) {
         return 2; // delete t2
     } else if (t1.is_greedy() && !t2.is_optional()) {
-        Optimizer::warn_once("Detected sequence that will never match: " + t1.to_string() + " " + t2.to_string());
-        return -1; //do nothing
+        Alternation* a = s->parent->as<Alternation>();
+        // TODO: implement recursive erase, to avoid this ugly if
+        if (a->size() > 1) {
+            log(1, "Removing %s from %s", s->to_string().c_str(), a->to_string().c_str());
+            a->erase(s);
+            return 0;
+        } else {
+            Optimizer::warn_once("Detected sequence that will never match: " + t1.to_string() + " " + t2.to_string());
+            return -1;
+        }
     } else if (t1.quantifier == '?') {
         switch (t2.quantifier) {
         case '*':

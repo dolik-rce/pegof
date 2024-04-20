@@ -22,6 +22,7 @@ public:
 
     void insert(int index, const Alternation& a);
     void erase(int index);
+    void erase(Sequence* s);
 
     friend bool operator==(const Alternation& a, const Alternation& b);
 };

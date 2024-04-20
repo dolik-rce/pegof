@@ -1,0 +1,16 @@
+WARNING: Detected sequence that will never match: X+ X
+Z <-
+    B1 C1
+    / B2 C2
+
+X <- "X"
+
+B1 <- X+ X
+
+C1 <- "A"
+
+B2 <- "B"
+
+C2 <-
+    "A"
+    / "B"
