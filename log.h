@@ -40,5 +40,5 @@ void error [[noreturn]] (const char* format, T... args) {
     fprintf(stderr, "ERROR: ");
     fprintf(stderr, format, args...);
     fprintf(stderr, "\n");
-    exit(1);
+    throw 1;
 }

@@ -94,7 +94,7 @@ void Config::usage_markdown() {
 
 int Config::help() {
     usage("");
-    exit(0);
+    std::exit(0);
 }
 
 int Config::set_input(const std::string& next) {
@@ -328,7 +328,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
     std::vector<std::string> arguments(argv + 1, argv + argc);
     if (argc == 2 && strcmp(argv[1], "--usage-markdown") == 0) {
         usage_markdown();
-        exit(0);
+        std::exit(0);
     }
     process_args(arguments, false);
     post_process();

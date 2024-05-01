@@ -73,14 +73,18 @@ void process(const Config::OutputType& output_type, const std::string& input, co
 }
 
 int main(int argc, char **argv) {
-    Config conf(argc, argv);
-    Checker checker;
+    try {
+        Config conf(argc, argv);
+        Checker checker;
 
-    for (int i = 0; i < conf.inputs.size(); i++) {
-        const std::string& input = conf.inputs[i];
-        const std::string& output = conf.outputs[i];
-        checker.set_input_dir(input);
-        process(conf.output_type, input, output, checker);
+        for (int i = 0; i < conf.inputs.size(); i++) {
+            const std::string& input = conf.inputs[i];
+            const std::string& output = conf.outputs[i];
+            checker.set_input_dir(input);
+            process(conf.output_type, input, output, checker);
+        }
+        return 0;
+    } catch (int e) {
+        return e;
     }
-    return 0;
 }
