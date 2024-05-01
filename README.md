@@ -38,7 +38,7 @@ as much as possible to reduce number of rules and terms.
         Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'.
         Note: --lines might not work as expected, because temporary file is used.
 
-`-I/--inplace` Modify the input files (only when formatting)
+`-n/--inplace` Modify the input files (only when formatting)
 
 `-i/--input FILE` Path to file with PEG grammar, multiple paths can be given
         Value "-" can be used to specify standard input
@@ -48,6 +48,8 @@ as much as possible to reduce number of rules and terms.
 `-o/--output FILE` Output to file (should be repeated if there is more inputs)
         Value "-" can be used to specify standard output
         Must not be used together with --inplace.
+
+`-I/--import PATH` Directory where to search for import files (may be repeated for multiple locations)
 
 
 ### Formatting options:

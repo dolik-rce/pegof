@@ -19,3 +19,5 @@ earlysource
     multiple
     lines
 }
+
+%import "../formatting.d/expand.peg"

@@ -17,7 +17,7 @@ Grammar parse(const std::string& input, const Checker& checker) {
 
     log(1, "Parsing grammar ...");
     Parser peg(content);
-    Grammar g(peg);
+    Grammar g(peg, input);
     if (!g) {
         error("Failed to parse grammar!");
     }
@@ -79,6 +79,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < conf.inputs.size(); i++) {
         const std::string& input = conf.inputs[i];
         const std::string& output = conf.outputs[i];
+        checker.set_input_dir(input);
         process(conf.output_type, input, output, checker);
     }
     return 0;

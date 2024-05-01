@@ -1,5 +1,6 @@
 #include "checker.h"
 #include "packcc_wrapper.h"
+#include "config.h"
 #include "utils.h"
 #include "log.h"
 
@@ -13,6 +14,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <cstdarg>
+#include <cstring>
 
 namespace fs = std::filesystem;
 
@@ -50,6 +52,11 @@ Checker::~Checker() {
     fs::remove_all(tmp);
 }
 
+
+void Checker::set_input_dir(const std::string& input) {
+    input_dir = dirname(input);
+}
+
 bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
     if (Config::get<bool>("skip-validation")) {
         log(2, "Skipping validation due to --skip-validation");
@@ -66,9 +73,19 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
         (contains(options, "debug") || contains(options, "d")) ? TRUE : FALSE
     };
 
-    void *const ctx = create_context(input.c_str(), output.c_str(), &opts);
+    string_array_t dirs;
+    string_array__init(&dirs);
+    if (!input_dir.empty()) {
+        string_array__add(&dirs, input_dir.c_str(), input_dir.size());
+    }
+    for (auto dir: Config::get().import_dirs) {
+        string_array__add(&dirs, dir.c_str(), dir.size());
+    }
+
+    void *const ctx = create_context(input.c_str(), output.c_str(), &dirs, &opts);
     bool result = parse(ctx) && generate(ctx);
     destroy_context(ctx);
+    string_array__term(&dirs);
 
     // Collect errors
     errors = packcc_errors.str();

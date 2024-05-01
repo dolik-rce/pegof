@@ -107,6 +107,11 @@ int Config::set_output(const std::string& next) {
     return 1;
 }
 
+int Config::set_import(const std::string& next) {
+    import_dirs.push_back(next);
+    return 1;
+}
+
 int Config::load_config(const std::string& next) {
     std::vector<std::string> arguments;
     std::ifstream file(next);
@@ -229,6 +234,37 @@ bool Config::get(const Optimization& opt) {
     return instance->optimizations & opt;
 }
 
+const Config& Config::get() {
+    return *instance;
+}
+
+std::vector<std::string> Config::get_all_imports_dirs(const std::string& input_file) {
+    std::vector<std::string> result;
+
+    // directory of currently parsed file
+    result.push_back(dirname(input_file));
+
+    // directories passed via -I option
+    result.insert(result.end(), get().import_dirs.begin(), get().import_dirs.end());
+
+    // directories from PCC_IMPORT_PATH
+    char* pcc_import_path = std::getenv("PCC_IMPORT_PATH");
+    if (pcc_import_path) {
+        for (auto path : split(pcc_import_path, ":")) {
+            result.push_back(path);
+        }
+    }
+
+    // user directory
+    char* home = std::getenv("HOME");
+    result.push_back(std::string(home ? home : "/root") + "/.packcc/import");
+
+    // system-wide directory
+    result.push_back("/usr/share/packcc/import");
+
+    return result;
+}
+
 bool Config::verbose(int level) {
     return instance->verbosity >= level || get<bool>("debug");
 }
@@ -279,9 +315,10 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
         Option(OG_IO, "p", "packcc", OT_PACKCC, "Output source files as if the grammar was passed to packcc"),
         Option(OG_IO, "P", "packcc-options", std::string(), "Additional comma separated options passed to packcc.\n        Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'.\n        Note: --lines might not work as expected, because temporary file is used."),
-        Option(OG_IO, "I", "inplace", false, "Modify the input files (only when formatting)"),
+        Option(OG_IO, "n", "inplace", false, "Modify the input files (only when formatting)"),
         Option(OG_IO, "i", "input", &Config::set_input, "Path to file with PEG grammar, multiple paths can be given\n        Value \"-\" can be used to specify standard input\n        Mainly useful for config file\n        If no file or --input is given, read standard input.", "FILE"),
         Option(OG_IO, "o", "output", &Config::set_output, "Output to file (should be repeated if there is more inputs)\n        Value \"-\" can be used to specify standard output\n        Must not be used together with --inplace.", "FILE"),
+        Option(OG_IO, "I", "import", &Config::set_import, "Directory where to search for import files (may be repeated for multiple locations)", "PATH"),
         Option(OG_FORMAT, "q", "quotes", QT_DOUBLE, "Switch between double and single quoted strings (defaults to double)", "single/double"),
         Option(OG_FORMAT, "w", "wrap-limit", 1, "Wrap alternations with more than N sequences (default 1)", "N"),
         Option(OG_OPT, "O", "optimize", &Config::parse_optimize, "Comma separated list of optimizations to apply", "OPT[,...]"),

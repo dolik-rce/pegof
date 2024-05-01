@@ -5,14 +5,19 @@
 Grammar::Grammar(
     const std::vector<Directive>& directives,
     const std::vector<Rule>& rules,
-    const Code& code
-) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code) {}
+    const Code& code,
+    const std::string& input_file
+) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code), input_file(input_file) {}
 
-Grammar::Grammar(Parser& p) : Node("Grammar", nullptr), code("", this) {
+Grammar::Grammar(Parser& p, const std::string& input_file)
+    : Node("Grammar", nullptr), code("", this), input_file(input_file)
+{
     parse(p);
 }
 
-Grammar::Grammar(const std::string& s) : Node("Grammar", nullptr), code("", this) {
+Grammar::Grammar(const std::string& s, const std::string& input_file)
+    : Node("Grammar", nullptr), code("", this), input_file(input_file)
+{
     Parser p(s);
     parse(p);
 }
@@ -35,7 +40,28 @@ void Grammar::parse(Parser& p) {
         }
         Directive d(p, this);
         if (d) {
-            directives.push_back(d);
+            if (d.is_import() && Config::get(O_ALL)) {
+                std::string name = d.get_value();
+                std::string path = name.substr(0, 1) != "/"
+                    ? find_file(name, Config::get_all_imports_dirs(input_file))
+                    : name;
+                if (path.empty()) {
+                    error("File '%s' not found", d.get_value().c_str());
+                }
+                log(1, "Importing file '%s'...", path.c_str());
+                Parser parser(read_file(path));
+                do {
+                    Rule r(parser, this);
+                    if (r) {
+                        rules.push_back(r);
+                        continue;
+                    }
+                } while (false);
+                log(3, "Import done, returning to previous file.");
+            } else {
+                directives.push_back(d);
+            }
+            debug("DBG: Grammar parsed so far:\n%s", dump().c_str());
             continue;
         }
         code.parse(p);

@@ -8,3 +8,4 @@ GRAMMAR
   DIRECTIVE earlyheader (0 comments) {earlyheader}
   DIRECTIVE earlysource (0 comments) {earlysource}
   DIRECTIVE earlycommon (0 comments) {earlycommon\n    multiple\n    lines}
+  DIRECTIVE import (0 comments) "string.peg"

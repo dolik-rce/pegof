@@ -1,3 +1,4 @@
+#define VOID_VALUE (~(size_t)0)
 
 extern "C" {
 typedef enum bool_tag {
@@ -11,7 +12,17 @@ typedef struct options_tag {
     bool_t debug;
 } options_t;
 
-void *create_context(const char *iname, const char *oname, const options_t *opts);
+typedef struct string_array_tag {
+    char **buf;
+    size_t max;
+    size_t len;
+} string_array_t;
+
+void string_array__init(string_array_t *array);
+void string_array__add(string_array_t *array, const char *str, size_t len);
+void string_array__term(string_array_t *array);
+
+void *create_context(const char *ipath, const char *opath, const string_array_t *dirs, const options_t *opts);
 void destroy_context(void *ctx);
 
 bool parse(void *ctx);

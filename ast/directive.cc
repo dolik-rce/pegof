@@ -7,6 +7,14 @@ Directive::Directive(Parser& p, Node* parent) : Node("Directive", parent) {
     parse(p);
 }
 
+bool Directive::is_import() const {
+    return name == "import";
+}
+
+std::string Directive::get_value() const {
+    return value;
+}
+
 void Directive::parse(Parser& p) {
     debug("Parsing Directive");
     DebugIndent _;
@@ -19,7 +27,7 @@ void Directive::parse(Parser& p) {
         }
         code = true;
         valid = true;
-    } else if (p.match_re("%(value|auxil|prefix)")) {
+    } else if (p.match_re("%(value|auxil|prefix|import)")) {
         name = p.last_re_match.str(1);
         if (p.match_quoted("\"", "\"") || p.match_quoted("'", "'")) {
             value = trim(p.last_match);

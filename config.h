@@ -38,6 +38,7 @@ struct Config {
     OutputType output_type;
     std::vector<std::string> inputs;
     std::vector<std::string> outputs;
+    std::vector<std::string> import_dirs;
 
     typedef int (Config::*MemberFn)();
     typedef int (Config::*MemberFn1)(const std::string&);
@@ -84,6 +85,7 @@ private:
     int help();
     int set_input(const std::string& next);
     int set_output(const std::string& next);
+    int set_import(const std::string& next);
     int load_config(const std::string& next);
     int parse_optimization_config(const std::string& param);
     int parse_optimize(const std::string& param);
@@ -99,6 +101,8 @@ public:
     }
 
     static bool get(const Optimization& opt);
+    static const Config& get();
+    static std::vector<std::string> get_all_imports_dirs(const std::string& input_file);
     static bool verbose(int level);
 
     Config(int argc, char **argv);

@@ -3,6 +3,8 @@
 
 std::string read_file(const std::string& filename);
 void write_file(const std::string& filename, const std::string& content);
+std::string dirname(const std::string& path);
+std::string find_file(const std::string& name, const std::vector<std::string> dirs);
 
 enum EscapeMode {
     ESCAPE_SINGLE_QUOTES = 1,

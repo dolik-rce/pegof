@@ -21,3 +21,5 @@ earlysource
     multiple
     lines
 }
+
+%import "string.peg"

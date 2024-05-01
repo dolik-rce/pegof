@@ -1,10 +1,12 @@
 #include "utils.h"
+#include "log.h"
 
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <regex>
+#include <filesystem>
 
 std::string read_file(const std::string& filename) {
     std::stringstream buffer;
@@ -20,6 +22,22 @@ void write_file(const std::string& filename, const std::string& content) {
         ofs << content;
         ofs.close();
     }
+}
+
+std::string dirname(const std::string& path) {
+    return std::filesystem::path(path).parent_path().native();
+}
+
+std::string find_file(const std::string& name, const std::vector<std::string> dirs) {
+    for (const auto& dir: dirs) {
+        std::string path = (dir.empty() ? "." : dir) + "/" + name;
+        if (std::filesystem::exists(path)) {
+            debug("Found '%s' in directory '%s'.", name.c_str(), dir.c_str());
+            return path;
+        }
+        debug("File '%s' doesn't exist.", path.c_str());
+    }
+    return "";
 }
 
 std::string to_c_string(std::string str, EscapeMode mode) {
