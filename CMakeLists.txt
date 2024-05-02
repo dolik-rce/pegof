@@ -41,6 +41,13 @@ add_custom_target(
 )
 
 add_custom_target(
+    test_all
+    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} INCLUDE_SLOW_TESTS=1 tests/run.sh -T
+    DEPENDS pegof pegof_test
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
     uncrustify
     ./uncrustify.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
