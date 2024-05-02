@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
         for (int i = 0; i < conf.inputs.size(); i++) {
             const std::string& input = conf.inputs[i];
             const std::string& output = conf.outputs[i];
-            checker.set_input_dir(input);
+            checker.set_input_file(input);
             process(conf.output_type, input, output, checker);
         }
         return 0;

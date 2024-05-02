@@ -53,8 +53,8 @@ Checker::~Checker() {
 }
 
 
-void Checker::set_input_dir(const std::string& input) {
-    input_dir = dirname(input);
+void Checker::set_input_file(const std::string& input) {
+    input_file = input;
 }
 
 bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
@@ -75,10 +75,7 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
 
     string_array_t dirs;
     string_array__init(&dirs);
-    if (!input_dir.empty()) {
-        string_array__add(&dirs, input_dir.c_str(), input_dir.size());
-    }
-    for (auto dir: Config::get().import_dirs) {
+    for (auto dir: Config::get_all_imports_dirs(input_file)) {
         string_array__add(&dirs, dir.c_str(), dir.size());
     }
 

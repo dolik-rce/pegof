@@ -16,7 +16,7 @@ public:
 
 class Checker {
     std::string tmp;
-    std::string input_dir;
+    std::string input_file;
     std::string output;
     bool call_packcc(const std::string& input, const std::string& output, std::string& stderr) const;
     bool validate(const std::string& input) const;
@@ -25,7 +25,7 @@ public:
     Checker();
     ~Checker();
 
-    void set_input_dir(const std::string& input);
+    void set_input_file(const std::string& input);
     bool packcc(const std::string& peg, const std::string& output) const;
     bool validate_string(const std::string& filename, const std::string& peg) const;
     bool validate_file(const std::string& filename) const;

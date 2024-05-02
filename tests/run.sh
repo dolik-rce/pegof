@@ -15,8 +15,11 @@ get_outputs() {
 generate_bats() {
     cat <<EOF
 #!/usr/bin/env bats
-load $TESTDIR/utils.sh
+load "$TESTDIR/utils.sh"
 EOF
+    if [ -e "$1/setup.sh" ]; then
+        echo "load \"$TESTDIR/$1/setup.sh\""
+    fi
     for CONF in "$1"/*.conf; do
         [ -e "$CONF" ] || continue
         echo

@@ -1,0 +1,9 @@
+main <- A B C D E F
+
+%import "import1.peg"
+%import "dir1/import2.peg"
+%import "import3.peg"
+%import "import4.peg"
+%import "import5.peg"
+
+F <- "f"

@@ -40,7 +40,7 @@ void Grammar::parse(Parser& p) {
         }
         Directive d(p, this);
         if (d) {
-            if (d.is_import() && Config::get(O_ALL)) {
+            if (d.is_import() && !Config::get<bool>("no-follow") && Config::get(O_ALL)) {
                 std::string name = d.get_value();
                 std::string path = name.substr(0, 1) != "/"
                     ? find_file(name, Config::get_all_imports_dirs(input_file))
@@ -61,7 +61,6 @@ void Grammar::parse(Parser& p) {
             } else {
                 directives.push_back(d);
             }
-            debug("DBG: Grammar parsed so far:\n%s", dump().c_str());
             continue;
         }
         code.parse(p);

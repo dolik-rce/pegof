@@ -67,6 +67,8 @@ as much as possible to reduce number of rules and terms.
         Number between 0.0 (inline everything) and 1.0 (most conservative), default is 0.2,
         only applied when inlining is enabled
 
+`-N/--no-follow` Do not inline imported files while optimizing.
+
 ### Supported values for --optimize and --exclude options:
 - `all` All optimizations: Shorthand option for combination of all available optimizations.
 

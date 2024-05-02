@@ -242,7 +242,9 @@ std::vector<std::string> Config::get_all_imports_dirs(const std::string& input_f
     std::vector<std::string> result;
 
     // directory of currently parsed file
-    result.push_back(dirname(input_file));
+    if (!input_file.empty()) {
+        result.push_back(dirname(input_file));
+    }
 
     // directories passed via -I option
     result.insert(result.end(), get().import_dirs.begin(), get().import_dirs.end());
@@ -324,6 +326,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_OPT, "O", "optimize", &Config::parse_optimize, "Comma separated list of optimizations to apply", "OPT[,...]"),
         Option(OG_OPT, "X", "exclude", &Config::parse_exclude, "Comma separated list of optimizations that should not be applied", "OPT[,...]"),
         Option(OG_OPT, "l", "inline-limit", 0.2, "Minimum inlining score needed for rule to be inlined.\n        Number between 0.0 (inline everything) and 1.0 (most conservative), default is 0.2,\n        only applied when inlining is enabled", "N"),
+        Option(OG_OPT, "N", "no-follow", false, "Do not inline imported files while optimizing."),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
     if (argc == 2 && strcmp(argv[1], "--usage-markdown") == 0) {
