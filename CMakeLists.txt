@@ -48,6 +48,13 @@ add_custom_target(
 )
 
 add_custom_target(
+    benchmark
+    benchmark/run.sh
+    DEPENDS pegof
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
     uncrustify
     ./uncrustify.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
