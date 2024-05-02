@@ -3,11 +3,10 @@
 #include "log.h"
 
 Grammar::Grammar(
-    const std::vector<Directive>& directives,
-    const std::vector<Rule>& rules,
+    const std::vector<TopLevel>& nodes,
     const Code& code,
     const std::string& input_file
-) : Node("Grammar", nullptr), directives(directives), rules(rules), code(code), input_file(input_file) {}
+) : Node("Grammar", nullptr), nodes(nodes), code(code), input_file(input_file) {}
 
 Grammar::Grammar(Parser& p, const std::string& input_file)
     : Node("Grammar", nullptr), code("", this), input_file(input_file)
@@ -35,7 +34,7 @@ void Grammar::parse(Parser& p) {
     while (true) {
         Rule r(p, this);
         if (r) {
-            rules.push_back(r);
+            nodes.push_back(r);
             continue;
         }
         Directive d(p, this);
@@ -53,13 +52,13 @@ void Grammar::parse(Parser& p) {
                 do {
                     Rule r(parser, this);
                     if (r) {
-                        rules.push_back(r);
+                        nodes.push_back(r);
                         continue;
                     }
                 } while (false);
                 log(3, "Import done, returning to previous file.");
             } else {
-                directives.push_back(d);
+                nodes.push_back(d);
             }
             continue;
         }
@@ -82,17 +81,32 @@ std::string join(const std::vector<std::string>& parts, const char* delimiter) {
     return result;
 }
 
+std::string to_string(const TopLevel& node) {
+    switch(node.index()) {
+    case 1: return std::get_if<Directive>(&node)->as<Directive>()->to_string();
+    case 2: return std::get_if<Rule>(&node)->as<Rule>()->to_string();
+    default:
+        error("unsupporrted type!");
+    }
+}
+
+std::string dump(const TopLevel& node, std::string indent) {
+    switch(node.index()) {
+    case 1: return std::get_if<Directive>(&node)->as<Directive>()->dump(indent);
+    case 2: return std::get_if<Rule>(&node)->as<Rule>()->dump(indent);
+    default:
+        error("unsupporrted type!");
+    }
+}
+
 std::string Grammar::to_string(std::string indent) const {
     std::vector<std::string> parts;
     std::string comments = format_comments();
     if (comments.size()) {
         parts.push_back(comments);
     }
-    for (int i = 0; i < directives.size(); i++) {
-        parts.push_back(directives[i].to_string());
-    }
-    for (int i = 0; i < rules.size(); i++) {
-        parts.push_back(rules[i].to_string());
+    for (const TopLevel& node : nodes) {
+        parts.push_back(::to_string(node));
     }
     if (!code.empty()) {
         parts.push_back(code.to_string());
@@ -110,11 +124,8 @@ std::string Grammar::dump(std::string indent) const {
         result += " (" + std::to_string(comments.size()) + " comments)";
     }
     result += "\n";
-    for (const Directive& directive : directives) {
-        result += directive.dump(indent + "  ") + "\n";
-    }
-    for (const Rule& rule : rules) {
-        result += rule.dump(indent + "  ") + "\n";
+    for (const TopLevel& node : nodes) {
+        result += ::dump(node, indent + "  ") + "\n";
     }
     if (!code.empty()) {
         result += code.dump(indent + "  ") + "\n";
@@ -123,22 +134,25 @@ std::string Grammar::dump(std::string indent) const {
 }
 
 Node* Grammar::operator[](int index) {
-    if (index < directives.size()) {
-        return &(directives[index]);
-    } else if (index < directives.size() + rules.size()) {
-        return &(rules[index - directives.size()]);
-    } else {
+    if (index >= nodes.size()) {
         error("index out of bounds!");
+    }
+    TopLevel& n = nodes[index];
+    switch(n.index()) {
+    case 1: return std::get_if<Directive>(&n)->as<Directive>();
+    case 2: return std::get_if<Rule>(&n)->as<Rule>();
+    default:
+        error("unsupporrted type!");
     }
 }
 
 long Grammar::size() const {
-    return directives.size() + rules.size();
+    return nodes.size();
 }
 
 void Grammar::erase(Rule* rule) {
-    std::vector<Rule>::iterator it = std::find_if(rules.begin(), rules.end(), [rule](const Rule& r) {
-        return &r == rule;
+    std::vector<TopLevel>::iterator it = std::find_if(nodes.begin(), nodes.end(), [rule](const TopLevel& n) {
+        return std::get_if<Rule>(&n) == rule;
     });
-    rules.erase(it);
+    nodes.erase(it);
 }

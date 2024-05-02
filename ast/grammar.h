@@ -5,15 +5,15 @@
 #include "ast/rule.h"
 #include "ast/code.h"
 
+using TopLevel = std::variant<std::monostate, Directive, Rule>;
+
 class Grammar : public Node {
-    std::vector<Directive> directives;
-    std::vector<Rule> rules;
+    std::vector<TopLevel> nodes;
     Code code;
     std::string input_file;
 public:
     Grammar(
-        const std::vector<Directive>& directives,
-        const std::vector<Rule>& rules,
+        const std::vector<TopLevel>& nodes,
         const Code& code,
         const std::string& input_file
     );
