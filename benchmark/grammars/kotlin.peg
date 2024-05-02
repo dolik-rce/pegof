@@ -167,9 +167,9 @@ inside_valueArgument <- annotation? __* (simpleIdentifier __* ASSIGNMENT __*)? M
 lambdaLiteral <- LCURL {printf("<lambda>\n");} __* statements __* RCURL / LCURL {printf("<lambda>\n");} __* lambdaParameters? __* ARROW __* statements __* RCURL
 lambdaParameters <- lambdaParameter (__* COMMA __* lambdaParameter)* (__* COMMA)?
 lambdaParameter <- variableDeclaration / multiVariableDeclaration (__* COLON __* type)?
-anonymousFunction <- FUN {printf("<anonymous function>");} (__* type __* DOT)? __* parametersWithOptionalType (__* COLON __* type)? (__* typeConstraints)? (__* functionBody)?
+anonymousFunction <- (SUSPEND __*)? FUN {printf("annonymous function\n");} (__* type __* DOT)? __* parametersWithOptionalType (__* COLON __* type)? (__* typeConstraints)? (__* functionBody)?
 functionLiteral <- lambdaLiteral / anonymousFunction
-objectLiteral <- OBJECT __* COLON __* delegationSpecifiers __* classBody / OBJECT __* classBody
+objectLiteral <- (DATA __*)? OBJECT __* COLON __* delegationSpecifiers __* classBody / OBJECT __* classBody
 thisExpression <- THIS_AT / THIS !(Letter / UnicodeDigit)
 superExpression <- SUPER_AT / SUPER (LANGLE __* type __* RANGLE)? (AT_NO_WS simpleIdentifier)?
 ifExpression <- IF __* LPAREN __* expression __* RPAREN __* controlStructureBody? __* SEMICOLON? __* ELSE __* (controlStructureBody / SEMICOLON) / IF __* LPAREN __* expression __* RPAREN __* (controlStructureBody / SEMICOLON)
@@ -278,6 +278,7 @@ MOD_ASSIGNMENT <- '%='
 ARROW <- '->'
 #DOUBLE_ARROW <- '=>'
 RANGE <- '..'
+RANGE_UNTIL <- '..<'
 COLONCOLON <- '::'
 #DOUBLE_SEMICOLON <- ';;'
 #HASH <- '#'
