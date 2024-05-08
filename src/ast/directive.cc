@@ -41,7 +41,11 @@ void Directive::parse(Parser& p) {
 }
 
 std::string Directive::to_string(std::string indent) const {
-    std::string result = format_comments() + "%" + name;
+    std::string result = format_comments();
+    if (result.size()) {
+        result += "\n";
+    }
+    result += "%" + name;
     result += code ? " {"  : " \"";
 
     if (code && value[0] == '#') {

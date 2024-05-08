@@ -1,0 +1,16 @@
+# This is grammar comment
+
+# This is a comment for value directive
+%value "x"
+
+#This is weirdly formated comment for source directive
+%source {
+    #define TEST
+}
+
+# This is a comment for header directive
+%header {
+    #define DEBUG 1
+}
+
+main <- "X"
