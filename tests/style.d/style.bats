@@ -21,8 +21,6 @@ test_code_style() {
     fi
 }
 
-@test "Source code style" {
-    for file in "$ROOTDIR"/src/*.{h,cc}; do
-        test_code_style "$file"
-    done
-}
+for FILE in "$ROOTDIR"/src{,/ast}/*.{h,cc}; do
+    bats_test_function --description "style.d - ${FILE/$ROOTDIR\/src\//}" -- test_code_style "$FILE"
+done
