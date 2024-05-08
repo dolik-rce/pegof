@@ -22,7 +22,7 @@ test_code_style() {
 }
 
 @test "Source code style" {
-    for file in "$ROOTDIR"/*.h "$ROOTDIR"/*.cc; do
+    for file in "$ROOTDIR"/src/*.{h,cc}; do
         test_code_style "$file"
     done
 }

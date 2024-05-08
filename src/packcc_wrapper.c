@@ -2,7 +2,7 @@
 #define fprintf fprintf_wrapped
 #define vfprintf vfprintf_wrapped
 #define static
-#include "packcc/src/packcc.c"
+#include "packcc.c"
 #undef static
 #undef vfprintf
 #undef fprintf

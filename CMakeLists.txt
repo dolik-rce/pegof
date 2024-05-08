@@ -7,16 +7,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_custom_command(
-    OUTPUT peg.c peg.h
-    COMMAND ${PACKCC} ARGS -l -o peg ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
-    VERBATIM
-)
-
-list(APPEND sources ast/action.cc ast/alternation.cc ast/capture.cc ast/code.cc ast/directive.cc ast/expand.cc ast/grammar.cc ast/group.cc ast/character_class.cc ast/node.cc ast/reference.cc ast/rule.cc ast/sequence.cc ast/string.cc ast/term.cc config.cc checker.cc log.cc main.cc optimizer.cc packcc_wrapper.c parser.cc utils.cc)
+list(APPEND sources src/ast/action.cc src/ast/alternation.cc src/ast/capture.cc src/ast/code.cc src/ast/directive.cc src/ast/expand.cc src/ast/grammar.cc src/ast/group.cc src/ast/character_class.cc src/ast/node.cc src/ast/reference.cc src/ast/rule.cc src/ast/sequence.cc src/ast/string.cc src/ast/term.cc src/config.cc src/checker.cc src/log.cc src/main.cc src/optimizer.cc src/packcc_wrapper.c src/parser.cc src/utils.cc)
 add_library(common INTERFACE)
-target_include_directories(common BEFORE INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(common BEFORE INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/packcc/src ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(common INTERFACE cxx_std_17)
 
 add_executable(pegof ${sources})
