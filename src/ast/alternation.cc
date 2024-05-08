@@ -27,7 +27,6 @@ void Alternation::parse(Parser& p) {
         }
         s = Sequence(p, this);
     }
-    parse_post_comment(p);
     sp.commit();
     valid = true;
 }

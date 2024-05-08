@@ -24,7 +24,6 @@ Grammar::Grammar(const std::string& s, const std::string& input_file)
 void Grammar::parse(Parser& p) {
     debug("Parsing Grammar");
     DebugIndent _;
-    //~ parse_comments(p);
     debug("Parsing comments for node of type Grammar");
     while (p.match_comment()) {
         comments.push_back(p.last_match);

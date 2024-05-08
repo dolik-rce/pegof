@@ -35,6 +35,7 @@ void Directive::parse(Parser& p) {
         code = false;
         valid = true;
     }
+    parse_post_comment(p);
     if (!valid) {
         s.rollback();
     }
@@ -71,6 +72,9 @@ std::string Directive::to_string(std::string indent) const {
         result += value;
     }
     result += code ? "}"  : "\"";
+    if (!post_comment.empty()) {
+        result += " #" + post_comment;
+    }
     return result;
 }
 

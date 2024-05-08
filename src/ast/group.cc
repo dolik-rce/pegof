@@ -11,7 +11,7 @@ void Group::parse(Parser& p) {
     debug("Parsing Group");
     DebugIndent _;
     Parser::State s = p.save_point();
-    parse_comments(p);
+    p.skip_space();
     if (!p.match('(')) {
         s.rollback();
         return;
@@ -33,11 +33,16 @@ void Group::parse(Parser& p) {
 
 std::string Group::to_string(std::string indent) const {
     bool multiline = expression->size() > Config::get<int>("wrap-limit");
+    std::string result;
     if (multiline) {
-        return "(\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + ")";
+        result = "(\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + ")";
     } else {
-        return "(" + expression->to_string(indent) + ")";
+        result = "(" + expression->to_string(indent) + ")";
     }
+    if (!post_comment.empty()) {
+        result += " #" + post_comment;
+    }
+    return result;
 }
 
 std::string Group::dump(std::string indent) const {
