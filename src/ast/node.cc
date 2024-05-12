@@ -18,10 +18,6 @@ long Node::size() const {
     return 0;
 }
 
-const char* Node::c_str() const {
-    return to_string().c_str();
-}
-
 void Node::parse_comments(Parser& p, bool store) {
     debug("Parsing comments for node of type %s", type);
     p.skip_space();

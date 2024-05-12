@@ -19,7 +19,6 @@ public:
     virtual void parse(Parser& p) = 0;
     virtual std::string to_string(std::string indent = "") const = 0;
     virtual std::string dump(std::string indent = "") const = 0;
-    const char* c_str() const;
 
     operator bool() const;
 

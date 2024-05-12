@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+#define STR(x) (x).to_string().c_str()
+
 std::string read_file(const std::string& filename);
 void write_file(const std::string& filename, const std::string& content);
 std::string dirname(const std::string& path);
