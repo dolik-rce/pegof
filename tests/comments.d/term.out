@@ -1,9 +1,18 @@
-main <- "A"
+main <-
+    X
     # This is term comment
-    "B" ("D"
+    "B" (
+        "C" # post-comment followed by another term
+        "D"
         # This is multiline
         # embedded term comment
         #
         # with extra space in between
         "E" # This is embedded term post-comment
     ) "F" # This is another post-comment on term
+
+X <-
+    "A" (
+        "B" # cmnt1
+        "C" # cmnt2
+    )?

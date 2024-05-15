@@ -33,9 +33,16 @@ void Sequence::parse(Parser& p) {
 }
 
 std::string Sequence::to_string(std::string indent) const {
-    std::string result = terms[0].to_string(indent);
-    for (int i = 1; i < terms.size(); i++) {
-        result += (terms[i].comments.empty() ? " " : "") + terms[i].to_string(indent);
+    std::string result;
+    for (int i = 0; i < terms.size(); i++) {
+        if (i == 0) {
+            // no delimiter before first term
+        } else if (terms[i - 1].has_post_comment()) {
+            result += "\n" + indent;
+        } else if (!terms[i].has_comments()) {
+            result += " ";
+        }
+        result += terms[i].to_string(indent);
     }
     return result;
 }
@@ -47,6 +54,10 @@ std::string Sequence::dump(std::string indent) const {
         result += terms[i].dump(indent + "  ");
     }
     return result;
+}
+
+bool Sequence::is_multiline() const {
+    return std::any_of(terms.begin(), terms.end(), ::is_multiline);
 }
 
 bool Sequence::has_single_term() const {

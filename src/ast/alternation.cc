@@ -13,7 +13,6 @@ void Alternation::parse(Parser& p) {
     debug("Parsing Alternation");
     DebugIndent _;
     Parser::State sp = p.save_point();
-    parse_comments(p);
     p.skip_space();
     Sequence s = Sequence(p, this);
     if (!s) {
@@ -32,29 +31,31 @@ void Alternation::parse(Parser& p) {
 }
 
 std::string Alternation::to_string(std::string indent) const {
-    bool multiline = sequences.size() > Config::get<int>("wrap-limit");
+    bool multiline = is_multiline();
     std::string delimiter = multiline ? ("\n" + indent + "/ ") : std::string(" / ");
     std::string result;
-    if (multiline && comments.empty()) {
+    if (multiline) {
         result += indent;
     }
-    if (!comments.empty()) {
-        result += format_comments(indent) + "\n" + indent;
-    }
-    result += sequences[0].to_string(indent + "    ");
+    result += sequences[0].to_string(indent);
     for (int i = 1; i < sequences.size(); i++) {
-        result += delimiter + sequences[i].to_string(indent + "    ");
+        result += delimiter + sequences[i].to_string(indent);
     }
     return result;
 }
 
 std::string Alternation::dump(std::string indent) const {
-    std::string result = indent + "ALTERNATION" + dump_comments() + "\n";
+    std::string result = indent + "ALTERNATION" + "\n";
     for (int i = 0; i < sequences.size(); i++) {
         if (i > 0) result += "\n";
         result += sequences[i].dump(indent + "  ");
     }
     return result;
+}
+
+bool Alternation::is_multiline() const {
+    return sequences.size() > Config::get<int>("wrap-limit")
+           || std::any_of(sequences.begin(), sequences.end(), ::is_multiline);
 }
 
 Sequence& Alternation::get(int index) {

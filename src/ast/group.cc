@@ -32,10 +32,9 @@ void Group::parse(Parser& p) {
 }
 
 std::string Group::to_string(std::string indent) const {
-    bool multiline = expression->size() > Config::get<int>("wrap-limit");
     std::string result;
-    if (multiline) {
-        result = "(\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + ")";
+    if (is_multiline()) {
+        result = "(\n" + expression->to_string(indent + "    ") + "\n" + indent + ")";
     } else {
         result = "(" + expression->to_string(indent) + ")";
     }
@@ -47,6 +46,10 @@ std::string Group::to_string(std::string indent) const {
 
 std::string Group::dump(std::string indent) const {
     return indent + "GROUP" + dump_comments() + "\n" + expression->dump(indent + "  ");
+}
+
+bool Group::is_multiline() const {
+    return expression->is_multiline();
 }
 
 Node* Group::operator[](int index) {

@@ -19,6 +19,7 @@ public:
     virtual void parse(Parser& p) = 0;
     virtual std::string to_string(std::string indent = "") const = 0;
     virtual std::string dump(std::string indent = "") const = 0;
+    virtual bool is_multiline() const = 0;
 
     operator bool() const;
 
@@ -54,6 +55,9 @@ public:
     void parse_post_comment(Parser& p);
     std::string format_comments(std::string indent = "") const;
     std::string dump_comments() const;
+
+    bool has_comments() const;
+    bool has_post_comment() const;
 
     friend bool operator==(const Node& a, const Node& b);
 };
@@ -105,3 +109,7 @@ void Node::find_all(std::vector<U*>& result, const std::function<bool(const U&)>
 
 bool operator==(const Node& a, const Node& b);
 bool operator!=(const Node& a, const Node& b);
+
+inline bool is_multiline(const Node& n) {
+    return n.is_multiline();
+}

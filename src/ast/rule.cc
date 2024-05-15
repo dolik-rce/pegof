@@ -28,7 +28,7 @@ void Rule::parse(Parser& p) {
 
 std::string Rule::to_string(std::string indent) const {
     std::string result = format_comments() + (comments.empty() ? "" : "\n") + name + " <-";
-    if (expression.size() > Config::get<int>("wrap-limit")) {
+    if (is_multiline()) {
         result += "\n" + expression.to_string("    ");
     } else {
         result += " " + expression.to_string();
@@ -40,6 +40,13 @@ std::string Rule::dump(std::string indent) const {
     return indent + "RULE " + name + dump_comments() + "\n" + expression.dump(indent + "  ");
 }
 
+bool Rule::is_multiline() const {
+    if (expression.to_string().find('\n') == std::string::npos) {
+        return false;
+    }
+    return expression.is_multiline();
+}
+
 Node* Rule::operator[](int index) {
     if (index == 0) {
         return &expression;
@@ -47,6 +54,7 @@ Node* Rule::operator[](int index) {
         error("index out of bounds!");
     }
 }
+
 long Rule::size() const {
     return 1;
 }

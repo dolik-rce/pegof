@@ -33,6 +33,7 @@ public:
     virtual void parse(Parser& p);
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
+    virtual bool is_multiline() const override;
 
     friend bool operator==(const CharacterClass& a, const CharacterClass& b);
 };

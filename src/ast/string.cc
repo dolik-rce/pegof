@@ -29,6 +29,10 @@ std::string String::dump(std::string indent) const {
     return indent + "STRING " + to_c_string(content);
 }
 
+bool String::is_multiline() const {
+    return false;
+}
+
 const char* String::c_str() const {
     return content.c_str();
 }

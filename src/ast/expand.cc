@@ -31,6 +31,9 @@ std::string Expand::dump(std::string indent) const {
     return indent + "EXPAND " + std::to_string(content);
 }
 
+bool Expand::is_multiline() const {
+    return false;
+}
 
 void Expand::shift(int n) {
     content += n;

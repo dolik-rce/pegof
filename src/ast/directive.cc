@@ -84,3 +84,7 @@ std::string Directive::dump(std::string indent) const {
     result += (code ? " {": " \"" ) + to_c_string(value) + (code ? "}": "\"" );
     return result;
 }
+
+bool Directive::is_multiline() const {
+    return !comments.empty() || code;
+}

@@ -97,6 +97,15 @@ void Node::update_parents() {
     }
 }
 
+bool Node::has_comments() const {
+    return !comments.empty();
+}
+
+bool Node::has_post_comment() const {
+    return !post_comment.empty();
+}
+
+
 #define CMP(TYPE) if (a.is<TYPE>()) { return *(TYPE*)(&a) == *(TYPE*)(&b); }
 
 bool operator==(const Node& a, const Node& b) {

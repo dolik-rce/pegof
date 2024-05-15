@@ -40,6 +40,10 @@ std::string Code::dump(std::string indent) const {
     return indent + "CODE " + dump_comments() + " \"" + to_c_string(content) + "\"";
 }
 
+bool Code::is_multiline() const {
+    return true;
+}
+
 bool Code::empty() const {
     return comments.empty() && content.empty();
 }

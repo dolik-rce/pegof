@@ -44,6 +44,10 @@ std::string Reference::dump(std::string indent) const {
     return result;
 }
 
+bool Reference::is_multiline() const {
+    return false;
+}
+
 bool Reference::references(const Rule* rule) const {
     return name == rule->name;
 }

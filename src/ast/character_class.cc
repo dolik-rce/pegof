@@ -150,6 +150,10 @@ std::string CharacterClass::dump(std::string indent) const {
     return indent + "CHAR_CLASS " + content;
 }
 
+bool CharacterClass::is_multiline() const {
+    return false;
+}
+
 bool CharacterClass::normalize() {
     if (tokens.empty()) {
         return false;

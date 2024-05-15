@@ -32,9 +32,8 @@ void Capture::parse(Parser& p) {
 }
 
 std::string Capture::to_string(std::string indent) const {
-    bool multiline = expression->size() > Config::get<int>("wrap-limit");
     std::string result;
-    if (multiline) {
+    if (is_multiline()) {
         result = "<\n" + expression->to_string(indent) + "\n" + indent.substr(0, indent.length() - 4) + ">";
     } else {
         result = "<" + expression->to_string(indent) + ">";
@@ -47,6 +46,10 @@ std::string Capture::to_string(std::string indent) const {
 
 std::string Capture::dump(std::string indent) const {
     return indent + "CAPTURE " + std::to_string(num) + dump_comments() + "\n" + expression->dump(indent + "  ");
+}
+
+bool Capture::is_multiline() const {
+    return expression->is_multiline();
 }
 
 Node* Capture::operator[](int index) {

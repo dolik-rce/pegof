@@ -132,6 +132,10 @@ std::string Grammar::dump(std::string indent) const {
     return result;
 }
 
+bool Grammar::is_multiline() const {
+    return true;
+}
+
 Node* Grammar::operator[](int index) {
     if (index >= nodes.size()) {
         error("index out of bounds!");

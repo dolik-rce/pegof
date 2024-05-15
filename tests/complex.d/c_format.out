@@ -109,10 +109,11 @@
 #type C Peg {
 #
 #}
-TranslationUnit <- Spacing (
-    ExternalDeclaration
-    / SEMI
-)* EOT
+TranslationUnit <-
+    Spacing (
+        ExternalDeclaration
+        / SEMI
+    )* EOT
 
 ExternalDeclaration <-
     FunctionDefinition
@@ -127,9 +128,9 @@ DeclarationList <- Declaration+
 #-------------------------------------------------------------------------
 Declaration <- DeclarationSpecifiers InitDeclaratorList? SEMI #{}
 
-
 DeclarationSpecifiers <-
-    ((
+    (
+        (
             StorageClassSpecifier
             / TypeQualifier
             / FunctionSpecifier
@@ -137,20 +138,18 @@ DeclarationSpecifiers <-
             StorageClassSpecifier
             / TypeQualifier
             / FunctionSpecifier
-        )*) #{DeclarationSpecifiers}
+        )*
+    ) #{DeclarationSpecifiers}
     / (
         StorageClassSpecifier
         / TypeSpecifier
         / TypeQualifier
         / FunctionSpecifier
     )+ #{DeclarationSpecifiers}
-    
 
 InitDeclaratorList <- InitDeclarator (COMMA InitDeclarator)* #{}
 
-
 InitDeclarator <- Declarator (EQU Initializer)? #{}
-
 
 StorageClassSpecifier <-
     TYPEDEF
@@ -175,10 +174,11 @@ TypeSpecifier <-
     / StructOrUnionSpecifier
     / EnumSpecifier
 
-StructOrUnionSpecifier <- StructOrUnion (
-    Identifier? LWING StructDeclaration* RWING
-    / Identifier
-)
+StructOrUnionSpecifier <-
+    StructOrUnion (
+        Identifier? LWING StructDeclaration* RWING
+        / Identifier
+    )
 
 StructOrUnion <-
     STRUCT
@@ -199,10 +199,11 @@ StructDeclarator <-
     Declarator? COLON ConstantExpression
     / Declarator
 
-EnumSpecifier <- ENUM (
-    Identifier? LWING EnumeratorList COMMA? RWING
-    / Identifier
-)
+EnumSpecifier <-
+    ENUM (
+        Identifier? LWING EnumeratorList COMMA? RWING
+        / Identifier
+    )
 
 EnumeratorList <- Enumerator (COMMA Enumerator)*
 
@@ -220,18 +221,18 @@ FunctionSpecifier <-
 
 Declarator <- Pointer? <DirectDeclarator> #{}
 
-DirectDeclarator <- (
-    Identifier
-    / LPAR Declarator RPAR
-) (
-    LBRK TypeQualifier* AssignmentExpression? RBRK
-    / LBRK STATIC TypeQualifier* AssignmentExpression RBRK
-    / LBRK TypeQualifier+ STATIC AssignmentExpression RBRK
-    / LBRK TypeQualifier* STAR RBRK
-    / LPAR ParameterTypeList RPAR
-    / LPAR IdentifierList? RPAR
-)* #{}
-
+DirectDeclarator <-
+    (
+        Identifier
+        / LPAR Declarator RPAR
+    ) (
+        LBRK TypeQualifier* AssignmentExpression? RBRK
+        / LBRK STATIC TypeQualifier* AssignmentExpression RBRK
+        / LBRK TypeQualifier+ STATIC AssignmentExpression RBRK
+        / LBRK TypeQualifier* STAR RBRK
+        / LPAR ParameterTypeList RPAR
+        / LPAR IdentifierList? RPAR
+    )* #{}
 
 Pointer <- (STAR TypeQualifier*)+
 
@@ -239,10 +240,11 @@ ParameterTypeList <- ParameterList (COMMA ELLIPSIS)?
 
 ParameterList <- ParameterDeclaration (COMMA ParameterDeclaration)*
 
-ParameterDeclaration <- DeclarationSpecifiers (
-    Declarator
-    / AbstractDeclarator
-)?
+ParameterDeclaration <-
+    DeclarationSpecifiers (
+        Declarator
+        / AbstractDeclarator
+    )?
 
 IdentifierList <- Identifier (COMMA Identifier)*
 
@@ -252,23 +254,23 @@ AbstractDeclarator <-
     Pointer? DirectAbstractDeclarator
     / Pointer
 
-DirectAbstractDeclarator <- (
-    LPAR AbstractDeclarator RPAR
-    / LBRK (
-        AssignmentExpression
-        / STAR
-    )? RBRK
-    / LPAR ParameterTypeList? RPAR
-) (
-    LBRK (
-        AssignmentExpression
-        / STAR
-    )? RBRK
-    / LPAR ParameterTypeList? RPAR
-)*
+DirectAbstractDeclarator <-
+    (
+        LPAR AbstractDeclarator RPAR
+        / LBRK (
+            AssignmentExpression
+            / STAR
+        )? RBRK
+        / LPAR ParameterTypeList? RPAR
+    ) (
+        LBRK (
+            AssignmentExpression
+            / STAR
+        )? RBRK
+        / LPAR ParameterTypeList? RPAR
+    )*
 
 TypedefName <- Identifier #{&TypedefName}
-
 
 Initializer <-
     AssignmentExpression
@@ -298,10 +300,11 @@ LabeledStatement <-
     / CASE ConstantExpression COLON Statement
     / DEFAULT COLON Statement
 
-CompoundStatement <- LWING (
-    Declaration
-    / Statement
-)* RWING
+CompoundStatement <-
+    LWING (
+        Declaration
+        / Statement
+    )* RWING
 
 ExpressionStatement <- Expression? SEMI
 
@@ -330,17 +333,18 @@ PrimaryExpression <-
     / Identifier
     / LPAR Expression RPAR
 
-PostfixExpression <- (
-    PrimaryExpression
-    / LPAR TypeName RPAR LWING InitializerList COMMA? RWING
-) (
-    LBRK Expression RBRK
-    / LPAR ArgumentExpressionList? RPAR
-    / DOT Identifier
-    / PTR Identifier
-    / INC
-    / DEC
-)*
+PostfixExpression <-
+    (
+        PrimaryExpression
+        / LPAR TypeName RPAR LWING InitializerList COMMA? RWING
+    ) (
+        LBRK Expression RBRK
+        / LPAR ArgumentExpressionList? RPAR
+        / DOT Identifier
+        / PTR Identifier
+        / INC
+        / DEC
+    )*
 
 ArgumentExpressionList <- AssignmentExpression (COMMA AssignmentExpression)*
 
@@ -366,33 +370,48 @@ CastExpression <-
     (LPAR TypeName RPAR CastExpression)
     / UnaryExpression
 
-MultiplicativeExpression <- CastExpression ((
-        STAR
-        / DIV
-        / MOD
-    ) CastExpression)*
+MultiplicativeExpression <-
+    CastExpression (
+        (
+            STAR
+            / DIV
+            / MOD
+        ) CastExpression
+    )*
 
-AdditiveExpression <- MultiplicativeExpression ((
-        PLUS
-        / MINUS
-    ) MultiplicativeExpression)*
+AdditiveExpression <-
+    MultiplicativeExpression (
+        (
+            PLUS
+            / MINUS
+        ) MultiplicativeExpression
+    )*
 
-ShiftExpression <- AdditiveExpression ((
-        LEFT
-        / RIGHT
-    ) AdditiveExpression)*
+ShiftExpression <-
+    AdditiveExpression (
+        (
+            LEFT
+            / RIGHT
+        ) AdditiveExpression
+    )*
 
-RelationalExpression <- ShiftExpression ((
-        LE
-        / GE
-        / LT
-        / GT
-    ) ShiftExpression)*
+RelationalExpression <-
+    ShiftExpression (
+        (
+            LE
+            / GE
+            / LT
+            / GT
+        ) ShiftExpression
+    )*
 
-EqualityExpression <- RelationalExpression ((
-        EQUEQU
-        / BANGEQU
-    ) RelationalExpression)*
+EqualityExpression <-
+    RelationalExpression (
+        (
+            EQUEQU
+            / BANGEQU
+        ) RelationalExpression
+    )*
 
 ANDExpression <- EqualityExpression (AND EqualityExpression)*
 
@@ -432,24 +451,21 @@ ConstantExpression <- ConditionalExpression
 #  Tokens are: Keyword, Identifier, Constant, StringLiteral, Punctuator.
 #  Tokens are separated by Spacing.
 #-------------------------------------------------------------------------
-Spacing <- (
-    WhiteSpace
-    / LongComment
-    / LineComment
-    / Pragma
-)*
+Spacing <-
+    (
+        WhiteSpace
+        / LongComment
+        / LineComment
+        / Pragma
+    )*
 
 WhiteSpace <- [ \n\r\t] # 7.4.1.10 [\u000B\u000C]
 
-
 LongComment <- "/*" (!"*/" .)* "*/" # 6.4.9
-
 
 LineComment <- "//" (!"\n" .)* # 6.4.9
 
-
 Pragma <- "#" (!"\n" .)* # Treat pragma as comment
-
 
 #-------------------------------------------------------------------------
 #  A.1.2  Keywords
@@ -532,48 +548,49 @@ DECLSPEC <- "__declspec" !IdChar Spacing
 
 ATTRIBUTE <- "__attribute__" !IdChar Spacing
 
-Keyword <- (
-    "auto"
-    / "break"
-    / "case"
-    / "char"
-    / "const"
-    / "continue"
-    / "default"
-    / "double"
-    / "do"
-    / "else"
-    / "enum"
-    / "extern"
-    / "float"
-    / "for"
-    / "goto"
-    / "if"
-    / "int"
-    / "inline"
-    / "long"
-    / "register"
-    / "restrict"
-    / "return"
-    / "short"
-    / "signed"
-    / "sizeof"
-    / "static"
-    / "struct"
-    / "switch"
-    / "typedef"
-    / "union"
-    / "unsigned"
-    / "void"
-    / "volatile"
-    / "while"
-    / "_Bool"
-    / "_Complex"
-    / "_Imaginary"
-    / "_stdcall"
-    / "__declspec"
-    / "__attribute__"
-) !IdChar
+Keyword <-
+    (
+        "auto"
+        / "break"
+        / "case"
+        / "char"
+        / "const"
+        / "continue"
+        / "default"
+        / "double"
+        / "do"
+        / "else"
+        / "enum"
+        / "extern"
+        / "float"
+        / "for"
+        / "goto"
+        / "if"
+        / "int"
+        / "inline"
+        / "long"
+        / "register"
+        / "restrict"
+        / "return"
+        / "short"
+        / "signed"
+        / "sizeof"
+        / "static"
+        / "struct"
+        / "switch"
+        / "typedef"
+        / "union"
+        / "unsigned"
+        / "void"
+        / "volatile"
+        / "while"
+        / "_Bool"
+        / "_Complex"
+        / "_Imaginary"
+        / "_stdcall"
+        / "__declspec"
+        / "__attribute__"
+    ) !IdChar
 
 #-------------------------------------------------------------------------
 #  A.1.3  Identifiers
@@ -581,7 +598,6 @@ Keyword <- (
 #  distinct from keywords, but it seems so.
 #-------------------------------------------------------------------------
 Identifier <- !Keyword IdNondigit IdChar* Spacing #{}
-
 
 IdNondigit <-
     [a-z]
@@ -611,15 +627,15 @@ HexQuad <- HexDigit HexDigit HexDigit HexDigit
 Constant <-
     FloatConstant
     / IntegerConstant # Note: can be a prefix of Float Constant!
-    
     / EnumerationConstant
     / CharacterConstant
 
-IntegerConstant <- (
-    DecimalConstant
-    / HexConstant
-    / OctalConstant
-) IntegerSuffix? Spacing
+IntegerConstant <-
+    (
+        DecimalConstant
+        / HexConstant
+        / OctalConstant
+    ) IntegerSuffix? Spacing
 
 DecimalConstant <- [1-9] [0-9]*
 
@@ -645,10 +661,11 @@ Lsuffix <-
     / "LL"
     / [lL]
 
-FloatConstant <- (
-    DecimalFloatConstant
-    / HexFloatConstant
-) FloatSuffix? Spacing
+FloatConstant <-
+    (
+        DecimalFloatConstant
+        / HexFloatConstant
+    ) FloatSuffix? Spacing
 
 DecimalFloatConstant <-
     Fraction Exponent?

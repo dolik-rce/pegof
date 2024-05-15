@@ -29,6 +29,7 @@ public:
     virtual std::string to_string(std::string indent = "") const override;
     std::string dump(const Primary& x, std::string indent) const;
     virtual std::string dump(std::string indent = "") const override;
+    virtual bool is_multiline() const override;
 
     virtual Node* operator[](int index);
     virtual long size() const;

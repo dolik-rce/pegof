@@ -109,20 +109,24 @@
 #type C Peg {
 #
 #}
-TranslationUnit <- Spacing (
-    DeclarationSpecifiers Declarator Declaration* "{" Spacing (
-        Declaration
-        / Statement
-    )* "}" Spacing
-    / Declaration
-    / ";" Spacing
-)* !.
+TranslationUnit <-
+    Spacing (
+        DeclarationSpecifiers Declarator Declaration* "{" Spacing (
+            Declaration
+            / Statement
+        )* "}" Spacing
+        / Declaration
+        / ";" Spacing
+    )* !.
 
 #-------------------------------------------------------------------------
 #  A.2.2  Declarations
 #-------------------------------------------------------------------------
-Declaration <- DeclarationSpecifiers (Declarator ("=" !"=" Spacing Initializer)? #{}
-     (COMMA Declarator ("=" !"=" Spacing Initializer)? #{}
+Declaration <-
+    DeclarationSpecifiers (
+        Declarator ("=" !"=" Spacing Initializer)? #{}
+        (
+            COMMA Declarator ("=" !"=" Spacing Initializer)? #{}
         )* #{}
     )? ";" Spacing
 
@@ -133,7 +137,7 @@ DeclarationSpecifiers <-
         / "inline" !IdChar Spacing
         / "_stdcall" !IdChar Spacing
     )* Identifier #{&TypedefName}
-     (
+    (
         StorageClassSpecifier
         / TypeQualifier
         / "inline" !IdChar Spacing
@@ -146,7 +150,6 @@ DeclarationSpecifiers <-
         / "inline" !IdChar Spacing
         / "_stdcall" !IdChar Spacing
     )+ #{DeclarationSpecifiers}
-    
 
 StorageClassSpecifier <-
     "typedef" !IdChar Spacing
@@ -172,20 +175,28 @@ TypeSpecifier <-
         "struct" !IdChar Spacing
         / "union" !IdChar Spacing
     ) (
-        Identifier? "{" Spacing (((
+        Identifier? "{" Spacing (
+            (
+                (
                     TypeQualifier* Identifier #{&TypedefName}
-                     TypeQualifier*
+                    TypeQualifier*
                     / (
                         TypeSpecifier
                         / TypeQualifier
                     )+
-                ) ((
+                ) (
+                    (
                         Declarator? ":" !">" Spacing ConditionalExpression
                         / Declarator
-                    ) (COMMA (
+                    ) (
+                        COMMA (
                             Declarator? ":" !">" Spacing ConditionalExpression
                             / Declarator
-                        ))*)?)? ";" Spacing)* "}" Spacing
+                        )
+                    )*
+                )?
+            )? ";" Spacing
+        )* "}" Spacing
         / Identifier
     )
     / "enum" !IdChar Spacing (
@@ -199,26 +210,29 @@ TypeQualifier <-
     / "volatile" !IdChar Spacing
     / "__declspec" !IdChar Spacing LPAR Identifier RPAR
 
-Declarator <- ("*" !"=" Spacing TypeQualifier*)* (
-    Identifier
-    / LPAR Declarator RPAR
-) (
-    "[" Spacing TypeQualifier* AssignmentExpression? "]" Spacing
-    / "[" Spacing "static" !IdChar Spacing TypeQualifier* AssignmentExpression "]" Spacing
-    / "[" Spacing TypeQualifier+ "static" !IdChar Spacing AssignmentExpression "]" Spacing
-    / "[" Spacing TypeQualifier* "*" !"=" Spacing "]" Spacing
-    / LPAR ParameterTypeList RPAR
-    / LPAR (Identifier (COMMA Identifier)*)? RPAR
-)* #{}
+Declarator <-
+    ("*" !"=" Spacing TypeQualifier*)* (
+        Identifier
+        / LPAR Declarator RPAR
+    ) (
+        "[" Spacing TypeQualifier* AssignmentExpression? "]" Spacing
+        / "[" Spacing "static" !IdChar Spacing TypeQualifier* AssignmentExpression "]" Spacing
+        / "[" Spacing TypeQualifier+ "static" !IdChar Spacing AssignmentExpression "]" Spacing
+        / "[" Spacing TypeQualifier* "*" !"=" Spacing "]" Spacing
+        / LPAR ParameterTypeList RPAR
+        / LPAR (Identifier (COMMA Identifier)*)? RPAR
+    )* #{}
 
-
-ParameterTypeList <- DeclarationSpecifiers (
-    Declarator
-    / AbstractDeclarator
-)? (COMMA DeclarationSpecifiers (
+ParameterTypeList <-
+    DeclarationSpecifiers (
         Declarator
         / AbstractDeclarator
-    )?)* (COMMA "..." Spacing)?
+    )? (
+        COMMA DeclarationSpecifiers (
+            Declarator
+            / AbstractDeclarator
+        )?
+    )* (COMMA "..." Spacing)?
 
 AbstractDeclarator <-
     ("*" !"=" Spacing TypeQualifier*)* (
@@ -241,10 +255,11 @@ Initializer <-
     AssignmentExpression
     / "{" Spacing Designation? Initializer (COMMA Designation? Initializer)* COMMA? "}" Spacing
 
-Designation <- (
-    "[" Spacing ConditionalExpression "]" Spacing
-    / "." Spacing Identifier
-)+ "=" !"=" Spacing
+Designation <-
+    (
+        "[" Spacing ConditionalExpression "]" Spacing
+        / "." Spacing Identifier
+    )+ "=" !"=" Spacing
 
 #-------------------------------------------------------------------------
 #  A.2.3  Statements
@@ -271,10 +286,12 @@ Statement <-
 
 UnaryExpression <-
     (
-        "L"? ("\"" (
+        "L"? (
+            "\"" (
                 Escape
                 / ![\n"\\] .
-            )* "\"" Spacing)+
+            )* "\"" Spacing
+        )+
         / (
             (
                 [0-9]* "." [0-9]+
@@ -321,7 +338,7 @@ UnaryExpression <-
         / LPAR Expression RPAR
         / LPAR (
             TypeQualifier* Identifier #{&TypedefName}
-             TypeQualifier*
+            TypeQualifier*
             / (
                 TypeSpecifier
                 / TypeQualifier
@@ -349,7 +366,7 @@ UnaryExpression <-
         UnaryExpression
         / LPAR (
             TypeQualifier* Identifier #{&TypedefName}
-             TypeQualifier*
+            TypeQualifier*
             / (
                 TypeSpecifier
                 / TypeQualifier
@@ -360,7 +377,7 @@ UnaryExpression <-
 CastExpression <-
     LPAR (
         TypeQualifier* Identifier #{&TypedefName}
-         TypeQualifier*
+        TypeQualifier*
         / (
             TypeSpecifier
             / TypeQualifier
@@ -368,34 +385,50 @@ CastExpression <-
     ) AbstractDeclarator? RPAR CastExpression
     / UnaryExpression
 
-MultiplicativeExpression <- CastExpression ((
-        "*" !"=" Spacing
-        / "/" !"=" Spacing
-        / "%" ![=>] Spacing
-    ) CastExpression)*
+MultiplicativeExpression <-
+    CastExpression (
+        (
+            "*" !"=" Spacing
+            / "/" !"=" Spacing
+            / "%" ![=>] Spacing
+        ) CastExpression
+    )*
 
-AdditiveExpression <- MultiplicativeExpression ((
-        "+" ![+=] Spacing
-        / "-" ![-=>] Spacing
-    ) MultiplicativeExpression)*
+AdditiveExpression <-
+    MultiplicativeExpression (
+        (
+            "+" ![+=] Spacing
+            / "-" ![-=>] Spacing
+        ) MultiplicativeExpression
+    )*
 
-RelationalExpression <- AdditiveExpression ((
-        "<<" !"=" Spacing
-        / ">>" !"=" Spacing
-    ) AdditiveExpression)* ((
-        "<=" Spacing
-        / ">=" Spacing
-        / "<" !"=" Spacing
-        / ">" !"=" Spacing
-    ) AdditiveExpression ((
+RelationalExpression <-
+    AdditiveExpression (
+        (
             "<<" !"=" Spacing
             / ">>" !"=" Spacing
-        ) AdditiveExpression)*)*
+        ) AdditiveExpression
+    )* (
+        (
+            "<=" Spacing
+            / ">=" Spacing
+            / "<" !"=" Spacing
+            / ">" !"=" Spacing
+        ) AdditiveExpression (
+            (
+                "<<" !"=" Spacing
+                / ">>" !"=" Spacing
+            ) AdditiveExpression
+        )*
+    )*
 
-EqualityExpression <- RelationalExpression ((
-        "==" Spacing
-        / "!=" Spacing
-    ) RelationalExpression)*
+EqualityExpression <-
+    RelationalExpression (
+        (
+            "==" Spacing
+            / "!=" Spacing
+        ) RelationalExpression
+    )*
 
 ExclusiveORExpression <- EqualityExpression ("&" !"&" Spacing EqualityExpression)* ("^" !"=" Spacing EqualityExpression ("&" !"&" Spacing EqualityExpression)*)*
 
@@ -426,69 +459,68 @@ Expression <- AssignmentExpression (COMMA AssignmentExpression)*
 #  Tokens are: Keyword, Identifier, Constant, StringLiteral, Punctuator.
 #  Tokens are separated by Spacing.
 #-------------------------------------------------------------------------
-Spacing <- (
-    [\t\n\r ] # 7.4.1.10 [\u000B\u000C]
-    
-    / "/*" (!"*/" .)* "*/" # 6.4.9
-    
-    / "//" (!"\n" .)* # 6.4.9
-    
-    / "#" (!"\n" .)* # Treat pragma as comment
-    
-)*
+Spacing <-
+    (
+        [\t\n\r ] # 7.4.1.10 [\u000B\u000C]
+        / "/*" (!"*/" .)* "*/" # 6.4.9
+        / "//" (!"\n" .)* # 6.4.9
+        / "#" (!"\n" .)* # Treat pragma as comment
+    )*
 
 #-------------------------------------------------------------------------
 #  A.1.3  Identifiers
 #  The standard does not explicitly state that identifiers must be
 #  distinct from keywords, but it seems so.
 #-------------------------------------------------------------------------
-Identifier <- !((
-        "auto"
-        / "break"
-        / "case"
-        / "char"
-        / "const"
-        / "continue"
-        / "default"
-        / "double"
-        / "do"
-        / "else"
-        / "enum"
-        / "extern"
-        / "float"
-        / "for"
-        / "goto"
-        / "if"
-        / "int"
-        / "inline"
-        / "long"
-        / "register"
-        / "restrict"
-        / "return"
-        / "short"
-        / "signed"
-        / "sizeof"
-        / "static"
-        / "struct"
-        / "switch"
-        / "typedef"
-        / "union"
-        / "unsigned"
-        / "void"
-        / "volatile"
-        / "while"
-        / "_Bool"
-        / "_Complex"
-        / "_Imaginary"
-        / "_stdcall"
-        / "__declspec"
-        / "__attribute__"
-    ) !IdChar) (
-    [A-Za-z]
-    / "_"
-    / UniversalCharacter
-) IdChar* Spacing #{}
-
+Identifier <-
+    !(
+        (
+            "auto"
+            / "break"
+            / "case"
+            / "char"
+            / "const"
+            / "continue"
+            / "default"
+            / "double"
+            / "do"
+            / "else"
+            / "enum"
+            / "extern"
+            / "float"
+            / "for"
+            / "goto"
+            / "if"
+            / "int"
+            / "inline"
+            / "long"
+            / "register"
+            / "restrict"
+            / "return"
+            / "short"
+            / "signed"
+            / "sizeof"
+            / "static"
+            / "struct"
+            / "switch"
+            / "typedef"
+            / "union"
+            / "unsigned"
+            / "void"
+            / "volatile"
+            / "while"
+            / "_Bool"
+            / "_Complex"
+            / "_Imaginary"
+            / "_stdcall"
+            / "__declspec"
+            / "__attribute__"
+        ) !IdChar
+    ) (
+        [A-Za-z]
+        / "_"
+        / UniversalCharacter
+    ) IdChar* Spacing #{}
 
 IdChar <-
     [0-9A-Za-z]

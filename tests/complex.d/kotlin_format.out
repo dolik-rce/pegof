@@ -30,16 +30,18 @@
     #include "kotlin_pre.h"
 }
 
-file <- shebangLine? NL* fileAnnotation* _* packageHeader* _* importList* _* (
-    filePart
-    / _
-    / unparsable
-)* EOF
+file <-
+    shebangLine? NL* fileAnnotation* _* packageHeader* _* importList* _* (
+        filePart
+        / _
+        / unparsable
+    )* EOF
 
-filePart <- (
-    topLevelObject
-    / (statement _* semi)
-) { resetFailure(auxil, $0s); }
+filePart <-
+    (
+        topLevelObject
+        / (statement _* semi)
+    ) { resetFailure(auxil, $0s); }
 
 unparsable <- [^\n]+ NL* { reportFailure(auxil, $0s); }
 
@@ -51,31 +53,34 @@ unparsable <- [^\n]+ NL* { reportFailure(auxil, $0s); }
 #script <- shebangLine? NL* fileAnnotation* _* packageHeader _* importList _* (statement _* semi)* EOF
 shebangLine <- ShebangLine _* NL+
 
-fileAnnotation <- (
-    AT_NO_WS
-    / AT_PRE_WS
-) FILE NL* COLON _* NL* (
-    LSQUARE _* unescapedAnnotation+ _* RSQUARE
-    / unescapedAnnotation
-) _* NL*
+fileAnnotation <-
+    (
+        AT_NO_WS
+        / AT_PRE_WS
+    ) FILE NL* COLON _* NL* (
+        LSQUARE _* unescapedAnnotation+ _* RSQUARE
+        / unescapedAnnotation
+    ) _* NL*
 
 packageHeader <- PACKAGE { PUSH_KIND(auxil, K_PACKAGE); } _ <identifier> { makeKotlinTag(auxil, $1, $1s, true); } _* semi?
 
 importList <- importHeader+
 
-importHeader <- IMPORT _ identifier (
-    DOT MULT
-    / importAlias
-)? _* semi? _*
+importHeader <-
+    IMPORT _ identifier (
+        DOT MULT
+        / importAlias
+    )? _* semi? _*
 
 importAlias <- _ AS _ simpleIdentifier
 
 topLevelObject <- declaration _* semis?
 
-typeAlias <- modifiers? _* TYPE_ALIAS { PUSH_KIND(auxil, K_TYPEALIAS); } (
-    _
-    / NL
-)* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, false); } _* (__* typeParameters)? __* ASSIGNMENT __* type
+typeAlias <-
+    modifiers? _* TYPE_ALIAS { PUSH_KIND(auxil, K_TYPEALIAS); } (
+        _
+        / NL
+    )* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, false); } _* (__* typeParameters)? __* ASSIGNMENT __* type
 
 declaration <-
     classDeclaration
@@ -85,13 +90,14 @@ declaration <-
     / typeAlias
 
 # // SECTION: classes
-classDeclaration <- modifiers? (
-    CLASS { PUSH_KIND(auxil, K_CLASS); }
-    / (FUN __*)? INTERFACE { PUSH_KIND(auxil, K_INTERFACE); }
-) _ NL* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } (__* typeParameters)? (__* primaryConstructor)? (__* COLON __* delegationSpecifiers)? (__* typeConstraints)? (
-    __* classBody
-    / __* enumClassBody
-)? { POP_SCOPE(auxil); }
+classDeclaration <-
+    modifiers? (
+        CLASS { PUSH_KIND(auxil, K_CLASS); }
+        / (FUN __*)? INTERFACE { PUSH_KIND(auxil, K_INTERFACE); }
+    ) _ NL* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } (__* typeParameters)? (__* primaryConstructor)? (__* COLON __* delegationSpecifiers)? (__* typeConstraints)? (
+        __* classBody
+        / __* enumClassBody
+    )? { POP_SCOPE(auxil); }
 
 primaryConstructor <- (modifiers? CONSTRUCTOR __*)? classParameters
 
@@ -99,11 +105,12 @@ classBody <- LCURL __* classMemberDeclarations __* RCURL
 
 classParameters <- LPAREN __* (classParameter (__* COMMA __* classParameter)* (__* COMMA)?)? __* RPAREN
 
-classParameter <- (
-    modifiers? _* VAL { PUSH_KIND(auxil, K_CONSTANT); }
-    / modifiers? _* VAR { PUSH_KIND(auxil, K_VARIABLE); }
-    / modifiers? { PUSH_KIND(auxil, K_IGNORE); } _*
-)? __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } _* COLON __* type (__* ASSIGNMENT __* expression)? { POP_SCOPE(auxil); }
+classParameter <-
+    (
+        modifiers? _* VAL { PUSH_KIND(auxil, K_CONSTANT); }
+        / modifiers? _* VAR { PUSH_KIND(auxil, K_VARIABLE); }
+        / modifiers? { PUSH_KIND(auxil, K_IGNORE); } _*
+    )? __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } _* COLON __* type (__* ASSIGNMENT __* expression)? { POP_SCOPE(auxil); }
 
 delegationSpecifiers <- annotatedDelegationSpecifier (__* COMMA __* annotatedDelegationSpecifier)*
 
@@ -117,10 +124,11 @@ constructorInvocation <- userType __* valueArguments
 
 annotatedDelegationSpecifier <- annotation* __* delegationSpecifier
 
-explicitDelegation <- (
-    userType
-    / functionType
-) __* BY __* expression
+explicitDelegation <-
+    (
+        userType
+        / functionType
+    ) __* BY __* expression
 
 typeParameters <- LANGLE __* typeParameter (__* COMMA __* typeParameter)* (__* COMMA)? __* RANGLE
 
@@ -157,19 +165,24 @@ variableDeclaration <- annotation* __* <simpleIdentifier> { makeKotlinTag(auxil,
 
 multiVariableDeclaration <- LPAREN __* variableDeclaration _* (__* COMMA __* variableDeclaration)* _* (__* COMMA)? __* RPAREN
 
-propertyDeclaration <- modifiers? _* (
-    VAL { PUSH_KIND(auxil, K_CONSTANT); }
-    / VAR { PUSH_KIND(auxil, K_VARIABLE); }
-) _ (__* typeParameters)? (__* receiverTypeAndDot)? (__* (
-        multiVariableDeclaration
-        / variableDeclaration
-    )) (__* typeConstraints)? (__* (
-        ASSIGNMENT __* expression
-        / propertyDelegate
-    ))? (
-    semi? _* setter (NL* semi? _* getter)?
-    / semi? _* getter (NL* semi? _* setter)?
-)?
+propertyDeclaration <-
+    modifiers? _* (
+        VAL { PUSH_KIND(auxil, K_CONSTANT); }
+        / VAR { PUSH_KIND(auxil, K_VARIABLE); }
+    ) _ (__* typeParameters)? (__* receiverTypeAndDot)? (
+        __* (
+            multiVariableDeclaration
+            / variableDeclaration
+        )
+    ) (__* typeConstraints)? (
+        __* (
+            ASSIGNMENT __* expression
+            / propertyDelegate
+        )
+    )? (
+        semi? _* setter (NL* semi? _* getter)?
+        / semi? _* getter (NL* semi? _* setter)?
+    )?
 
 propertyDelegate <- BY __* expression
 
@@ -204,26 +217,29 @@ enumEntries <- enumEntry (__* COMMA __* enumEntry)* __* COMMA?
 enumEntry <- (modifiers __*)? simpleIdentifier (__* valueArguments)? (__* classBody)?
 
 # // SECTION: types
-type <- typeModifiers? (
-    functionType
-    / nullableType
-    / parenthesizedType
-    / typeReference
-)
+type <-
+    typeModifiers? (
+        functionType
+        / nullableType
+        / parenthesizedType
+        / typeReference
+    )
 
 typeReference <-
     userType
     / DYNAMIC
 
-nullableType <- (
-    typeReference
-    / parenthesizedType
-) __* quest+
+nullableType <-
+    (
+        typeReference
+        / parenthesizedType
+    ) __* quest+
 
-quest <- !elvis (
-    QUEST_WS
-    / QUEST_NO_WS
-)
+quest <-
+    !elvis (
+        QUEST_WS
+        / QUEST_NO_WS
+    )
 
 userType <- simpleUserType (__* DOT __* simpleUserType)*
 
@@ -241,47 +257,54 @@ typeProjectionModifier <-
 
 functionType <- (receiverType __* DOT __*)? functionTypeParameters __* ARROW __* type
 
-functionTypeParameters <- LPAREN __* (
-    parameter
-    / type
-)? _* (__* COMMA __* (
+functionTypeParameters <-
+    LPAREN __* (
         parameter
         / type
-    ))* _* (__* COMMA)? __* RPAREN
+    )? _* (
+        __* COMMA __* (
+            parameter
+            / type
+        )
+    )* _* (__* COMMA)? __* RPAREN
 
 parenthesizedType <- LPAREN __* type __* RPAREN
 
-receiverType <- (typeModifiers _*)? (
-    nullableType
-    / parenthesizedType
-    / typeReference
-)
+receiverType <-
+    (typeModifiers _*)? (
+        nullableType
+        / parenthesizedType
+        / typeReference
+    )
 
 # parenthesizedUserType <- LPAREN __* userType __* RPAREN / LPAREN __* parenthesizedUserType __* RPAREN
-receiverTypeAndDot <- (typeModifiers _*)? (
-    nullableType __* DOT __*
-    / parenthesizedType __* DOT __*
-    / (simpleUserType __* DOT __*)+
-)
+receiverTypeAndDot <-
+    (typeModifiers _*)? (
+        nullableType __* DOT __*
+        / parenthesizedType __* DOT __*
+        / (simpleUserType __* DOT __*)+
+    )
 
 # // SECTION: statements
 #statements <- (statement (semis statement)*)? semis?
 statements <- (statement _* (semis _* statement _*)*)? _* semis?
 
-statement <- (
-    label
-    / annotation
-)* (
-    declaration
-    / assignment
-    / loopStatement
-    / expression
-)
+statement <-
+    (
+        label
+        / annotation
+    )* (
+        declaration
+        / assignment
+        / loopStatement
+        / expression
+    )
 
-label <- simpleIdentifier (
-    AT_POST_WS
-    / AT_NO_WS
-) __*
+label <-
+    simpleIdentifier (
+        AT_POST_WS
+        / AT_NO_WS
+    ) __*
 
 controlStructureBody <-
     block
@@ -294,10 +317,11 @@ loopStatement <-
     / whileStatement
     / doWhileStatement
 
-forStatement <- FOR __* LPAREN _* annotation* _* (
-    variableDeclaration
-    / multiVariableDeclaration
-) _ IN _ inside_expression _* RPAREN __* (controlStructureBody)?
+forStatement <-
+    FOR __* LPAREN _* annotation* _* (
+        variableDeclaration
+        / multiVariableDeclaration
+    ) _ IN _ inside_expression _* RPAREN __* (controlStructureBody)?
 
 whileStatement <-
     WHILE __* LPAREN _* inside_expression _* RPAREN __* controlStructureBody
@@ -309,15 +333,21 @@ assignment <-
     directlyAssignableExpression _* ASSIGNMENT __* expression
     / assignableExpression _* assignmentAndOperator __* expression
 
-semi <- (_* (
-        SEMICOLON
-        / NL
-    ) _*) NL*
+semi <-
+    (
+        _* (
+            SEMICOLON
+            / NL
+        ) _*
+    ) NL*
 
-semis <- (_* (
-        SEMICOLON
-        / NL
-    ) _*)+
+semis <-
+    (
+        _* (
+            SEMICOLON
+            / NL
+        ) _*
+    )+
 
 # // SECTION: expressions
 expression <- disjunction
@@ -332,10 +362,11 @@ comparison <- genericCallLikeComparison (_* comparisonOperator __* genericCallLi
 
 genericCallLikeComparison <- infixOperation (_* callSuffix)*
 
-infixOperation <- elvisExpression (
-    _* inOperator __* elvisExpression
-    / _* isOperator __* type
-)*
+infixOperation <-
+    elvisExpression (
+        _* inOperator __* elvisExpression
+        / _* isOperator __* type
+    )*
 
 elvisExpression <- infixFunctionCall (__* elvis __* infixFunctionCall)*
 
@@ -343,10 +374,13 @@ elvis <- QUEST_NO_WS COLON
 
 infixFunctionCall <- rangeExpression (_* simpleIdentifier __* rangeExpression)*
 
-rangeExpression <- additiveExpression (_* (
-        RANGE_UNTIL
-        / RANGE
-    ) __* additiveExpression)*
+rangeExpression <-
+    additiveExpression (
+        _* (
+            RANGE_UNTIL
+            / RANGE
+        ) __* additiveExpression
+    )*
 
 additiveExpression <- multiplicativeExpression (_* additiveOperator __* multiplicativeExpression)*
 
@@ -393,11 +427,12 @@ assignableSuffix <-
 
 indexingSuffix <- LSQUARE __* inside_expression (__* COMMA __* inside_expression)* (__* COMMA)? __* RSQUARE
 
-navigationSuffix <- __* memberAccessOperator __* (
-    simpleIdentifier
-    / parenthesizedExpression
-    / CLASS
-)
+navigationSuffix <-
+    __* memberAccessOperator __* (
+        simpleIdentifier
+        / parenthesizedExpression
+        / CLASS
+    )
 
 callSuffix <-
     typeArguments? _* valueArguments? _* annotatedLambda
@@ -449,17 +484,19 @@ stringLiteral <-
     multiLineStringLiteral
     / lineStringLiteral
 
-lineStringLiteral <- QUOTE_OPEN (
-    lineStringExpression
-    / lineStringContent
-)* QUOTE_CLOSE
+lineStringLiteral <-
+    QUOTE_OPEN (
+        lineStringExpression
+        / lineStringContent
+    )* QUOTE_CLOSE
 
 #lineStringLiteral <- QUOTE_OPEN (lineStringExpression / EscapedIdentifier / UniCharacterLiteral / stringChar)* QUOTE_CLOSE
-multiLineStringLiteral <- TRIPLE_QUOTE_OPEN (
-    multiLineStringExpression
-    / multiLineStringContent
-    / MultiLineStringQuote
-)* TRIPLE_QUOTE_CLOSE
+multiLineStringLiteral <-
+    TRIPLE_QUOTE_OPEN (
+        multiLineStringExpression
+        / multiLineStringContent
+        / MultiLineStringQuote
+    )* TRIPLE_QUOTE_CLOSE
 
 #multiLineStringLiteral <- TRIPLE_QUOTE_OPEN (multiLineStringExpression / MultiLineStringQuote / EscapedIdentifier / UniChracterLiteral / stringChar)* TRIPLE_QUOTE_CLOSE
 lineStringContent <-
@@ -482,66 +519,91 @@ inside_disjunction <- inside_conjunction (__* DISJ __* inside_conjunction)*
 
 inside_conjunction <- inside_equality (__* CONJ __* inside_equality)*
 
-inside_equality <- inside_comparison ((
-        _
-        / NL
-    )* equalityOperator __* inside_comparison (
-        _
-        / NL
-    )*)*
+inside_equality <-
+    inside_comparison (
+        (
+            _
+            / NL
+        )* equalityOperator __* inside_comparison (
+            _
+            / NL
+        )*
+    )*
 
-inside_comparison <- inside_genericCallLikeComparison ((
-        _
-        / NL
-    )* comparisonOperator __* inside_genericCallLikeComparison (
-        _
-        / NL
-    )*)*
+inside_comparison <-
+    inside_genericCallLikeComparison (
+        (
+            _
+            / NL
+        )* comparisonOperator __* inside_genericCallLikeComparison (
+            _
+            / NL
+        )*
+    )*
 
-inside_genericCallLikeComparison <- inside_infixOperation ((
-        _
-        / NL
-    )* callSuffix)*
+inside_genericCallLikeComparison <-
+    inside_infixOperation (
+        (
+            _
+            / NL
+        )* callSuffix
+    )*
 
-inside_infixOperation <- inside_elvisExpression (
-    (
-        _
-        / NL
-    )* inOperator __* inside_elvisExpression
-    / (
-        _
-        / NL
-    )* isOperator __* type
-)*
+inside_infixOperation <-
+    inside_elvisExpression (
+        (
+            _
+            / NL
+        )* inOperator __* inside_elvisExpression
+        / (
+            _
+            / NL
+        )* isOperator __* type
+    )*
 
 inside_elvisExpression <- inside_infixFunctionCall (__* elvis __* inside_infixFunctionCall)*
 
-inside_infixFunctionCall <- inside_rangeExpression ((
-        _
-        / NL
-    )* simpleIdentifier __* inside_rangeExpression)*
+inside_infixFunctionCall <-
+    inside_rangeExpression (
+        (
+            _
+            / NL
+        )* simpleIdentifier __* inside_rangeExpression
+    )*
 
-inside_rangeExpression <- inside_additiveExpression ((
-        _
-        / NL
-    )* RANGE __* inside_additiveExpression)*
+inside_rangeExpression <-
+    inside_additiveExpression (
+        (
+            _
+            / NL
+        )* RANGE __* inside_additiveExpression
+    )*
 
-inside_additiveExpression <- inside_multiplicativeExpression ((
-        _
-        / NL
-    )* additiveOperator __* inside_multiplicativeExpression)*
+inside_additiveExpression <-
+    inside_multiplicativeExpression (
+        (
+            _
+            / NL
+        )* additiveOperator __* inside_multiplicativeExpression
+    )*
 
-inside_multiplicativeExpression <- inside_asExpression ((
-        _
-        / NL
-    )* multiplicativeOperator __* inside_asExpression)*
+inside_multiplicativeExpression <-
+    inside_asExpression (
+        (
+            _
+            / NL
+        )* multiplicativeOperator __* inside_asExpression
+    )*
 
 inside_asExpression <- inside_prefixUnaryExpression (__* asOperator __* type)*
 
-inside_prefixUnaryExpression <- (inside_unaryPrefix (
-        _
-        / NL
-    )*)* inside_postfixUnaryExpression
+inside_prefixUnaryExpression <-
+    (
+        inside_unaryPrefix (
+            _
+            / NL
+        )*
+    )* inside_postfixUnaryExpression
 
 inside_unaryPrefix <-
     annotation
@@ -549,10 +611,12 @@ inside_unaryPrefix <-
     / prefixUnaryOperator __*
 
 inside_postfixUnaryExpression <-
-    primaryExpression ((
+    primaryExpression (
+        (
             _
             / NL
-        )* inside_postfixUnarySuffix)+
+        )* inside_postfixUnarySuffix
+    )+
     / primaryExpression
 
 inside_postfixUnarySuffix <-
@@ -637,10 +701,11 @@ rangeTest <- inOperator __* expression
 
 typeTest <- isOperator __* type
 
-tryExpression <- TRY __* block (
-    (__* catchBlock)+ (__* finallyBlock)?
-    / __* finallyBlock
-)
+tryExpression <-
+    TRY __* block (
+        (__* catchBlock)+ (__* finallyBlock)?
+        / __* finallyBlock
+    )
 
 catchBlock <- CATCH __* LPAREN _* (annotation _*)* simpleIdentifier _* COLON _* type (__* COMMA)? _* RPAREN __* block
 
@@ -657,10 +722,13 @@ jumpExpression <-
     / BREAK_AT
     / BREAK
 
-callableReference <- (receiverType? __* COLONCOLON __* (
-        simpleIdentifier
-        / CLASS
-    ))
+callableReference <-
+    (
+        receiverType? __* COLONCOLON __* (
+            simpleIdentifier
+            / CLASS
+        )
+    )
 
 assignmentAndOperator <-
     ADD_ASSIGNMENT
@@ -726,26 +794,29 @@ memberAccessOperator <-
 safeNav <- QUEST_NO_WS DOT
 
 # // SECTION: modifiers
-modifiers <- (
-    annotation
-    / modifier
-)+
+modifiers <-
+    (
+        annotation
+        / modifier
+    )+
 
-parameterModifiers <- (
-    annotation
-    / parameterModifier
-)+
+parameterModifiers <-
+    (
+        annotation
+        / parameterModifier
+    )+
 
-modifier <- (
-    classModifier
-    / memberModifier
-    / visibilityModifier
-    / functionModifier
-    / propertyModifier
-    / inheritanceModifier
-    / parameterModifier
-    / platformModifier
-) __*
+modifier <-
+    (
+        classModifier
+        / memberModifier
+        / visibilityModifier
+        / functionModifier
+        / propertyModifier
+        / inheritanceModifier
+        / parameterModifier
+        / platformModifier
+    ) __*
 
 typeModifiers <- typeModifier+
 
@@ -808,10 +879,11 @@ platformModifier <-
     / ACTUAL
 
 # // SECTION: annotations
-annotation <- (
-    singleAnnotation
-    / multiAnnotation
-) __*
+annotation <-
+    (
+        singleAnnotation
+        / multiAnnotation
+    ) __*
 
 singleAnnotation <-
     annotationUseSiteTarget __* unescapedAnnotation
@@ -827,19 +899,20 @@ multiAnnotation <-
         / AT_PRE_WS
     ) LSQUARE unescapedAnnotation+ RSQUARE
 
-annotationUseSiteTarget <- (
-    AT_NO_WS
-    / AT_PRE_WS
-) (
-    FIELD
-    / PROPERTY
-    / GET
-    / SET
-    / RECEIVER
-    / PARAM
-    / SETPARAM
-    / DELEGATE
-) __* COLON
+annotationUseSiteTarget <-
+    (
+        AT_NO_WS
+        / AT_PRE_WS
+    ) (
+        FIELD
+        / PROPERTY
+        / GET
+        / SET
+        / RECEIVER
+        / PARAM
+        / SETPARAM
+        / DELEGATE
+    ) __* COLON
 
 unescapedAnnotation <-
     constructorInvocation
@@ -847,11 +920,13 @@ unescapedAnnotation <-
 
 # // SECTION: identifiers
 simpleIdentifier <-
-    !(hardKeyword !(
+    !(
+        hardKeyword !(
             Letter
             / "_"
             / UnicodeDigit
-        )) Identifier
+        )
+    ) Identifier
     / ABSTRACT
     / ANNOTATION
     / BY
@@ -935,10 +1010,11 @@ hardKeyword <-
 # // SECTION: lexicalGeneral
 ShebangLine <- "#!" [^\r\n]*
 
-DelimitedComment <- "/*" (
-    DelimitedComment
-    / !"*/" .
-)* "*/"
+DelimitedComment <-
+    "/*" (
+        DelimitedComment
+        / !"*/" .
+    )* "*/"
 
 LineComment <- "//" [^\r\n]*
 
@@ -1022,15 +1098,17 @@ COLONCOLON <- "::"
 #HASH <- '#'
 AT_NO_WS <- "@"
 
-AT_POST_WS <- "@" (
-    Hidden
-    / NL
-)
+AT_POST_WS <-
+    "@" (
+        Hidden
+        / NL
+    )
 
-AT_PRE_WS <- (
-    Hidden
-    / NL
-) "@"
+AT_PRE_WS <-
+    (
+        Hidden
+        / NL
+    ) "@"
 
 #AT_BOTH_WS <- (Hidden / NL) '@' (Hidden / NL)
 QUEST_WS <- "?" Hidden
@@ -1068,371 +1146,444 @@ THIS_AT <- "this@" Identifier
 
 SUPER_AT <- "super@" Identifier
 
-FILE <- "file" !(
-    Letter
-    / UnicodeDigit
-)
+FILE <-
+    "file" !(
+        Letter
+        / UnicodeDigit
+    )
 
-FIELD <- "field" !(
-    Letter
-    / UnicodeDigit
-)
+FIELD <-
+    "field" !(
+        Letter
+        / UnicodeDigit
+    )
 
-PROPERTY <- "property" !(
-    Letter
-    / UnicodeDigit
-)
+PROPERTY <-
+    "property" !(
+        Letter
+        / UnicodeDigit
+    )
 
-GET <- "get" !(
-    Letter
-    / UnicodeDigit
-)
+GET <-
+    "get" !(
+        Letter
+        / UnicodeDigit
+    )
 
-SET <- "set" !(
-    Letter
-    / UnicodeDigit
-)
+SET <-
+    "set" !(
+        Letter
+        / UnicodeDigit
+    )
 
-RECEIVER <- "receiver" !(
-    Letter
-    / UnicodeDigit
-)
+RECEIVER <-
+    "receiver" !(
+        Letter
+        / UnicodeDigit
+    )
 
-PARAM <- "param" !(
-    Letter
-    / UnicodeDigit
-)
+PARAM <-
+    "param" !(
+        Letter
+        / UnicodeDigit
+    )
 
-SETPARAM <- "setparam" !(
-    Letter
-    / UnicodeDigit
-)
+SETPARAM <-
+    "setparam" !(
+        Letter
+        / UnicodeDigit
+    )
 
-DELEGATE <- "delegate" !(
-    Letter
-    / UnicodeDigit
-)
+DELEGATE <-
+    "delegate" !(
+        Letter
+        / UnicodeDigit
+    )
 
-PACKAGE <- "package" !(
-    Letter
-    / UnicodeDigit
-)
+PACKAGE <-
+    "package" !(
+        Letter
+        / UnicodeDigit
+    )
 
-IMPORT <- "import" !(
-    Letter
-    / UnicodeDigit
-)
+IMPORT <-
+    "import" !(
+        Letter
+        / UnicodeDigit
+    )
 
-CLASS <- "class" !(
-    Letter
-    / UnicodeDigit
-)
+CLASS <-
+    "class" !(
+        Letter
+        / UnicodeDigit
+    )
 
-INTERFACE <- "interface" !(
-    Letter
-    / UnicodeDigit
-)
+INTERFACE <-
+    "interface" !(
+        Letter
+        / UnicodeDigit
+    )
 
-FUN <- "fun" !(
-    Letter
-    / UnicodeDigit
-)
+FUN <-
+    "fun" !(
+        Letter
+        / UnicodeDigit
+    )
 
-OBJECT <- "object" !(
-    Letter
-    / UnicodeDigit
-)
+OBJECT <-
+    "object" !(
+        Letter
+        / UnicodeDigit
+    )
 
-VAL <- "val" !(
-    Letter
-    / UnicodeDigit
-)
+VAL <-
+    "val" !(
+        Letter
+        / UnicodeDigit
+    )
 
-VAR <- "var" !(
-    Letter
-    / UnicodeDigit
-)
+VAR <-
+    "var" !(
+        Letter
+        / UnicodeDigit
+    )
 
-TYPE_ALIAS <- "typealias" !(
-    Letter
-    / UnicodeDigit
-)
+TYPE_ALIAS <-
+    "typealias" !(
+        Letter
+        / UnicodeDigit
+    )
 
-CONSTRUCTOR <- "constructor" !(
-    Letter
-    / UnicodeDigit
-)
+CONSTRUCTOR <-
+    "constructor" !(
+        Letter
+        / UnicodeDigit
+    )
 
-BY <- "by" !(
-    Letter
-    / UnicodeDigit
-)
+BY <-
+    "by" !(
+        Letter
+        / UnicodeDigit
+    )
 
-COMPANION <- "companion" !(
-    Letter
-    / UnicodeDigit
-)
+COMPANION <-
+    "companion" !(
+        Letter
+        / UnicodeDigit
+    )
 
-INIT <- "init" !(
-    Letter
-    / UnicodeDigit
-)
+INIT <-
+    "init" !(
+        Letter
+        / UnicodeDigit
+    )
 
-THIS <- "this" !(
-    Letter
-    / UnicodeDigit
-)
+THIS <-
+    "this" !(
+        Letter
+        / UnicodeDigit
+    )
 
-SUPER <- "super" !(
-    Letter
-    / UnicodeDigit
-)
+SUPER <-
+    "super" !(
+        Letter
+        / UnicodeDigit
+    )
 
-TYPEOF <- "typeof" !(
-    Letter
-    / UnicodeDigit
-)
+TYPEOF <-
+    "typeof" !(
+        Letter
+        / UnicodeDigit
+    )
 
-WHERE <- "where" !(
-    Letter
-    / UnicodeDigit
-)
+WHERE <-
+    "where" !(
+        Letter
+        / UnicodeDigit
+    )
 
-IF <- "if" !(
-    Letter
-    / UnicodeDigit
-)
+IF <-
+    "if" !(
+        Letter
+        / UnicodeDigit
+    )
 
-ELSE <- "else" !(
-    Letter
-    / UnicodeDigit
-)
+ELSE <-
+    "else" !(
+        Letter
+        / UnicodeDigit
+    )
 
-WHEN <- "when" !(
-    Letter
-    / UnicodeDigit
-)
+WHEN <-
+    "when" !(
+        Letter
+        / UnicodeDigit
+    )
 
-TRY <- "try" !(
-    Letter
-    / UnicodeDigit
-)
+TRY <-
+    "try" !(
+        Letter
+        / UnicodeDigit
+    )
 
-CATCH <- "catch" !(
-    Letter
-    / UnicodeDigit
-)
+CATCH <-
+    "catch" !(
+        Letter
+        / UnicodeDigit
+    )
 
-FINALLY <- "finally" !(
-    Letter
-    / UnicodeDigit
-)
+FINALLY <-
+    "finally" !(
+        Letter
+        / UnicodeDigit
+    )
 
-FOR <- "for" !(
-    Letter
-    / UnicodeDigit
-)
+FOR <-
+    "for" !(
+        Letter
+        / UnicodeDigit
+    )
 
-DO <- "do" !(
-    Letter
-    / UnicodeDigit
-)
+DO <-
+    "do" !(
+        Letter
+        / UnicodeDigit
+    )
 
-WHILE <- "while" !(
-    Letter
-    / UnicodeDigit
-)
+WHILE <-
+    "while" !(
+        Letter
+        / UnicodeDigit
+    )
 
-THROW <- "throw" !(
-    Letter
-    / UnicodeDigit
-)
+THROW <-
+    "throw" !(
+        Letter
+        / UnicodeDigit
+    )
 
-RETURN <- "return" !(
-    Letter
-    / UnicodeDigit
-)
+RETURN <-
+    "return" !(
+        Letter
+        / UnicodeDigit
+    )
 
-CONTINUE <- "continue" !(
-    Letter
-    / UnicodeDigit
-)
+CONTINUE <-
+    "continue" !(
+        Letter
+        / UnicodeDigit
+    )
 
-BREAK <- "break" !(
-    Letter
-    / UnicodeDigit
-)
+BREAK <-
+    "break" !(
+        Letter
+        / UnicodeDigit
+    )
 
-AS <- "as" !(
-    Letter
-    / UnicodeDigit
-)
+AS <-
+    "as" !(
+        Letter
+        / UnicodeDigit
+    )
 
-IS <- "is" !(
-    Letter
-    / UnicodeDigit
-)
+IS <-
+    "is" !(
+        Letter
+        / UnicodeDigit
+    )
 
-IN <- "in" !(
-    Letter
-    / UnicodeDigit
-)
+IN <-
+    "in" !(
+        Letter
+        / UnicodeDigit
+    )
 
-NOT_IS <- "!is" !(
-    Letter
-    / UnicodeDigit
-)
+NOT_IS <-
+    "!is" !(
+        Letter
+        / UnicodeDigit
+    )
 
-NOT_IN <- "!in" !(
-    Letter
-    / UnicodeDigit
-)
+NOT_IN <-
+    "!in" !(
+        Letter
+        / UnicodeDigit
+    )
 
-OUT <- "out" !(
-    Letter
-    / UnicodeDigit
-)
+OUT <-
+    "out" !(
+        Letter
+        / UnicodeDigit
+    )
 
-DYNAMIC <- "dynamic" !(
-    Letter
-    / UnicodeDigit
-)
+DYNAMIC <-
+    "dynamic" !(
+        Letter
+        / UnicodeDigit
+    )
 
 # // SECTION: lexicalModifiers
-PUBLIC <- "public" !(
-    Letter
-    / UnicodeDigit
-)
+PUBLIC <-
+    "public" !(
+        Letter
+        / UnicodeDigit
+    )
 
-PRIVATE <- "private" !(
-    Letter
-    / UnicodeDigit
-)
+PRIVATE <-
+    "private" !(
+        Letter
+        / UnicodeDigit
+    )
 
-PROTECTED <- "protected" !(
-    Letter
-    / UnicodeDigit
-)
+PROTECTED <-
+    "protected" !(
+        Letter
+        / UnicodeDigit
+    )
 
-INTERNAL <- "internal" !(
-    Letter
-    / UnicodeDigit
-)
+INTERNAL <-
+    "internal" !(
+        Letter
+        / UnicodeDigit
+    )
 
-ENUM <- "enum" !(
-    Letter
-    / UnicodeDigit
-)
+ENUM <-
+    "enum" !(
+        Letter
+        / UnicodeDigit
+    )
 
-SEALED <- "sealed" !(
-    Letter
-    / UnicodeDigit
-)
+SEALED <-
+    "sealed" !(
+        Letter
+        / UnicodeDigit
+    )
 
-ANNOTATION <- "annotation" !(
-    Letter
-    / UnicodeDigit
-)
+ANNOTATION <-
+    "annotation" !(
+        Letter
+        / UnicodeDigit
+    )
 
-DATA <- "data" !(
-    Letter
-    / UnicodeDigit
-)
+DATA <-
+    "data" !(
+        Letter
+        / UnicodeDigit
+    )
 
-INNER <- "inner" !(
-    Letter
-    / UnicodeDigit
-)
+INNER <-
+    "inner" !(
+        Letter
+        / UnicodeDigit
+    )
 
-TAILREC <- "tailrec" !(
-    Letter
-    / UnicodeDigit
-)
+TAILREC <-
+    "tailrec" !(
+        Letter
+        / UnicodeDigit
+    )
 
-OPERATOR <- "operator" !(
-    Letter
-    / UnicodeDigit
-)
+OPERATOR <-
+    "operator" !(
+        Letter
+        / UnicodeDigit
+    )
 
-INLINE <- "inline" !(
-    Letter
-    / UnicodeDigit
-)
+INLINE <-
+    "inline" !(
+        Letter
+        / UnicodeDigit
+    )
 
-INFIX <- "infix" !(
-    Letter
-    / UnicodeDigit
-)
+INFIX <-
+    "infix" !(
+        Letter
+        / UnicodeDigit
+    )
 
-EXTERNAL <- "external" !(
-    Letter
-    / UnicodeDigit
-)
+EXTERNAL <-
+    "external" !(
+        Letter
+        / UnicodeDigit
+    )
 
-SUSPEND <- "suspend" !(
-    Letter
-    / UnicodeDigit
-)
+SUSPEND <-
+    "suspend" !(
+        Letter
+        / UnicodeDigit
+    )
 
-OVERRIDE <- "override" !(
-    Letter
-    / UnicodeDigit
-)
+OVERRIDE <-
+    "override" !(
+        Letter
+        / UnicodeDigit
+    )
 
-ABSTRACT <- "abstract" !(
-    Letter
-    / UnicodeDigit
-)
+ABSTRACT <-
+    "abstract" !(
+        Letter
+        / UnicodeDigit
+    )
 
-FINAL <- "final" !(
-    Letter
-    / UnicodeDigit
-)
+FINAL <-
+    "final" !(
+        Letter
+        / UnicodeDigit
+    )
 
-OPEN <- "open" !(
-    Letter
-    / UnicodeDigit
-)
+OPEN <-
+    "open" !(
+        Letter
+        / UnicodeDigit
+    )
 
-CONST <- "const" !(
-    Letter
-    / UnicodeDigit
-)
+CONST <-
+    "const" !(
+        Letter
+        / UnicodeDigit
+    )
 
-LATEINIT <- "lateinit" !(
-    Letter
-    / UnicodeDigit
-)
+LATEINIT <-
+    "lateinit" !(
+        Letter
+        / UnicodeDigit
+    )
 
-VARARG <- "vararg" !(
-    Letter
-    / UnicodeDigit
-)
+VARARG <-
+    "vararg" !(
+        Letter
+        / UnicodeDigit
+    )
 
-NOINLINE <- "noinline" !(
-    Letter
-    / UnicodeDigit
-)
+NOINLINE <-
+    "noinline" !(
+        Letter
+        / UnicodeDigit
+    )
 
-CROSSINLINE <- "crossinline" !(
-    Letter
-    / UnicodeDigit
-)
+CROSSINLINE <-
+    "crossinline" !(
+        Letter
+        / UnicodeDigit
+    )
 
-REIFIED <- "reified" !(
-    Letter
-    / UnicodeDigit
-)
+REIFIED <-
+    "reified" !(
+        Letter
+        / UnicodeDigit
+    )
 
-EXPECT <- "expect" !(
-    Letter
-    / UnicodeDigit
-)
+EXPECT <-
+    "expect" !(
+        Letter
+        / UnicodeDigit
+    )
 
-ACTUAL <- "actual" !(
-    Letter
-    / UnicodeDigit
-)
+ACTUAL <-
+    "actual" !(
+        Letter
+        / UnicodeDigit
+    )
 
 # // SECTION: literals
 DecDigit <- [0-9]
@@ -1486,17 +1637,19 @@ BinLiteral <-
     "0" [bB] BinDigit BinDigitOrSeparator*
     / "0" [bB] BinDigit
 
-UnsignedLiteral <- (
-    HexLiteral
-    / BinLiteral
-    / IntegerLiteral
-) [uU] [lL]?
+UnsignedLiteral <-
+    (
+        HexLiteral
+        / BinLiteral
+        / IntegerLiteral
+    ) [uU] [lL]?
 
-LongLiteral <- (
-    HexLiteral
-    / BinLiteral
-    / IntegerLiteral
-) [lL]
+LongLiteral <-
+    (
+        HexLiteral
+        / BinLiteral
+        / IntegerLiteral
+    ) [lL]
 
 BooleanLiteral <-
     "true"
@@ -1504,10 +1657,11 @@ BooleanLiteral <-
 
 NullLiteral <- "null"
 
-CharacterLiteral <- "'" (
-    EscapeSeq
-    / [^\n\r'\\]
-) "'"
+CharacterLiteral <-
+    "'" (
+        EscapeSeq
+        / [^\n\r'\\]
+    ) "'"
 
 # // SECTION: lexicalIdentifiers
 #UnicodeDigit <- UNICODE_CLASS_ND
@@ -1575,16 +1729,17 @@ FieldIdentifier <- "$" IdentifierOrSoftKey
 
 UniCharacterLiteral <- "\\" "u" HexDigit HexDigit HexDigit HexDigit
 
-EscapedIdentifier <- "\\" (
-    "t"
-    / "b"
-    / "r"
-    / "n"
-    / "'"
-    / "\""
-    / "\\"
-    / "$"
-)
+EscapedIdentifier <-
+    "\\" (
+        "t"
+        / "b"
+        / "r"
+        / "n"
+        / "'"
+        / "\""
+        / "\\"
+        / "$"
+    )
 
 EscapeSeq <-
     UniCharacterLiteral
@@ -1633,24 +1788,27 @@ MultiLineStrText <-
 
 MultiLineStrExprStart <- "${"
 
-_ <- (
-    WS
-    / DelimitedComment
-    / LineComment
-)+
+_ <-
+    (
+        WS
+        / DelimitedComment
+        / LineComment
+    )+
 
-__ <- (
-    [ \t\f\r\n]
-    / DelimitedComment
-    / LineComment
-)+
+__ <-
+    (
+        [ \t\f\r\n]
+        / DelimitedComment
+        / LineComment
+    )+
 
 WS <- [ \t\f]
 
-NL <- _* (
-    "\n"
-    / "\r" "\n"?
-) _*
+NL <-
+    _* (
+        "\n"
+        / "\r" "\n"?
+    ) _*
 
 EOF <- !.
 

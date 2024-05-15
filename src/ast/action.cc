@@ -25,6 +25,10 @@ std::string Action::dump(std::string indent) const {
     return indent + "ACTION " + to_c_string(code);
 }
 
+bool Action::is_multiline() const {
+    return code.find('\n') != std::string::npos;
+}
+
 bool Action::contains_reference(const Reference& ref) const {
     std::regex re(".*\\b" + ref.var + "\\b.*");
     return std::regex_match(code, re);

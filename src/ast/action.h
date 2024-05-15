@@ -12,6 +12,7 @@ public:
 
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
+    virtual bool is_multiline() const override;
 
     bool contains_reference(const Reference& ref) const;
     bool contains_capture(int i) const;

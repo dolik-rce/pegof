@@ -84,7 +84,7 @@ std::string Term::to_string(std::string indent) const {
     result += to_string(primary, indent);
     if (quantifier != 0) result += std::string(1, quantifier);
     if (!post_comment.empty()) {
-        result += " #" + post_comment + "\n" + indent.substr(0, indent.length() - 4);
+        result += " #" + post_comment;
     }
     return result;
 }
@@ -95,6 +95,19 @@ std::string Term::dump(std::string indent) const {
     if (quantifier != 0) result += " " + std::string(1, quantifier);
     result += dump_comments() + "\n" + dump(primary, indent + "  ");
     return result;
+}
+
+bool Term::is_multiline() const {
+    if (!comments.empty()) return true;
+    if (!post_comment.empty()) return true;
+    if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary))->is_multiline();
+    if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary))->is_multiline();
+    if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary))->is_multiline();
+    if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary))->is_multiline();
+    if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary))->is_multiline();
+    if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary))->is_multiline();
+    if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary))->is_multiline();
+    error("unsupported type!");
 }
 
 Node* Term::operator[](int index) {
