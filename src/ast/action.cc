@@ -41,6 +41,8 @@ bool Action::contains_capture(int i) const {
 
 void Action::renumber_capture(int from, int to) {
     code = replace(code, "\\$" + std::to_string(from) + "\\b", "$$" + std::to_string(to));
+    code = replace(code, "\\$" + std::to_string(from) + "s\\b", "$$" + std::to_string(to) + "s");
+    code = replace(code, "\\$" + std::to_string(from) + "e\\b", "$$" + std::to_string(to) + "e");
 }
 
 bool operator==(const Action& a, const Action& b) {

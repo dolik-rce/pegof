@@ -2,4 +2,4 @@ main <- A / B / C
 
 A <- <[Aa]> { printf("A: %s\n", $1); }
 B <- <[Bb]> $1
-C <- <[Cc]> $1 { printf("C: %s\n", $1); }
+C <- <[Cc]> $1 { printf("C: %s, %p, %p\n", $1, $1s, $1e); }
