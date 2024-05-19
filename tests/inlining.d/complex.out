@@ -2,3 +2,6 @@ main <-
     (<[Aa]> { printf("A: %s\n", $1); })
     / (<[Bb]> $2)
     / (<[Cc]> $3 { printf("C: %s, %p, %p\n", $3, $3s, $3e); })
+    / D
+
+D <- [Dd] { printf("D: %s, %p, %p", $0, $0s, $0e); }

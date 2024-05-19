@@ -383,6 +383,14 @@ int Optimizer::inline_rules() {
             continue;
         }
 
+        bool contains_full_rule_ref = !rule.find_all<Action>([rule](const Action& ref) -> bool {
+            return ref.contains_capture(0);
+        }).empty();
+        if (contains_full_rule_ref) {
+            log(2, "Not inlining %s: rule contains action with '$0'", rule.c_str());
+            continue;
+        }
+
         double score = calculate_score(rule.count_terms() + rule.count_cc_tokens(), refs.size());
         log(4, "Score for %s: %f", rule.c_str(), score);
 

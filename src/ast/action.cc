@@ -35,7 +35,7 @@ bool Action::contains_reference(const Reference& ref) const {
 }
 
 bool Action::contains_capture(int i) const {
-    std::regex re(".*\\$" + std::to_string(i) + "\\b.*");
+    std::regex re(".*\\$" + std::to_string(i) + "[se]?\\b.*");
     return std::regex_match(code, re);
 }
 
