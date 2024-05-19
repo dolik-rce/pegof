@@ -169,17 +169,16 @@ This tool is currently lacking proper unicode support in many places. It might b
 
 ## Building
 
-Pegof uses cmake, so to build it just run:
+Pegof uses cmake. To build it just run:
 
 ```sh
-mkdir build
-cd build
-cmake ..
-make
-make test # optional, but recommended
+cmake -B ./build
+cmake --build ./build --parallel 4
+cmake --build ./build --target test    # optional, but recommended
 ```
 
-Building on non-linux platforms has not been tested and might require some modifications to the process.
+Building on non-linux platforms has not been tested and might require some modifications to the process
+or even to the application itself.
 
 ## Acknowledgment
 
