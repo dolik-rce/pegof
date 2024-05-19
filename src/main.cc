@@ -5,6 +5,7 @@
 #include "config.h"
 #include "utils.h"
 #include "log.h"
+#include "version.h"
 
 Grammar parse(const std::string& input, const Checker& checker) {
     std::string content = read_file(input);
@@ -75,6 +76,8 @@ void process(const Config::OutputType& output_type, const std::string& input, co
 int main(int argc, char **argv) {
     try {
         Config conf(argc, argv);
+        debug("Pegof version: %s", pegof_version.c_str());
+        debug("PackCC version: %s", pcc_version.c_str());
         Checker checker;
 
         for (int i = 0; i < conf.inputs.size(); i++) {

@@ -16,6 +16,8 @@ as much as possible to reduce number of rules and terms.
 ### Basic options:
 `-h/--help` Show help (this text)
 
+`-V/--version` Show version and exit
+
 `-c/--conf FILE` Use given configuration file
 
 `-v/--verbose` Verbose logging to stderr (repeat for even more verbose output)

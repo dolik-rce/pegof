@@ -1,3 +1,4 @@
+#pragma once
 #define VOID_VALUE (~(size_t)0)
 
 extern "C" {

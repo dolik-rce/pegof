@@ -1,6 +1,7 @@
 #include "config.h"
 #include "utils.h"
 #include "log.h"
+#include "version.h"
 
 #include <algorithm>
 #include <fstream>
@@ -94,6 +95,11 @@ void Config::usage_markdown() {
 
 int Config::help() {
     usage("");
+    std::exit(0);
+}
+
+int Config::version() {
+    printf("Pegof version: %s\nPackCC version: %s\n", pegof_version.c_str(), pcc_version.c_str());
     std::exit(0);
 }
 
@@ -308,6 +314,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
 
     args = {
         Option(OG_BASIC, "h", "help", &Config::help, "Show help (this text)"),
+        Option(OG_BASIC, "V", "version", &Config::version, "Show version and exit"),
         Option(OG_BASIC, "c", "conf", &Config::load_config, "Use given configuration file", "FILE"),
         Option(OG_BASIC, "v", "verbose", &Config::inc_verbosity, "Verbose logging to stderr (repeat for even more verbose output)"),
         Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),

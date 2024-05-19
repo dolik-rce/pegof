@@ -1,6 +1,4 @@
-#ifndef INCLUDED_CONFIG_H
-#define INCLUDED_CONFIG_H
-
+#pragma once
 #include <any>
 #include <map>
 #include <string>
@@ -83,6 +81,7 @@ private:
     void post_process();
 
     int help();
+    int version();
     int set_input(const std::string& next);
     int set_output(const std::string& next);
     int set_import(const std::string& next);
@@ -107,5 +106,3 @@ public:
 
     Config(int argc, char **argv);
 };
-
-#endif /* INCLUDED_CONFIG_H */

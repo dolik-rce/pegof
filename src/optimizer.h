@@ -1,3 +1,4 @@
+#pragma once
 #include "ast/grammar.h"
 #include "config.h"
 
