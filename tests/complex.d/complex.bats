@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-load /home/h/prog/pegof/tests/utils.sh
+load "$TESTDIR/utils.sh"
 
 PEGOF="${PEGOF/_test/}"
 
