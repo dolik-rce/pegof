@@ -1,0 +1,40 @@
+name: build and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  testing:
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        compiler: [g++, clang]
+
+    runs-on: ${{ matrix.os }}
+    env:
+      BUILDDIR: ${{ matrix.os }}-${{ matrix.compiler }}
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: update package information
+      run: sudo apt-get -y -o APT::Immediate-Configure=false update
+    - name: install tools
+      if: matrix.compiler == 'g++'
+      run: sudo apt-get -y -o APT::Immediate-Configure=false install gcc g++ cmake bats
+    - name: install tools
+      if: matrix.compiler == 'clang'
+      run: sudo apt-get -y -o APT::Immediate-Configure=false install clang cmake bats
+    - name: cmake -B
+      run: cmake -B ./$BUILDDIR
+    - name: build
+      run: cmake --build ./$BUILDDIR --parallel 4
+    - name: test
+      run: cmake --build ./$BUILDDIR --target test
