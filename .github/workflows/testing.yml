@@ -1,0 +1,36 @@
+name: build and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  testing:
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        compiler: [g++]
+
+    runs-on: ${{ matrix.os }}
+      CC: ${{ matrix.compiler }}
+      BUILDDIR: ${{ matrix.os }}-${{ matrix.compiler }}
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submoduleles: recursive
+    - name: update package information
+      run: sudo apt-get -y -o APT::Immediate-Configure=false update
+    - name: install tools and libraries
+      run: sudo apt-get -y -o APT::Immediate-Configure=false install $CC cmake bats
+    - name: cmake -B
+      run: cmake -B ./$BUILDDIR
+    - name: build
+      run: cmake --build ./$BUILDDIR --parallel 4
+    - name: test
+      run: cmake --build ./$BUILDDIR --target test
