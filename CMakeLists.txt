@@ -37,14 +37,14 @@ add_custom_command(
 
 add_custom_target(
     test
-    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} tests/run.sh -T
+    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} tests/run.sh
     DEPENDS pegof pegof_test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(
     test_all
-    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} INCLUDE_SLOW_TESTS=1 tests/run.sh -T
+    ${CMAKE_COMMAND} -E env PACKCC=${PACKCC} BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} INCLUDE_SLOW_TESTS=1 tests/run.sh
     DEPENDS pegof pegof_test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
