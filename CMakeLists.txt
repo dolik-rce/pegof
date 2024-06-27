@@ -26,8 +26,8 @@ target_link_libraries(pegof common version)
 
 add_executable(pegof_test ${sources})
 target_compile_options(pegof_test PRIVATE --coverage -g -O0 -fsanitize=address -fsanitize=undefined)
-target_link_options(pegof_test PRIVATE -fsanitize=address -fsanitize=undefined)
-target_link_libraries(pegof_test common version gcov)
+target_link_options(pegof_test PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+target_link_libraries(pegof_test common version)
 
 add_custom_command(
     TARGET pegof POST_BUILD

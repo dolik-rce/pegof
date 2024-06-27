@@ -1,0 +1,7 @@
+SET(CACHE CMAKE_C_COMPILER   "/usr/bin/gcc"     CACHE FILEPATH "")
+SET(CACHE CMAKE_CXX_COMPILER "/usr/bin/g++"     CACHE FILEPATH "")
+SET(CACHE CMAKE_AR           "/usr/bin/ar"      CACHE FILEPATH "")
+SET(CACHE CMAKE_LINKER       "/usr/bin/ld"      CACHE FILEPATH "")
+SET(CACHE CMAKE_NM           "/usr/bin/nm"      CACHE FILEPATH "")
+SET(CACHE CMAKE_OBJDUMP      "/usr/bin/objdump" CACHE FILEPATH "")
+SET(CACHE CMAKE_RANLIB       "/usr/bin/ranlib"  CACHE FILEPATH "")

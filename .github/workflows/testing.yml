@@ -2,7 +2,7 @@ name: build and test
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, testing ]
   pull_request:
     branches: [ master ]
 
@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
+        os: [ubuntu-24.04]
         compiler: [g++, clang]
 
     runs-on: ${{ matrix.os }}
@@ -25,16 +25,16 @@ jobs:
         fetch-depth: 0
         submodules: recursive
     - name: update package information
-      run: sudo apt-get -y -o APT::Immediate-Configure=false update
+      run: sudo apt-get update
     - name: install tools
       if: matrix.compiler == 'g++'
-      run: sudo apt-get -y -o APT::Immediate-Configure=false install gcc g++ cmake bats
+      run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install g++ gcovr cmake bats uncrustify
     - name: install tools
       if: matrix.compiler == 'clang'
-      run: sudo apt-get -y -o APT::Immediate-Configure=false install clang cmake bats
+      run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install clang llvm libclang-rt-dev cmake bats uncrustify
     - name: cmake -B
-      run: cmake -B ./$BUILDDIR
+      run: cmake -C ${{ matrix.compiler }}.cmake -B ./$BUILDDIR
     - name: build
-      run: cmake --build ./$BUILDDIR --parallel 4
+      run: cmake --build ./$BUILDDIR -- VERBOSE=1
     - name: test
       run: cmake --build ./$BUILDDIR --target test
