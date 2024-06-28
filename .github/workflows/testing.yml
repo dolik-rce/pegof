@@ -10,13 +10,16 @@ jobs:
   testing:
 
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-24.04]
+        os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04]
         compiler: [g++, clang]
 
     runs-on: ${{ matrix.os }}
     env:
       BUILDDIR: ${{ matrix.os }}-${{ matrix.compiler }}
+      OS: ${{ matrix.os }}
+      COMPILER: ${{ matrix.compiler }}
       DEBIAN_FRONTEND: noninteractive
 
     steps:
@@ -24,22 +27,37 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
-    - name: update package information
-      run: sudo apt-get update
-    - name: install tools
-      if: matrix.compiler == 'g++'
-      run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install g++ gcovr lcov cmake bats uncrustify
-    - name: install tools
-      if: matrix.compiler == 'clang'
-      run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install clang llvm libclang-rt-dev cmake bats uncrustify
-    - name: cmake -B
-      run: cmake -C ${{ matrix.compiler }}.cmake -B ./$BUILDDIR
-    - name: build
-      run: cmake --build ./$BUILDDIR -- VERBOSE=1
-    - name: test
-      run: cmake --build ./$BUILDDIR --target test
-    - name: check coverage
-      if: matrix.compiler == 'g++'
+    - name: Install dependencies
+      shell: bash
+      run: |
+        set -ex
+        DEPS=(cmake bats)
+        if [ "$OS" = "ubuntu-24.04" ]; then
+            if [ "$COMPILER" = "g++" ]; then
+                DEPS+=(g++ gcovr lcov uncrustify)
+            else
+                DEPS+=(clang llvm libclang-rt-dev)
+            fi
+        else
+            if [ "$COMPILER" = "g++" ]; then
+                DEPS+=(g++)
+            else
+                DEPS+=(clang llvm libclang-dev)
+            fi
+        fi
+        sudo apt-get update
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install "${DEPS[@]}"
+    - name: Build
+      shell: bash
+      run: |
+        set -ex
+        cmake -C "$COMPILER.cmake" -B "./$BUILDDIR"
+        cmake --build "./$BUILDDIR" -- VERBOSE=1
+    - name: Test
+      shell: bash
+      run: BUILDDIR=$PWD/$BUILDDIR tests/run.sh
+    - name: Coverage
+      if: ${{ strategy.job-index == 0 }}
       run: lcov --capture --base-directory "$PWD" --directory ./$BUILDDIR --no-external --exclude "$PWD/packcc" --output ./lcov.info
     - uses: romeovs/lcov-reporter-action@v0.4.0
       with:
