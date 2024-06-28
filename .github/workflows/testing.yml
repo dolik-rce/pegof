@@ -2,7 +2,7 @@ name: build and test
 
 on:
   push:
-    branches: [ master, testing ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -28,7 +28,7 @@ jobs:
       run: sudo apt-get update
     - name: install tools
       if: matrix.compiler == 'g++'
-      run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install g++ gcovr cmake bats uncrustify
+      run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install g++ gcovr lcov cmake bats uncrustify
     - name: install tools
       if: matrix.compiler == 'clang'
       run: sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install clang llvm libclang-rt-dev cmake bats uncrustify
@@ -38,3 +38,11 @@ jobs:
       run: cmake --build ./$BUILDDIR -- VERBOSE=1
     - name: test
       run: cmake --build ./$BUILDDIR --target test
+    - name: check coverage
+      if: matrix.compiler == 'g++'
+      run: lcov --capture --base-directory "$PWD" --directory ./$BUILDDIR --no-external --exclude "$PWD/packcc" --output ./lcov.info
+    - uses: romeovs/lcov-reporter-action@v0.4.0
+      with:
+        lcov-file: ./lcov.info
+        lcov-base: ./lcov.info
+        delete-old-comments: true
