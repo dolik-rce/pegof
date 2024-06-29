@@ -42,7 +42,8 @@ std::string Stats::compare(const Stats& s) const {
 }
 
 Checker::Checker() {
-    fs::path tmp_dir = fs::temp_directory_path() / ("pegof_" + std::to_string(time(0)));
+    char filename[] = "pegof_XXXXXX";
+    fs::path tmp_dir = mkdtemp(filename);
     output = (tmp_dir / "output").native();
     tmp = tmp_dir.native();
     fs::create_directory(tmp_dir);
