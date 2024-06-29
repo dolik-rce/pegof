@@ -30,12 +30,12 @@ bool Action::is_multiline() const {
 }
 
 bool Action::contains_reference(const Reference& ref) const {
-    std::regex re(".*\\b" + ref.var + "\\b.*");
+    std::regex re("(.|\n)*\\b" + ref.var + "\\b(.|\n)*");
     return std::regex_match(code, re);
 }
 
 bool Action::contains_capture(int i) const {
-    std::regex re(".*\\$" + std::to_string(i) + "[se]?\\b.*");
+    std::regex re("(.|\n)*\\$" + std::to_string(i) + "[se]?\\b(.|\n)*");
     return std::regex_match(code, re);
 }
 

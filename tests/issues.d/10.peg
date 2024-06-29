@@ -1,0 +1,5 @@
+name
+    <- < [A-Z][A-Za-z0-9]* > {
+    if (PEEK_KIND (auxil) != KIND_GHOST_INDEX)
+       SET_SCOPE(auxil, makeVarlinkTag(auxil, $1, $1s));
+}
