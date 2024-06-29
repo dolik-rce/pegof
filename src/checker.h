@@ -10,7 +10,7 @@ class Stats {
     int memory;
 public:
     Stats(int bytes, int lines, int rules, int terms, int duration, int memory)
-        : bytes(bytes), lines(lines), rules(rules), terms(terms), duration(duration), memory(memory) {};
+        : lines(lines), bytes(bytes), rules(rules), terms(terms), duration(duration), memory(memory) {};
     std::string compare(const Stats& s) const;
 };
 

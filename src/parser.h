@@ -9,8 +9,8 @@ class Parser {
 public:
 
     struct State {
-        unsigned long saved_pos;
         Parser* p;
+        unsigned long saved_pos;
 
         State(Parser* p);
         bool rollback();

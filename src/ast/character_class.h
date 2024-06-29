@@ -30,7 +30,7 @@ public:
     String convert_to_string() const;
     void merge(const CharacterClass& cc);
 
-    virtual void parse(Parser& p);
+    virtual void parse(Parser& p) override;
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
     virtual bool is_multiline() const override;

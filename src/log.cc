@@ -6,7 +6,7 @@ DebugIndent::DebugIndent() {
 
 DebugIndent::~DebugIndent() {
     DebugIndent::dec();
-};
+}
 
 int DebugIndent::indent(int increment) {
     static int indent = 0;

@@ -11,13 +11,13 @@ public:
     Group(const Alternation& expression, Node* parent);
     Group(Parser& p, Node* parent);
 
-    virtual void parse(Parser& p);
+    virtual void parse(Parser& p) override;
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
     virtual bool is_multiline() const override;
 
-    virtual Node* operator[](int index);
-    virtual long size() const;
+    virtual Node* operator[](int index) override;
+    virtual long size() const override;
 
     bool has_single_sequence() const;
     bool has_single_term() const;

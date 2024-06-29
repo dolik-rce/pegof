@@ -11,13 +11,13 @@ public:
     Rule(const std::string& name, const Alternation& expression, Node* parent);
     Rule(Parser& p, Node* parent);
 
-    virtual void parse(Parser& p);
+    virtual void parse(Parser& p) override;
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;
 
-    virtual Node* operator[](int index);
-    virtual long size() const;
+    virtual Node* operator[](int index) override;
+    virtual long size() const override;
 
     const char* c_str() const;
     bool is_terminal() const;

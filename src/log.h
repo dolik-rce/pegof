@@ -12,6 +12,9 @@ public:
     static void print();
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+
 template <typename... T>
 void debug(const char* format, T... args) {
     if (Config::get<bool>("debug")) {
@@ -43,3 +46,5 @@ void error [[noreturn]] (const char* format, T... args) {
     fprintf(stderr, "\n");
     throw 1;
 }
+
+#pragma GCC diagnostic pop

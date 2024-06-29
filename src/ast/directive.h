@@ -12,7 +12,7 @@ public:
     bool is_import() const;
     std::string get_value() const;
 
-    virtual void parse(Parser& p);
+    virtual void parse(Parser& p) override;
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;

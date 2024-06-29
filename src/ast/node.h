@@ -11,6 +11,7 @@ public:
     bool valid;
     Node* parent;
     Node(const char* type, Node* parent);
+    virtual ~Node();
 
     const char* type;
     std::vector<std::string> comments;

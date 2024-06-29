@@ -14,6 +14,8 @@ add_custom_command(
     VERBATIM
 )
 
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-sign-compare -Werror)
+
 list(APPEND sources src/ast/action.cc src/ast/alternation.cc src/ast/capture.cc src/ast/code.cc src/ast/directive.cc src/ast/expand.cc src/ast/grammar.cc src/ast/group.cc src/ast/character_class.cc src/ast/node.cc src/ast/reference.cc src/ast/rule.cc src/ast/sequence.cc src/ast/string.cc src/ast/term.cc src/config.cc src/checker.cc src/log.cc src/main.cc src/optimizer.cc src/packcc_wrapper.c src/parser.cc src/utils.cc)
 add_library(common INTERFACE)
 target_include_directories(common BEFORE INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/packcc/src ${CMAKE_CURRENT_BINARY_DIR})

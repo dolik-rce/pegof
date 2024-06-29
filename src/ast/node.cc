@@ -6,6 +6,8 @@ Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(
     debug("Creating %s @%p, parent: %p", type, this, parent);
 }
 
+Node::~Node() {}
+
 Node::operator bool() const {
     return valid;
 }

@@ -2,31 +2,31 @@
 #include "log.h"
 #include "utils.h"
 
-Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {};
+Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {}
 
 bool Parser::State::rollback() {
     if (p->pos != saved_pos) debug("Rollback %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->input.substr(saved_pos, p->pos - saved_pos)).c_str());
     p->pos = saved_pos;
     return false;
-};
+}
 
 bool Parser::State::commit() {
     p->last_match = p->input.substr(saved_pos, p->pos - saved_pos);
     debug("Matched %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->last_match).c_str());
     return true;
-};
+}
 
 bool Parser::State::commit(int start, int end) {
     p->last_match = p->input.substr(start, end - start);
     debug("Matched %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->last_match).c_str());
     return true;
-};
+}
 
 bool Parser::State::commit(const std::string& result) {
     p->last_match = result;
     debug("Matched %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->last_match).c_str());
     return true;
-};
+}
 
 Parser::Parser(std::string input) : input(input), pos(0) {}
 
@@ -143,7 +143,6 @@ bool Parser::match_quoted(const char *left, const char *right) {
     skip_space();
     std::string result;
     if (match(left)) {
-        int start = pos;
         for (; !match(right); pos++) {
             if (match('\\')) {
                 switch (input[pos]) {

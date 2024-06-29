@@ -355,7 +355,6 @@ int Optimizer::inline_rules() {
     }
     double best_score = 0;
     int candidate = -1;
-    int optimized = 0;
     double min_score = Config::get<double>("inline-limit");
 
     std::vector<Rule*> rules = g.find_all<Rule>();
@@ -481,7 +480,6 @@ int Optimizer::inline_rules() {
         log(2, "  Removing inlined rule %s", rule.c_str());
         g.erase(&rule);
         g.update_parents();
-        optimized++;
         return true;
     }
     return false;

@@ -23,7 +23,7 @@ public:
     template<class T>
     bool parse(Parser& p);
 
-    virtual void parse(Parser& p);
+    virtual void parse(Parser& p) override;
 
     std::string to_string(const Primary& x, const std::string& indent) const;
     virtual std::string to_string(std::string indent = "") const override;
@@ -31,8 +31,8 @@ public:
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;
 
-    virtual Node* operator[](int index);
-    virtual long size() const;
+    virtual Node* operator[](int index) override;
+    virtual long size() const override;
 
     template<class T>
     bool contains() const;

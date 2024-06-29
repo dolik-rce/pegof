@@ -20,13 +20,13 @@ public:
     Grammar(Parser& p, const std::string& input_file);
     Grammar(const std::string& p, const std::string& input_file);
 
-    virtual void parse(Parser& p);
+    virtual void parse(Parser& p) override;
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;
 
-    virtual Node* operator[](int index);
-    virtual long size() const;
+    virtual Node* operator[](int index) override;
+    virtual long size() const override;
 
     void erase(Rule* rule);
 };
