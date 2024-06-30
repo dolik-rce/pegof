@@ -488,6 +488,7 @@ int Optimizer::inline_rules() {
 Grammar Optimizer::optimize() {
     int opts = 1;
     int pass = 1;
+    std::string debug_script = Config::get<std::string>("debug-script");
     debug("Input grammar:\n%s", STR(g));
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
@@ -504,6 +505,17 @@ Grammar Optimizer::optimize() {
         opts += unused_variables();
         opts += unused_captures();
         if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, STR(g));
+        if (!debug_script.empty()) {
+            log(0, "Running debug script %s...", debug_script.c_str());
+            std::string filename = TempDir::get("pass_" + std::to_string(pass) + ".peg");
+            write_file(filename, g.to_string());
+            int exit_code;
+            exit_code = system((debug_script + " " + filename).c_str());
+            if (exit_code != 0) {
+                error("Debug script failed in pass %d! (exit_code=%d)", pass, exit_code);
+            }
+            log(2, "Debug script finished successfully.");
+        }
         pass++;
     }
     return g;
