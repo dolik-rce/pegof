@@ -7,7 +7,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <filesystem>
 #include <algorithm>
 #include <chrono>
 
@@ -15,8 +14,6 @@
 #include <unistd.h>
 #include <cstdarg>
 #include <cstring>
-
-namespace fs = std::filesystem;
 
 std::stringstream packcc_errors;
 
@@ -42,17 +39,10 @@ std::string Stats::compare(const Stats& s) const {
 }
 
 Checker::Checker() {
-    char filename[] = "pegof_XXXXXX";
-    fs::path tmp_dir = mkdtemp(filename);
-    output = (tmp_dir / "output").native();
-    tmp = tmp_dir.native();
-    fs::create_directory(tmp_dir);
+    output = TempDir::get("output");
 }
 
-Checker::~Checker() {
-    fs::remove_all(tmp);
-}
-
+Checker::~Checker() {}
 
 void Checker::set_input_file(const std::string& input) {
     input_file = input;
@@ -94,9 +84,9 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
 
 bool Checker::packcc(const std::string& peg, const std::string& output) const {
     std::string err;
-    fs::path input = fs::path(tmp) / "tmp.peg";
-    write_file(input.native(), peg);
-    return call_packcc(input.native(), output, err);
+    std::string input = TempDir::get("tmp.peg");
+    write_file(input, peg);
+    return call_packcc(input, output, err);
 }
 
 Stats Checker::stats(Grammar& g) const {
@@ -129,9 +119,9 @@ bool Checker::validate(const std::string& filename, const std::string& content) 
 }
 
 bool Checker::validate_string(const std::string& filename, const std::string& peg) const {
-    fs::path input = fs::path(tmp) / filename;
-    write_file(input.native(), peg);
-    return validate(input.native());
+    std::string input = TempDir::get(filename);
+    write_file(input, peg);
+    return validate(input);
 }
 
 bool Checker::validate_file(const std::string& filename) const {
@@ -151,7 +141,7 @@ void Checker::benchmark(int& duration, int& memory) const {
         error("Benchmark setup failed! (exit_code=%d)", exit_code);
     }
 
-    std::string out = tmp + "/benchmark.out";
+    std::string out = TempDir::get("benchmark.out");
     std::string time;
     if (system("which /usr/bin/time 2> /dev/null > /dev/null") == 0) {
         time = "/usr/bin/time -f \"\\n%M\" ";

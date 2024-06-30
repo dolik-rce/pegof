@@ -1,12 +1,38 @@
 #include "utils.h"
 #include "log.h"
 
+#include <string.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <regex>
 #include <filesystem>
+
+namespace fs = std::filesystem;
+
+TempDir::TempDir() {
+    std::string tmp_dir_template = (fs::temp_directory_path() / "pegof_XXXXXX").native();
+    char* filename = new char[tmp_dir_template.size() + 1];
+    strcpy(filename, tmp_dir_template.c_str());
+    fs::path tmp_dir = mkdtemp(filename);
+    delete[] filename;
+    fs::create_directory(tmp_dir);
+    path = tmp_dir.native();
+}
+
+TempDir::~TempDir() {
+    fs::remove_all(path);
+}
+
+std::string TempDir::get(const std::string& filename) {
+    static TempDir instance;
+    if (filename.empty()) {
+        return instance.path;
+    } else {
+        return (fs::path(instance.path) / filename).native();
+    }
+}
 
 std::string read_file(const std::string& filename) {
     std::stringstream buffer;
@@ -25,13 +51,13 @@ void write_file(const std::string& filename, const std::string& content) {
 }
 
 std::string dirname(const std::string& path) {
-    return std::filesystem::path(path).parent_path().native();
+    return fs::path(path).parent_path().native();
 }
 
 std::string find_file(const std::string& name, const std::vector<std::string> dirs) {
     for (const auto& dir: dirs) {
         std::string path = (dir.empty() ? "." : dir) + "/" + name;
-        if (std::filesystem::exists(path)) {
+        if (fs::exists(path)) {
             debug("Found '%s' in directory '%s'.", name.c_str(), dir.c_str());
             return path;
         }

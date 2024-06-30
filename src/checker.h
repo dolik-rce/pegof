@@ -15,7 +15,6 @@ public:
 };
 
 class Checker {
-    std::string tmp;
     std::string input_file;
     std::string output;
     bool call_packcc(const std::string& input, const std::string& output, std::string& stderr) const;

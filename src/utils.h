@@ -4,6 +4,15 @@
 
 #define STR(x) (x).to_string().c_str()
 
+class TempDir {
+private:
+    TempDir();
+    ~TempDir();
+    std::string path;
+public:
+    static std::string get(const std::string& filename);
+};
+
 std::string read_file(const std::string& filename);
 void write_file(const std::string& filename, const std::string& content);
 std::string dirname(const std::string& path);
