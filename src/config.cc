@@ -320,6 +320,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),
         Option(OG_BASIC, "S", "skip-validation", false, "Skip result validation (useful only for debugging purposes)"),
         Option(OG_BASIC, "b", "benchmark", std::string(), "Benchmarking script, see documentation for details", "SCRIPT"),
+        Option(OG_BASIC, "D", "debug-script", std::string(), "Debugging script, see documentation for details", "SCRIPT"),
         Option(OG_IO, "f", "format", OT_FORMAT, "Output formatted grammar (default)"),
         Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
         Option(OG_IO, "p", "packcc", OT_PACKCC, "Output source files as if the grammar was passed to packcc"),
