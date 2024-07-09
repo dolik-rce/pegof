@@ -42,7 +42,7 @@ as much as possible to reduce number of rules and terms.
         Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'.
         Note: --lines might not work as expected, because temporary file is used.
 
-`-n/--inplace` Modify the input files (only when formatting)
+`-n/--inplace` Modify the input files, use with caution
 
 `-i/--input FILE` Path to file with PEG grammar, multiple paths can be given
         Value "-" can be used to specify standard input
@@ -50,8 +50,7 @@ as much as possible to reduce number of rules and terms.
         If no file or --input is given, read standard input.
 
 `-o/--output FILE` Output to file (should be repeated if there is more inputs)
-        Value "-" can be used to specify standard output
-        Must not be used together with --inplace.
+        Value "-" can be used to specify standard output.
 
 `-I/--import PATH` Directory where to search for import files (may be repeated for multiple locations)
 
@@ -67,11 +66,11 @@ as much as possible to reduce number of rules and terms.
 
 `-X/--exclude OPT[,...]` Comma separated list of optimizations that should not be applied
 
-`-l/--inline-limit N` Minimum inlining score needed for rule to be inlined.
+`-l/--inline-limit N` Minimum inlining score needed for rule to be inlined
         Number between 0.0 (inline everything) and 1.0 (most conservative), default is 0.2,
         only applied when inlining is enabled
 
-`-N/--no-follow` Do not inline imported files while optimizing.
+`-N/--no-follow` Do not inline imported files while optimizing
 
 ### Supported values for --optimize and --exclude options:
 - `all` All optimizations: Shorthand option for combination of all available optimizations.
