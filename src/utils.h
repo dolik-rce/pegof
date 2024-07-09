@@ -32,8 +32,9 @@ enum TrimType {
     TRIM_BOTH = TRIM_LEFT | TRIM_RIGHT
 };
 
-std::string trim(const std::string& str, TrimType type = TRIM_BOTH);
+std::string trim(const std::string& str, TrimType type = TRIM_BOTH, const char* whitespace = " \t\r\n");
 std::vector<std::string> split(const std::string &s, const std::string& delimiter = "\\s*,\\s*");
+std::string join(const std::vector<std::string> &v, const std::string& delimiter = "\n");
 bool contains(std::vector<std::string> values, std::string x);
 std::string replace(const std::string& input, const std::string& re, const std::string& replace);
 std::string left_pad(const std::string& s, int width);

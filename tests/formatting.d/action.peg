@@ -1,6 +1,18 @@
-X <- A B C
+X <- A B C D E F
 A <- {
 action1();
 }
 B <- "B" { action2; }
 C <- "C" { action3 = "abcd"; } "\n"
+D <- "D" {
+    // first line
+        if (false)
+            exit (0)
+    /* last line */
+}
+E <- "E1" / ("E2" / "E3" {
+e = $0;
+} )
+F <- "F" {
+    #define MACRO 1
+}

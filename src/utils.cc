@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <regex>
 #include <filesystem>
+#include <numeric>
 
 namespace fs = std::filesystem;
 
@@ -96,9 +97,9 @@ std::string to_c_string(std::string str, EscapeMode mode) {
     return result;
 }
 
-std::string trim(const std::string& str, TrimType type) {
-    size_t start = (type & TRIM_LEFT) ? str.find_first_not_of(" \t\r\n") : 0;
-    size_t end = (type & TRIM_RIGHT) ? str.find_last_not_of(" \t\r\n") + 1 : str.size();
+std::string trim(const std::string& str, TrimType type, const char* whitespace) {
+    size_t start = (type & TRIM_LEFT) ? str.find_first_not_of(whitespace) : 0;
+    size_t end = (type & TRIM_RIGHT) ? str.find_last_not_of(whitespace) + 1 : str.size();
     if (start == std::string::npos) {
         start = 0;
     }
@@ -110,6 +111,15 @@ std::vector<std::string> split(const std::string &s, const std::string& delimite
     std::sregex_token_iterator iter(s.begin(), s.end(), sep_regex, -1);
     std::sregex_token_iterator end;
     return {iter, end};
+}
+
+std::string join(const std::vector<std::string> &v, const std::string& delimiter) {
+    if (v.empty()) {
+        return "";
+    }
+    return std::accumulate(std::next(v.begin()), v.end(), v[0], [delimiter](const std::string& a, const std::string& b) {
+        return a + delimiter + b;
+    });
 }
 
 bool contains(std::vector<std::string> values, std::string x) {
