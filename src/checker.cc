@@ -92,8 +92,8 @@ bool Checker::packcc(const std::string& peg, const std::string& output) const {
 Stats Checker::stats(Grammar& g) const {
     std::string code = read_file(output + ".c");
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
-    int rules = g.find_all<Rule>().size();
-    int terms = g.find_all<Term>().size();
+    int rules = g.find_children<Rule>().size();
+    int terms = g.find_children<Term>().size();
     int duration = 0;
     int memory = 0;
     benchmark(duration, memory);

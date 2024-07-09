@@ -16,6 +16,7 @@ public:
 
     bool contains_reference(const Reference& ref) const;
     bool contains_capture(int i) const;
+    bool contains_any_capture() const;
     void renumber_capture(int from, int to);
 
     friend bool operator==(const Action& a, const Action& b);

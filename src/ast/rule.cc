@@ -74,21 +74,21 @@ Group Rule::convert_to_group() const {
 }
 
 bool Rule::contains_alternation() {
-    return find_all<Alternation>([](const Alternation& alternation) -> bool {
+    return find_children<Alternation>([](const Alternation& alternation) -> bool {
         return alternation.size() > 1;
     }).size() > 0;
 }
 
 bool Rule::contains_expand() {
-    return find_all<Expand>().size() > 0;
+    return find_children<Expand>().size() > 0;
 }
 
 int Rule::count_terms() {
-    return find_all<Term>().size();
+    return find_children<Term>().size();
 }
 
 int Rule::count_cc_tokens() {
-    std::vector<CharacterClass*> ccs = find_all<CharacterClass>([](const CharacterClass& cc) -> bool {
+    std::vector<CharacterClass*> ccs = find_children<CharacterClass>([](const CharacterClass& cc) -> bool {
         return !cc.any_char();
     });
     int count = 0;
@@ -97,7 +97,7 @@ int Rule::count_cc_tokens() {
 }
 
 void Rule::update_captures() {
-    std::vector<Capture*> captures = find_all<Capture>();
+    std::vector<Capture*> captures = find_children<Capture>();
     for (int i = 0; i < captures.size(); i++) {
         captures[i]->num = i+1;
     }

@@ -39,6 +39,11 @@ bool Action::contains_capture(int i) const {
     return std::regex_match(code, re);
 }
 
+bool Action::contains_any_capture() const {
+    std::regex re("(.|\n)*\\$[0-9]+[se]?\\b(.|\n)*");
+    return std::regex_match(code, re);
+}
+
 void Action::renumber_capture(int from, int to) {
     code = replace(code, "\\$" + std::to_string(from) + "\\b", "$$" + std::to_string(to));
     code = replace(code, "\\$" + std::to_string(from) + "s\\b", "$$" + std::to_string(to) + "s");

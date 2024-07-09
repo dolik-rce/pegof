@@ -45,10 +45,16 @@ public:
     void update_parents();
 
     template <class U>
-    std::vector<U*> find_all(const std::function<bool(const U&)>& predicate=[] (const U & node)->bool { return true; });
+    std::vector<U*> find_children(const std::function<bool(const U&)>& predicate=[] (const U & node)->bool { return true; });
 
     template <class U>
-    void find_all(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
+    void find_children(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
+
+    template <class U>
+    std::vector<U*> find_ancestors(const std::function<bool(const U&)>& predicate=[] (const U & node)->bool { return true; });
+
+    template <class U>
+    void find_ancestors(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
 
     bool map(const std::function<bool(Node&)>& transform);
 
@@ -91,20 +97,37 @@ U* Node::get_ancestor() const {
 }
 
 template <class U>
-std::vector<U*> Node::find_all(const std::function<bool(const U&)>& predicate) {
+std::vector<U*> Node::find_children(const std::function<bool(const U&)>& predicate) {
     std::vector<U*> result;
-    find_all(result, predicate);
+    find_children(result, predicate);
     return result;
 }
 
 template <class U>
-void Node::find_all(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
+void Node::find_children(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
     if (is<U>() && predicate(*(U*)this)) {
         result.push_back((U*)(this));
     }
     for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
-        n->find_all(result, predicate);
+        n->find_children(result, predicate);
+    }
+}
+
+template <class U>
+std::vector<U*> Node::find_ancestors(const std::function<bool(const U&)>& predicate) {
+    std::vector<U*> result;
+    find_ancestors(result, predicate);
+    return result;
+}
+
+template <class U>
+void Node::find_ancestors(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
+    if (is<U>() && predicate(*(U*)this)) {
+        result.push_back((U*)(this));
+    }
+    if (parent) {
+        parent->find_ancestors(result, predicate);
     }
 }
 

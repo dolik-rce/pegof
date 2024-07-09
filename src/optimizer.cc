@@ -289,7 +289,7 @@ int Optimizer::unused_variables() {
         Reference* r = node.as<Reference>();
         if (!r || !r->has_variable()) return false;
         Rule* rule = node.get_ancestor<Rule>();
-        std::vector<Action*> actions = rule->find_all<Action>([r](const Action& action) -> bool {
+        std::vector<Action*> actions = rule->find_children<Action>([r](const Action& action) -> bool {
             return action.contains_reference(*r);
         });
         if (!actions.empty()) return false;
@@ -304,10 +304,10 @@ int Optimizer::unused_captures() {
     return apply(O_UNUSED_CAPTURE, [](Node& node, int& optimized) -> bool {
         Rule* rule = node.as<Rule>();
         if (!rule) return false;
-        std::vector<Capture*> captures = rule->find_all<Capture>();
+        std::vector<Capture*> captures = rule->find_children<Capture>();
         if (captures.empty()) return false;
-        std::vector<Expand*> expands = rule->find_all<Expand>();
-        std::vector<Action*> actions = rule->find_all<Action>();
+        std::vector<Expand*> expands = rule->find_children<Expand>();
+        std::vector<Action*> actions = rule->find_children<Action>();
 
         for (int i = 0; i < captures.size(); i++) {
             bool used_in_source = std::any_of(actions.begin(), actions.end(), [i](const Action* action){
@@ -357,13 +357,13 @@ int Optimizer::inline_rules() {
     int candidate = -1;
     double min_score = Config::get<double>("inline-limit");
 
-    std::vector<Rule*> rules = g.find_all<Rule>();
+    std::vector<Rule*> rules = g.find_children<Rule>();
     // intentionally skipping the first rule, because it is the main one, which can't be inlined anyway
     for (int i = rules.size() - 1; i > 0; i--) {
         Rule& rule = *rules[i];
 
         // check for direct recursion
-        bool is_recursive = !rule.find_all<Reference>([rule](const Reference& ref) -> bool {
+        bool is_recursive = !rule.find_children<Reference>([rule](const Reference& ref) -> bool {
             return ref.references(&rule);
         }).empty();
         if (is_recursive) {
@@ -371,7 +371,7 @@ int Optimizer::inline_rules() {
             continue;
         }
 
-        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& ref) -> bool {
+        std::vector<Reference*> refs = g.find_children<Reference>([rule](const Reference& ref) -> bool {
             return ref.references(&rule);
         });
 
@@ -382,13 +382,26 @@ int Optimizer::inline_rules() {
             continue;
         }
 
-        bool contains_full_rule_ref = !rule.find_all<Action>([rule](const Action& ref) -> bool {
-            return ref.contains_capture(0);
+        bool contains_full_rule_ref = !rule.find_children<Action>([rule](const Action& action) -> bool {
+            return action.contains_capture(0);
         }).empty();
         if (contains_full_rule_ref) {
             log(2, "Not inlining %s: rule contains action with '$0'", rule.c_str());
             continue;
         }
+
+        bool has_captures = rule.find_children<Action>([](const Action& action) -> bool {
+            return action.contains_any_capture();
+        }).size();
+        if (std::any_of(refs.begin(), refs.end(), [has_captures](Reference* ref){
+            return has_captures && ref->find_ancestors<Term>([](const Term& term) -> bool {
+                return term.is_greedy();
+            }).size();
+        })) {
+            log(2, "Not inlining %s: repeated reference to rule with captures", rule.c_str());
+            continue;
+        }
+
 
         double score = calculate_score(rule.count_terms() + rule.count_cc_tokens(), refs.size());
         log(4, "Score for %s: %f", rule.c_str(), score);
@@ -400,11 +413,11 @@ int Optimizer::inline_rules() {
     }
     if (candidate >= 0 && best_score >= min_score) {
         Rule& rule = *rules[candidate];
-        std::vector<Reference*> refs = g.find_all<Reference>([rule](const Reference& ref) -> bool {
+        std::vector<Reference*> refs = g.find_children<Reference>([rule](const Reference& ref) -> bool {
             return ref.references(&rule);
         });
 
-        int src_captures = rule.find_all<Capture>().size();
+        int src_captures = rule.find_children<Capture>().size();
 
         log(1, "Inlining rule %s (score %f)", rule.c_str(), best_score);
         for (int j = 0; j < refs.size(); j++) {
@@ -416,7 +429,7 @@ int Optimizer::inline_rules() {
             // fix capture references in expands and actions
             if (src_captures) {
                 Rule* dest_rule = dest->get_ancestor<Rule>();
-                int dest_captures = dest_rule->find_all<Capture>().size();
+                int dest_captures = dest_rule->find_children<Capture>().size();
                 if (dest_captures) {
                     // Algorithm:
                     //   shift = how many captures is before the insertion point
@@ -505,7 +518,7 @@ Grammar Optimizer::optimize() {
         opts += unused_variables();
         opts += unused_captures();
         if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, STR(g));
-        if (!debug_script.empty()) {
+        if (opts > 0 && !debug_script.empty()) {
             log(0, "Running debug script %s...", debug_script.c_str());
             std::string filename = TempDir::get("pass_" + std::to_string(pass) + ".peg");
             write_file(filename, g.to_string());

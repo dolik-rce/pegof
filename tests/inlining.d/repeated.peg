@@ -1,0 +1,17 @@
+X <- A+ (B C)* (D (E F))+ ((G H)?)?
+
+A <- <"A"> { printf("%s\n", $1); }
+
+B <- <"B"> { printf("%s\n", $1); }
+
+C <- <"C"> { printf("%s\n", $1); }
+
+D <- <"D"> { printf("%s\n", $1); }
+
+E <- <"E"> { printf("%s\n", $1); }
+
+F <- <"F"> { printf("%s\n", $1); }
+
+G <- <"G"> { printf("%s\n", $1); }
+
+H <- <"H"> { printf("%s\n", $1); }
