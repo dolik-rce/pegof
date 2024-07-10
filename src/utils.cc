@@ -2,6 +2,8 @@
 #include "log.h"
 
 #include <string.h>
+#include <unistd.h>
+
 #include <fstream>
 #include <sstream>
 #include <iostream>
