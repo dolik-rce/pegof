@@ -2,10 +2,19 @@ cmake_minimum_required(VERSION 3.11)
 
 project(pegof)
 
+########################################################################
+
+option(ENABLE_TESTS "Whether to build and run tests." ON)
+
 set(PACKCC packcc CACHE FILEPATH "Specify file path of packcc command.")
+
+########################################################################
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+########################################################################
 
 add_custom_command(
     OUTPUT version.cc
@@ -26,6 +35,7 @@ add_library(version ${CMAKE_CURRENT_BINARY_DIR}/version.cc)
 add_executable(pegof ${sources})
 target_link_libraries(pegof common version)
 
+if (ENABLE_TESTS)
 add_executable(pegof_test ${sources})
 target_compile_options(pegof_test PRIVATE --coverage -g -O0 -fsanitize=address -fsanitize=undefined)
 target_link_options(pegof_test PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
@@ -63,3 +73,4 @@ add_custom_target(
     ./uncrustify.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+endif()
