@@ -7,6 +7,26 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+function(check_linker_options option)
+    message(CHECK_START "Testing ${option} support")
+    try_compile(
+        OPTION_WORKS
+        SOURCE_FROM_CONTENT check.c "int main(int argc, char *argv[]) { (void)argc; (void)argv; return 0; }"
+        LINK_OPTIONS ${options}
+    )
+    if(OPTION_WORKS)
+        message(CHECK_PASS "works")
+        list(APPEND OPTIONAL_DEBUG_OPTIONS ${option})
+        SET(OPTIONAL_DEBUG_OPTIONS ${OPTIONAL_DEBUG_OPTIONS} PARENT_SCOPE)
+    else()
+        message(CHECK_FAIL "not supported")
+    endif()
+endfunction()
+
+check_linker_options(-fsanitize=address)
+check_linker_options(-fsanitize=undefined)
+check_linker_options(-fno-omit-frame-pointer)
+
 add_custom_command(
     OUTPUT version.cc
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/update_versions.sh ${CMAKE_CURRENT_BINARY_DIR}/version.cc
@@ -27,8 +47,9 @@ add_executable(pegof ${sources})
 target_link_libraries(pegof common version)
 
 add_executable(pegof_test ${sources})
-target_compile_options(pegof_test PRIVATE --coverage -g -O0 -fsanitize=address -fsanitize=undefined)
-target_link_options(pegof_test PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+set_target_properties(pegof_test PROPERTIES EXCLUDE_FROM_ALL 1)
+target_compile_options(pegof_test PRIVATE --coverage -g -O0 ${OPTIONAL_DEBUG_OPTIONS})
+target_link_options(pegof_test PRIVATE --coverage ${OPTIONAL_DEBUG_OPTIONS})
 target_link_libraries(pegof_test common version)
 
 add_custom_command(
