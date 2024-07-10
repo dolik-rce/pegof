@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/bin/sh
 
 
 ROOTDIR="$(cd "${0%/*}" 2>/dev/null || exit; pwd)"
