@@ -52,7 +52,7 @@ jobs:
       run: |
         set -ex
         cmake -C "$COMPILER.cmake" -B "./$BUILDDIR"
-        cmake --build "./$BUILDDIR" -- VERBOSE=1
+        cmake --build "./$BUILDDIR" --verbose
     - name: Test
       shell: bash
       run: |
@@ -63,6 +63,7 @@ jobs:
       if: ${{ strategy.job-index == 0 && github.event_name != 'push' }}
       run: lcov --capture --base-directory "$PWD" --directory ./$BUILDDIR --no-external --exclude "$PWD/packcc" --output ./lcov.info
     - uses: romeovs/lcov-reporter-action@v0.4.0
+      if: ${{ strategy.job-index == 0 && github.event_name != 'push' }}
       with:
         lcov-file: ./lcov.info
         lcov-base: ./lcov.info
