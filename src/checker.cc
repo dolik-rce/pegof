@@ -15,10 +15,12 @@
 #include <cstdarg>
 #include <cstring>
 
+
 std::stringstream packcc_errors;
 
 const std::string EMPTY = "";
 const int COL_WIDTH = 10;
+const int BUFFER_SIZE = 10240;
 
 std::string Stats::compare(const Stats& s) const {
     std::string result;
@@ -174,9 +176,12 @@ extern "C" {
 int vfprintf_wrapped(FILE *stream, const char *format, va_list args) {
     int result;
     if (stream == stderr) {
-        char buffer[10240];
-        result = vsprintf(buffer, format, args);
+        char buffer[BUFFER_SIZE];
+        result = vsnprintf(buffer, BUFFER_SIZE, format, args);
         packcc_errors << buffer;
+        if (result >= BUFFER_SIZE) {
+            packcc_errors << "...";
+        }
     } else {
         result = vfprintf (stream, format, args);
     }
