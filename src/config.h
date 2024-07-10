@@ -21,6 +21,12 @@ enum Optimization {
     O_ALL = 4095
 };
 
+enum HeaderMode {
+    HM_NEVER = 0,
+    HM_AUTO = 1,
+    HM_ALWAYS = 2
+};
+
 struct Config {
     enum OutputType {
         OT_FORMAT,
@@ -74,6 +80,7 @@ private:
     std::vector<Option> args;
     int optimizations;
     int verbosity;
+    HeaderMode header;
 
     void usage(const std::string& error);
     void usage_markdown();
@@ -88,6 +95,7 @@ private:
     int load_config(const std::string& next);
     int parse_optimization_config(const std::string& param);
     int parse_optimize(const std::string& param);
+    int parse_header(const std::string& param);
     int parse_exclude(const std::string& param);
     int inc_verbosity();
 
@@ -100,6 +108,7 @@ public:
     }
 
     static bool get(const Optimization& opt);
+    static bool get(const HeaderMode& headerMode);
     static const Config& get();
     static std::vector<std::string> get_all_imports_dirs(const std::string& input_file);
     static bool verbose(int level);
