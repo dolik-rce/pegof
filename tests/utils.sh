@@ -1,5 +1,5 @@
 run_test() {
-    echo "CMD: $PEGOF -c $CONF" > /dev/stderr
+    echo "CMD: $PEGOF -c $1" > /dev/stderr
     mapfile -t INPUTS <<<"$2"
     for INPUT in "${INPUTS[@]}"; do
         [ "$INPUT" ] || continue
@@ -13,7 +13,7 @@ run_test() {
         else
             rm -f "$INPUT".backup
         fi
-        done
+    done
 }
 
 check_status() {
