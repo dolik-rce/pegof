@@ -55,7 +55,10 @@ jobs:
         cmake --build "./$BUILDDIR" -- VERBOSE=1
     - name: Test
       shell: bash
-      run: BUILDDIR=$PWD/$BUILDDIR tests/run.sh
+      run: |
+        set -ex
+        cmake --build "./$BUILDDIR" --target pegof_test --verbose
+        BUILDDIR=$PWD/$BUILDDIR tests/run.sh
     - name: Coverage
       if: ${{ strategy.job-index == 0 && github.event_name != 'push' }}
       run: lcov --capture --base-directory "$PWD" --directory ./$BUILDDIR --no-external --exclude "$PWD/packcc" --output ./lcov.info
