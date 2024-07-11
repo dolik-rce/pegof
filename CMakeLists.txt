@@ -12,7 +12,7 @@ function(check_linker_options option)
     try_compile(
         OPTION_WORKS
         SOURCE_FROM_CONTENT check.c "int main(int argc, char *argv[]) { (void)argc; (void)argv; return 0; }"
-        LINK_OPTIONS ${options}
+        LINK_OPTIONS ${option}
     )
     if(OPTION_WORKS)
         message(CHECK_PASS "works")
