@@ -17,7 +17,7 @@ public:
 class Checker {
     std::string input_file;
     std::string output;
-    bool call_packcc(const std::string& input, const std::string& output, std::string& stderr) const;
+    bool call_packcc(const std::string& input, const std::string& output, std::string& errors) const;
     bool validate(const std::string& input) const;
     void benchmark(int& duration, int& memory) const;
 public:
