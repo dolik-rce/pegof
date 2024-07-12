@@ -146,7 +146,7 @@ void Checker::benchmark(int& duration, int& memory) const {
     std::string out = TempDir::get("benchmark.out");
     std::string time;
     if (system("which /usr/bin/time 2> /dev/null > /dev/null") == 0) {
-        time = "/usr/bin/time -f \"\\n%M\" ";
+        time = "/usr/bin/time -f \"\n%M\" ";
     }
     std::string cmd = time + script + " benchmark " + output + " > " + out + " 2>&1";
 
