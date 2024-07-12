@@ -5,7 +5,6 @@ main() {
 
     export ROOTDIR="$(cd "$(dirname "$0")/.." && pwd)"
     export PEGOF="$1"
-    export PACKCC="${PACKCC:-packcc}"
     export OPTS="${OPTS:---optimize all}"
 
     cd "$ROOTDIR"
