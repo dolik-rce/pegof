@@ -73,7 +73,7 @@ add_custom_target(
 
 add_custom_target(
     benchmark
-    benchmark/run.sh
+    benchmark/run.sh ${CMAKE_CURRENT_BINARY_DIR}/pegof
     DEPENDS pegof
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

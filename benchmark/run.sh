@@ -4,12 +4,11 @@ main() {
     set -e -o pipefail
 
     export ROOTDIR="$(cd "$(dirname "$0")/.." && pwd)"
-    export PEGOF="build/pegof"
+    export PEGOF="$1"
     export PACKCC="${PACKCC:-packcc}"
     export OPTS="${OPTS:---optimize all}"
 
     cd "$ROOTDIR"
-    make -C build pegof
 
     for GRAMMAR in benchmark/grammars/*.peg; do
         BASE="$(basename "$GRAMMAR" .peg)"
