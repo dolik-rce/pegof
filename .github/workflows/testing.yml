@@ -1,4 +1,4 @@
-name: build and test
+name: Build and test
 
 on:
   push:
@@ -21,6 +21,7 @@ jobs:
       OS: ${{ matrix.os }}
       COMPILER: ${{ matrix.compiler }}
       DEBIAN_FRONTEND: noninteractive
+      CMAKE_BUILD_TYPE: Release
 
     steps:
     - uses: actions/checkout@v4
@@ -32,17 +33,14 @@ jobs:
       run: |
         set -ex
         DEPS=(cmake bats)
-        if [ "$OS" = "ubuntu-24.04" ]; then
-            if [ "$COMPILER" = "g++" ]; then
-                DEPS+=(g++ gcovr lcov uncrustify)
-            else
-                DEPS+=(clang llvm libclang-rt-dev)
-            fi
+        if [ "$COMPILER" = "g++" ]; then
+            DEPS+=(g++)
         else
-            if [ "$COMPILER" = "g++" ]; then
-                DEPS+=(g++)
+            DEPS+=(clang llvm)
+            if [ "$OS" = "ubuntu-24.04" ]; then
+                DEPS+=(libclang-rt-dev)
             else
-                DEPS+=(clang llvm libclang-dev)
+                DEPS+=(libclang-dev)
             fi
         fi
         sudo apt-get update
@@ -55,16 +53,4 @@ jobs:
         cmake --build "./$BUILDDIR" --verbose
     - name: Test
       shell: bash
-      run: |
-        set -ex
-        cmake --build "./$BUILDDIR" --target pegof_test --verbose
-        BUILDDIR=$PWD/$BUILDDIR tests/run.sh
-    - name: Coverage
-      if: ${{ strategy.job-index == 0 && github.event_name != 'push' }}
-      run: lcov --capture --base-directory "$PWD" --directory ./$BUILDDIR --no-external --exclude "$PWD/packcc" --output ./lcov.info
-    - uses: romeovs/lcov-reporter-action@v0.4.0
-      if: ${{ strategy.job-index == 0 && github.event_name != 'push' }}
-      with:
-        lcov-file: ./lcov.info
-        lcov-base: ./lcov.info
-        delete-old-comments: true
+      run: cmake --build "./$BUILDDIR" --target test --verbose

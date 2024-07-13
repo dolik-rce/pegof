@@ -46,11 +46,11 @@ target_compile_features(common INTERFACE cxx_std_17)
 add_executable(pegof ${sources})
 target_link_libraries(pegof common)
 
-add_executable(pegof_test ${sources})
-set_target_properties(pegof_test PROPERTIES EXCLUDE_FROM_ALL 1)
-target_compile_options(pegof_test PRIVATE --coverage -g -O0 ${OPTIONAL_DEBUG_OPTIONS})
-target_link_options(pegof_test PRIVATE --coverage ${OPTIONAL_DEBUG_OPTIONS})
-target_link_libraries(pegof_test common)
+add_executable(pegof_coverage ${sources})
+set_target_properties(pegof_coverage PROPERTIES EXCLUDE_FROM_ALL 1)
+target_compile_options(pegof_coverage PRIVATE --coverage -g -O0 ${OPTIONAL_DEBUG_OPTIONS})
+target_link_options(pegof_coverage PRIVATE --coverage ${OPTIONAL_DEBUG_OPTIONS})
+target_link_libraries(pegof_coverage common)
 
 add_custom_command(
     TARGET pegof POST_BUILD
@@ -60,15 +60,22 @@ add_custom_command(
 
 add_custom_target(
     test
-    ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} tests/run.sh ${TEST_OPTS}
-    DEPENDS pegof pegof_test
+    ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} tests/run.sh
+    DEPENDS pegof
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(
     test_all
-    ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} INCLUDE_SLOW_TESTS=1 tests/run.sh ${TEST_OPTS}
-    DEPENDS pegof pegof_test
+    ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} INCLUDE_SLOW_TESTS=1 tests/run.sh
+    DEPENDS pegof
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    coverage
+    ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_BINARY_DIR} PEGOF=${CMAKE_CURRENT_BINARY_DIR}/pegof_coverage tests/coverage.sh
+    DEPENDS pegof_coverage
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

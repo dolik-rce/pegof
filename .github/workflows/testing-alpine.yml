@@ -29,7 +29,7 @@ jobs:
 
       - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
 
-      - run: cmake --build build --target test_all benchmark
+      - run: cmake --build build --target test
 
 
   release:
@@ -55,7 +55,7 @@ jobs:
 
       - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release ${{ matrix.opt }}
 
-      - run: cmake --build build --target benchmark
+      - run: cmake --build build --target test
 
       - run: readelf -h build/pegof
       - run: readelf -d build/pegof

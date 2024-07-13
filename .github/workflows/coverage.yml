@@ -1,0 +1,35 @@
+name: Check coverage
+
+on:
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  testing:
+    runs-on: ubuntu-24.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      CMAKE_BUILD_TYPE: Debug
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Install dependencies
+      shell: bash
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install cmake bats g++ gcovr lcov uncrustify
+    - name: Coverage
+      run: |
+        set -ex
+        cmake -B "./build.d"
+        cmake --build "./build.d" --target coverage --verbose
+        lcov --capture --base-directory "$PWD" --directory ./build.d --no-external --exclude "$PWD/packcc" --output ./lcov.info
+    - uses: romeovs/lcov-reporter-action@v0.4.0
+      with:
+        lcov-file: ./lcov.info
+        lcov-base: ./lcov.info
+        delete-old-comments: true
