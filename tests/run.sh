@@ -54,7 +54,7 @@ main() {
     export TESTDIR="$(cd "$(dirname "$0")" && pwd)"
     export ROOTDIR="$TESTDIR/.."
     export BUILDDIR="${BUILDDIR:-$ROOTDIR/build}"
-    export PEGOF="${PEGOF:-$BUILDDIR/pegof_test}"
+    export PEGOF="${PEGOF:-$BUILDDIR/pegof}"
     cd "$TESTDIR"
 
     clean
@@ -66,17 +66,7 @@ main() {
     done
 
     echo "Running tests:"
-    set +e # we want coverage even if the tests fail
     bats "$@" ./*.d
-    RESULT=$?
-    set -e
-    if which gcovr &> /dev/null; then
-        cd "$BUILDDIR"
-        mkdir -p "coverage"
-        gcovr -s --calls -e '.*/packcc.c' -r "$ROOTDIR" . --html-details="coverage/report.html"
-        echo "Coverage report: file://$BUILDDIR/coverage/report.html"
-    fi
-    exit $RESULT
 }
 
 main "$@"
