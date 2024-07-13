@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.14)
 
 project(pegof)
 
@@ -6,11 +6,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+write_file("${CMAKE_CURRENT_BINARY_DIR}/check.cc" "int main(int argc, char *argv[]) { (void)argc; (void)argv; return 0; }")
 function(check_linker_options option)
     message(CHECK_START "Testing ${option} support")
     try_compile(
         OPTION_WORKS
-        SOURCE_FROM_CONTENT check.c "int main(int argc, char *argv[]) { (void)argc; (void)argv; return 0; }"
+        ${CMAKE_CURRENT_BINARY_DIR}
+        SOURCES "${CMAKE_CURRENT_BINARY_DIR}/check.cc"
         LINK_OPTIONS ${option}
     )
     if(OPTION_WORKS)
