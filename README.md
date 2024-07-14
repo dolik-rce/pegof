@@ -194,6 +194,17 @@ cmake --build ./build --target test    # optional, but recommended
 Building on non-linux platforms has not been tested and might require some modifications to the process
 or even to the application itself.
 
+## Docker
+
+If you just want to give pegof a quick try, without going through the hassle of compilation, you can use a docker image, e.g.:
+```
+docker pull dolik/pegof:latest
+# running without arguments just prints usage information
+docker run dolik/pegof:latest
+# to optimize a grammar you can call it like this:
+docker run -i dolik/pegof:latest --verbose --optimize all < grammar.peg > optimized.peg
+```
+
 ## Acknowledgment
 
 Big thanks go to [Arihiro Yoshida](https://github.com/arithy), author of [PackCC](https://github.com/arithy/packcc)
