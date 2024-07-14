@@ -9,10 +9,31 @@
 #include <iostream>
 #include <iomanip>
 #include <regex>
-#include <filesystem>
 #include <numeric>
 
+#if defined(USE_EXPERIMENTAL_FILESYSTEM)
+    #if defined(__cpp_lib_filesystem)
+        #define USE_EXPERIMENTAL_FILESYSTEM 0
+    #elif defined(__cpp_lib_experimental_filesystem)
+        #define USE_EXPERIMENTAL_FILESYSTEM 1
+    #elif !defined(__has_include)
+        #define USE_EXPERIMENTAL_FILESYSTEM 1
+    #elif __has_include(<filesystem>)
+        #define USE_EXPERIMENTAL_FILESYSTEM 0
+    #elif __has_include(<experimental/filesystem>)
+        #define USE_EXPERIMENTAL_FILESYSTEM 1
+    #else
+        #error "Could not find <filesystem> or <experimental/filesystem> system header"
+    #endif
+#endif
+
+#if USE_EXPERIMENTAL_FILESYSTEM
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#else
+#include <filesystem>
 namespace fs = std::filesystem;
+#endif
 
 TempDir::TempDir() {
     std::string tmp_dir_template = (fs::temp_directory_path() / "pegof_XXXXXX").native();
