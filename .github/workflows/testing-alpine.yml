@@ -1,0 +1,64 @@
+name: build and test on AlpineLinux
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  debug:
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: ['3.20','3.19','3.18','3.17']
+
+    runs-on: ubuntu-latest
+
+    container: alpine:${{ matrix.tag }}
+
+    steps:
+      - run: apk add git libc++-dev g++ cmake make bash bats diffutils
+
+      - run: git config --global --add safe.directory /__w/pegof/pegof
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
+
+      - run: cmake --build build --target test_all benchmark
+
+
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: ['3.20','3.19','3.18','3.17']
+        opt: ['', '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE']
+
+    runs-on: ubuntu-latest
+
+    container: alpine:${{ matrix.tag }}
+
+    steps:
+      - run: apk add git libc++-dev g++ cmake make bash
+
+      - run: git config --global --add safe.directory /__w/pegof/pegof
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release ${{ matrix.opt }}
+
+      - run: cmake --build build --target benchmark
+
+      - run: readelf -h build/pegof
+      - run: readelf -d build/pegof
+
+      - run: build/pegof --help
+      - run: build/pegof --version
