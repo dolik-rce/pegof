@@ -1,0 +1,53 @@
+name: build and test on macOS
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  debug:
+
+    strategy:
+      matrix:
+        os: [macos-14, macos-13, macos-12]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: brew install bash bats-core
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
+
+      - run: cmake --build build --target test_all
+
+  release:
+
+    strategy:
+      matrix:
+        os: [macos-14, macos-13, macos-12]
+        opt: ['', '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release ${{ matrix.opt }}
+
+      - run: cmake --build build
+
+      - run: otool -L build/pegof
+      - run: otool -l build/pegof
+
+      - run: build/pegof --help
+      - run: build/pegof --version
