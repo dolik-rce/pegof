@@ -1,0 +1,54 @@
+name: cross compile for OpenBSD on Ubuntu
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://cdn.openbsd.org/pub/OpenBSD/
+        openbsd-release-version: ['7.5', '7.4', '7.3']
+
+    runs-on: ubuntu-latest
+
+    env:
+      CC:  clang   --target=amd64-unknown-openbsd --sysroot=${{ github.workspace }}/amd64-unknown-openbsd-sysroot
+      CXX: clang++ --target=amd64-unknown-openbsd --sysroot=${{ github.workspace }}/amd64-unknown-openbsd-sysroot
+      CFLAGS:   -fPIC
+      CXXFLAGS: -fPIC -I${{ github.workspace }}/amd64-unknown-openbsd-sysroot/usr/include/c++/v1
+      LDFLAGS:  -flto -Os -static-pie -stdlib=libc++ -fuse-ld=lld
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: sudo apt-get -y update
+      - run: sudo apt-get -y install curl cmake make clang lld
+
+      - run: install -d amd64-unknown-openbsd-sysroot
+
+      - name: install amd64-unknown-openbsd-sysroot
+        run: |
+          major="$(printf '%s\n' ${{ matrix.openbsd-release-version }} | cut -d. -f1)"
+          minor="$(printf '%s\n' ${{ matrix.openbsd-release-version }} | cut -d. -f2)"
+
+          for item in base comp
+          do
+            FILENAME="$item$major$minor.tgz"
+            curl -LO "https://cdn.openbsd.org/pub/OpenBSD/${{ matrix.openbsd-release-version }}/amd64/$FILENAME"
+            tar vxf "$FILENAME" -C amd64-unknown-openbsd-sysroot
+          done
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
+
+      - run: cmake --build build
+
+      - run: readelf -h build/pegof
+      - run: readelf -d build/pegof
