@@ -1,0 +1,46 @@
+name: cross compile for FreeBSD on Ubuntu
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://archive.freebsd.org/old-releases/amd64/
+        freebsd-release-version: ['14.1', '14.0', '13.3', '13.2']
+
+    runs-on: ubuntu-latest
+
+    env:
+      CC:  clang   --target=amd64-unknown-freebsd --sysroot=${{ github.workspace }}/amd64-unknown-freebsd-sysroot
+      CXX: clang++ --target=amd64-unknown-freebsd --sysroot=${{ github.workspace }}/amd64-unknown-freebsd-sysroot
+      CFLAGS:   -fPIC
+      CXXFLAGS: -fPIC -I${{ github.workspace }}/amd64-unknown-freebsd-sysroot/usr/include/c++/v1
+      LDFLAGS:  -flto -Os -static -stdlib=libc++ -fuse-ld=lld
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: sudo apt-get -y update
+      - run: sudo apt-get -y install curl cmake make clang lld
+
+      - run: install -d amd64-unknown-freebsd-sysroot
+
+      - run: curl -L -o amd64-unknown-freebsd-sysroot.txz https://archive.freebsd.org/old-releases/amd64/${{ matrix.freebsd-release-version }}-RELEASE/base.txz
+      - run: tar vxf    amd64-unknown-freebsd-sysroot.txz -C amd64-unknown-freebsd-sysroot
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
+
+      - run: cmake --build build
+
+      - run: readelf -h build/pegof
+      - run: readelf -h build/pegof | grep FreeBSD
+      - run: readelf -d build/pegof
