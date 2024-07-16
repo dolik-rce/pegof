@@ -1,0 +1,74 @@
+name: build and test on Cygwin
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  debug: 
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: C:\tools\cygwin\bin\bash.exe -l -i {0}
+
+    steps:
+      # https://www.cygwin.com/faq/faq.html#faq.setup.cli
+      - run: Invoke-WebRequest -OutFile setup-x86_64.exe "http://cygwin.com/setup-x86_64.exe"
+        shell: pwsh
+
+      - run: .\setup-x86_64.exe --quiet-mode --no-desktop --no-shortcuts --no-startmenu --only-site --site http://mirrors.kernel.org/sourceware/cygwin/ --root C:\tools\cygwin --local-package-dir C:\tools\cygwin\packages --packages gcc-g++,make,cmake | Out-Default
+        shell: pwsh
+
+      - run: git config --global core.autocrlf input
+        shell: bash
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: printf 'cd %s' "$(cygpath '${{ github.workspace }}')" >> ~/.bashrc
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
+
+      - run: cmake --build build --target test_all benchmark
+
+  release: 
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        opt: ['', '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=TRUE']
+
+    defaults:
+      run:
+        shell: C:\tools\cygwin\bin\bash.exe -l -i {0}
+
+    steps:
+      # https://www.cygwin.com/faq/faq.html#faq.setup.cli
+      - run: Invoke-WebRequest -OutFile setup-x86_64.exe "http://cygwin.com/setup-x86_64.exe"
+        shell: pwsh
+
+      - run: .\setup-x86_64.exe --quiet-mode --no-desktop --no-shortcuts --no-startmenu --only-site --site http://mirrors.kernel.org/sourceware/cygwin/ --root C:\tools\cygwin --local-package-dir C:\tools\cygwin\packages --packages gcc-g++,make,cmake | Out-Default
+        shell: pwsh
+
+      - run: git config --global core.autocrlf input
+        shell: bash
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: printf 'cd %s' "$(cygpath '${{ github.workspace }}')" >> ~/.bashrc
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release ${{ matrix.opt }}
+
+      - run: cmake --build build
+
+      - run: build/pegof --help
+      - run: build/pegof --version
