@@ -67,15 +67,13 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
     };
 
     string_array_t dirs;
-    string_array__init(&dirs);
+    pcc_array_init(&dirs);
     for (auto dir: Config::get_all_imports_dirs(input_file)) {
-        string_array__add(&dirs, dir.c_str(), dir.size());
+        pcc_array_add(&dirs, dir.c_str(), dir.size());
     }
 
-    void *const ctx = create_context(input.c_str(), output.c_str(), &dirs, &opts);
-    bool result = parse(ctx) && generate(ctx);
-    destroy_context(ctx);
-    string_array__term(&dirs);
+    bool result = pcc_process(input.c_str(), output.c_str(), &dirs, &opts);
+    pcc_array_term(&dirs);
 
     // Collect errors
     errors = packcc_errors.str();

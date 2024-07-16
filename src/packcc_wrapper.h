@@ -1,5 +1,4 @@
 #pragma once
-#define VOID_VALUE (~(size_t)0)
 
 extern "C" {
 typedef enum bool_tag {
@@ -19,16 +18,12 @@ typedef struct string_array_tag {
     size_t len;
 } string_array_t;
 
-void string_array__init(string_array_t *array);
-void string_array__add(string_array_t *array, const char *str, size_t len);
-void string_array__term(string_array_t *array);
+void pcc_array_init(string_array_t *array);
+void pcc_array_add(string_array_t *array, const char *str, size_t len);
+void pcc_array_term(string_array_t *array);
 
-void *create_context(const char *ipath, const char *opath, const string_array_t *dirs, const options_t *opts);
-void destroy_context(void *ctx);
+bool_t pcc_unescape_string(char *str, bool_t cls);
+size_t pcc_utf8_to_utf32(const char *seq, int *out);
 
-bool parse(void *ctx);
-bool generate(void *ctx);
-
-bool_t unescape_string(char *str, bool_t cls);
-size_t utf8_to_utf32(const char *seq, int *out);
+bool_t pcc_process(const char *ipath, const char *opath, const string_array_t *dirs, const options_t *opts);
 }

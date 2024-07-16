@@ -19,7 +19,7 @@ CharacterClass::CharacterClass(Parser& p, Node* parent) : Node("CharacterClass",
 static std::string unescape(const std::string& s) {
     char* char_array = new char[s.size() + 1];
     strcpy(char_array, s.c_str());
-    unescape_string(char_array, FALSE);
+    pcc_unescape_string(char_array, FALSE);
     std::string result = char_array;
     delete[] char_array;
     return result;
@@ -48,7 +48,7 @@ static std::string to_char(int c) {
 
 static int get_char(const std::string& s, int& pos) {
     int result;
-    pos += utf8_to_utf32(s.c_str() + pos, &result);
+    pos += pcc_utf8_to_utf32(s.c_str() + pos, &result);
     if (result != '\\' || pos == s.size()) {
         return result;
     }
