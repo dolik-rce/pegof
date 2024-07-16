@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <regex>
 #include <numeric>
+#include <random>
 
 #if defined(USE_EXPERIMENTAL_FILESYSTEM)
     #if defined(__cpp_lib_filesystem)
@@ -36,13 +37,18 @@ namespace fs = std::filesystem;
 #endif
 
 TempDir::TempDir() {
-    std::string tmp_dir_template = (fs::temp_directory_path() / "pegof_XXXXXX").native();
-    char* filename = new char[tmp_dir_template.size() + 1];
-    strcpy(filename, tmp_dir_template.c_str());
-    fs::path tmp_dir = mkdtemp(filename);
-    delete[] filename;
-    fs::create_directory(tmp_dir);
-    path = tmp_dir.native();
+    std::mt19937 rng(std::time(nullptr));
+    std::filesystem::path tmp;
+    // It'd be better to use mkdtemp here, but it is available on POSIX platforms only...
+    for (int i = 0; i < 128; i++) {
+        tmp = fs::temp_directory_path() / ("pegof_" + std::to_string(rng()).substr(0, 6));
+        if (std::filesystem::create_directory(tmp)) {
+            log(4, "Created temporary directory '%s'.", tmp.c_str());
+            path = tmp.native();
+            return;
+        }
+    }
+    error("Failed to create temporary directory in '%s'!", fs::temp_directory_path().c_str());
 }
 
 TempDir::~TempDir() {
