@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 get_inputs() {
-    sed -n '/^input/s/input\s\+//p;' "$1"
+    sed -n '/^input/s/input //p;' "$1"
 }
 
 get_outputs() {
     if grep -q inplace "$1"; then
         get_inputs "$1"
     else
-        sed -n '/^output/s/output\s\+//p;' "$1"
+        sed -n '/^output/s/output //p;' "$1"
     fi
 }
 
