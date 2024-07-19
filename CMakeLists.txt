@@ -102,8 +102,8 @@ add_custom_target(
 )
 
 add_custom_target(
-    uncrustify
-    ./uncrustify.sh
+    format
+    ./format.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

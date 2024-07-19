@@ -1,0 +1,27 @@
+name: Check code formatting
+
+on:
+  push:
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Install dependencies
+      shell: bash
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install clang-format bats
+    - name: Check formatting
+      run: |
+        set -ex
+        tests/run.sh -f style.d
