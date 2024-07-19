@@ -2,20 +2,25 @@
 
 load "$TESTDIR/utils.sh"
 
-check_uncrustify_version() {
-    version="$(uncrustify --version)"
+check_bats_version() {
+    version="$(bats --version | cut -d" " -f2)"
     major="$(echo "$version" | cut -d. -f1 | grep -oE '[0-9]+$')"
     minor="$(echo "$version" | cut -d. -f2)"
-    [ "$major" -gt 0 ] || { [ "$major" -eq 0 ] && [ "$minor" -ge 72 ]; }
+    [ "$major" -gt 1 ] || { [ "$major" -eq 1 ] && [ "$minor" -ge 11 ]; }
+}
+
+check_clang_format_version() {
+    major="$(clang-format --version | grep -Eo '[0-9]+.[0-9]+.[0-9]+' | grep -o '^[0-9]*')"
+    [ "$major" -ge "$1" ]
 }
 
 test_code_style() {
-    if ! command -v "uncrustify" &> /dev/null; then
-        skip "uncrustify is not installed"
-    elif ! check_uncrustify_version &> /dev/null; then
-        skip "uncrustify is too old (minimal required version is 0.72.0)"
+    if ! command -v "clang-format" &> /dev/null; then
+        skip "clang-format is not installed"
+    elif ! check_clang_format_version 18; then
+        skip "requires clang-format version 18 or higher"
     else
-        run uncrustify -q -c "$ROOTDIR/uncrustify.cfg" -f "$1"
+        run clang-format "$1"
         [ "$status" -eq 0 ]
         diff --strip-trailing-cr -uN "$1" --label "$1" <(echo "$output") --label "formatted"
     fi

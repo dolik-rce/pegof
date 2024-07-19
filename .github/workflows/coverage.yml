@@ -21,7 +21,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install cmake bats g++ lcov uncrustify
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install cmake bats g++ lcov
     - name: Coverage
       run: |
         set -ex
