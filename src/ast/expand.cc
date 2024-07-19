@@ -1,8 +1,9 @@
 #include "ast/expand.h"
+
 #include "log.h"
 
-Expand::Expand(int content, Node* parent) : Node("Expand", parent), content(content) {}
-Expand::Expand(Parser& p, Node* parent) : Node("Expand", parent) {
+Expand::Expand(int content, Node* parent): Node("Expand", parent), content(content) {}
+Expand::Expand(Parser& p, Node* parent): Node("Expand", parent) {
     parse(p);
 }
 

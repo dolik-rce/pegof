@@ -1,16 +1,18 @@
 #include "ast/term.h"
+
 #include "log.h"
 #include "utils.h"
 
-Term::Term(char prefix, char quantifier, const Primary& primary, const std::optional<Action>& error_action, Node* parent)
-    : Node("Term", parent), prefix(prefix), quantifier(quantifier), error_action(error_action), primary(primary) {}
+Term::Term(
+    char prefix, char quantifier, const Primary& primary, const std::optional<Action>& error_action, Node* parent
+):
+    Node("Term", parent), prefix(prefix), quantifier(quantifier), error_action(error_action), primary(primary) {}
 
-Term::Term(Parser& p, Node* parent) : Node("Term", parent) {
+Term::Term(Parser& p, Node* parent): Node("Term", parent) {
     parse(p);
 }
 
-template<class T>
-bool Term::parse(Parser& p) {
+template<class T> bool Term::parse(Parser& p) {
     T parsed(p, this);
     if (parsed) {
         primary = parsed;
@@ -29,14 +31,8 @@ void Term::parse(Parser& p) {
     } else {
         prefix = 0;
     }
-    if (!(parse<Reference>(p)
-          || parse<String>(p)
-          || parse<CharacterClass>(p)
-          || parse<Expand>(p)
-          || parse<Group>(p)
-          || parse<Capture>(p)
-          || parse<Action>(p))
-    ) {
+    if (!(parse<Reference>(p) || parse<String>(p) || parse<CharacterClass>(p) || parse<Expand>(p) || parse<Group>(p) ||
+          parse<Capture>(p) || parse<Action>(p))) {
         s.rollback();
         return;
     }
@@ -59,7 +55,7 @@ void Term::parse(Parser& p) {
 }
 
 std::string Term::to_string(const Primary& x, const std::string& indent) const {
-    switch(x.index()) {
+    switch (x.index()) {
     case 1: return std::get_if<String>(&x)->as<String>()->to_string(indent);
     case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string(indent);
     case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->to_string(indent);
@@ -67,13 +63,12 @@ std::string Term::to_string(const Primary& x, const std::string& indent) const {
     case 5: return std::get_if<Action>(&x)->as<Action>()->to_string(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->to_string(indent);
     case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string(indent);
-    default:
-        error(INTERNAL_ERROR, "unsupported type!");
+    default: error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 
 std::string Term::dump(const Primary& x, std::string indent) const {
-    switch(x.index()) {
+    switch (x.index()) {
     case 1: return std::get_if<String>(&x)->as<String>()->dump(indent);
     case 2: return std::get_if<Reference>(&x)->as<Reference>()->dump(indent);
     case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->dump(indent);
@@ -81,8 +76,7 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
     case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
-    default:
-        error(INTERNAL_ERROR, "unsupported type!");
+    default: error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 
@@ -91,9 +85,13 @@ std::string Term::to_string(std::string indent) const {
     if (comments.size()) {
         result += "\n" + format_comments(indent) + "\n" + indent;
     }
-    if (prefix != 0) result += std::string(1, prefix);
+    if (prefix != 0) {
+        result += std::string(1, prefix);
+    }
     result += to_string(primary, indent);
-    if (quantifier != 0) result += std::string(1, quantifier);
+    if (quantifier != 0) {
+        result += std::string(1, quantifier);
+    }
     if (error_action) {
         result += " ~ " + error_action->to_string();
     }
@@ -105,35 +103,73 @@ std::string Term::to_string(std::string indent) const {
 
 std::string Term::dump(std::string indent) const {
     std::string result = indent + "TERM";
-    if (prefix != 0) result += " " + std::string(1, prefix);
-    if (quantifier != 0) result += " " + std::string(1, quantifier);
+    if (prefix != 0) {
+        result += " " + std::string(1, prefix);
+    }
+    if (quantifier != 0) {
+        result += " " + std::string(1, quantifier);
+    }
     result += dump_comments() + "\n" + dump(primary, indent + "  ");
-    if (error_action) result += "\n" + error_action->dump(indent + "  ERROR ");
+    if (error_action) {
+        result += "\n" + error_action->dump(indent + "  ERROR ");
+    }
     return result;
 }
 
 bool Term::is_multiline() const {
-    if (!comments.empty()) return true;
-    if (!post_comment.empty()) return true;
-    if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary))->is_multiline();
-    if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary))->is_multiline();
-    if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary))->is_multiline();
-    if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary))->is_multiline();
-    if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary))->is_multiline();
-    if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary))->is_multiline();
-    if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary))->is_multiline();
+    if (!comments.empty()) {
+        return true;
+    }
+    if (!post_comment.empty()) {
+        return true;
+    }
+    if (std::get_if<1>(&primary)) {
+        return (Node*)(std::get_if<1>(&primary))->is_multiline();
+    }
+    if (std::get_if<2>(&primary)) {
+        return (Node*)(std::get_if<2>(&primary))->is_multiline();
+    }
+    if (std::get_if<3>(&primary)) {
+        return (Node*)(std::get_if<3>(&primary))->is_multiline();
+    }
+    if (std::get_if<4>(&primary)) {
+        return (Node*)(std::get_if<4>(&primary))->is_multiline();
+    }
+    if (std::get_if<5>(&primary)) {
+        return (Node*)(std::get_if<5>(&primary))->is_multiline();
+    }
+    if (std::get_if<6>(&primary)) {
+        return (Node*)(std::get_if<6>(&primary))->is_multiline();
+    }
+    if (std::get_if<7>(&primary)) {
+        return (Node*)(std::get_if<7>(&primary))->is_multiline();
+    }
     error(INTERNAL_ERROR, "unsupported type!");
 }
 
 Node* Term::operator[](int index) {
     if (index == 0) {
-        if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary));
-        if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary));
-        if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary));
-        if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary));
-        if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
-        if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
-        if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary));
+        if (std::get_if<1>(&primary)) {
+            return (Node*)(std::get_if<1>(&primary));
+        }
+        if (std::get_if<2>(&primary)) {
+            return (Node*)(std::get_if<2>(&primary));
+        }
+        if (std::get_if<3>(&primary)) {
+            return (Node*)(std::get_if<3>(&primary));
+        }
+        if (std::get_if<4>(&primary)) {
+            return (Node*)(std::get_if<4>(&primary));
+        }
+        if (std::get_if<5>(&primary)) {
+            return (Node*)(std::get_if<5>(&primary));
+        }
+        if (std::get_if<6>(&primary)) {
+            return (Node*)(std::get_if<6>(&primary));
+        }
+        if (std::get_if<7>(&primary)) {
+            return (Node*)(std::get_if<7>(&primary));
+        }
         error(INTERNAL_ERROR, "unsupported type!");
     } else {
         error(INTERNAL_ERROR, "index out of bounds!");

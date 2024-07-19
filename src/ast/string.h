@@ -1,8 +1,9 @@
 #pragma once
 #include "ast/node.h"
 
-class String : public Node {
+class String: public Node {
     std::string content;
+
 public:
     String(const std::string& content, Node* parent);
     String(Parser& p, Node* parent);

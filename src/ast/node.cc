@@ -1,8 +1,9 @@
 #include "ast/node.h"
+
 #include "ast/grammar.h"
 #include "log.h"
 
-Node::Node(const char* type, Node* parent) : valid(false), parent(parent), type(type) {
+Node::Node(const char* type, Node* parent): valid(false), parent(parent), type(type) {
     debug("Creating %s @%p, parent: %p", type, this, parent);
 }
 
@@ -53,9 +54,11 @@ void Node::parse_post_comment(Parser& p) {
 }
 
 std::string Node::format_comments(std::string indent) const {
-    if (comments.empty()) return "";
+    if (comments.empty()) {
+        return "";
+    }
     std::string result;
-    for(int i = 0; i < comments.size(); i++) {
+    for (int i = 0; i < comments.size(); i++) {
         result += (i ? "\n" : "") + indent + "#" + comments[i];
     }
     return result;
@@ -76,24 +79,39 @@ std::string Node::dump_comments() const {
 }
 
 bool Node::map(const std::function<bool(Node&)>& transform) {
-    if (transform(*this)) return true;
+    if (transform(*this)) {
+        return true;
+    }
     for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
-        if (n->map(transform)) return true;
+        if (n->map(transform)) {
+            return true;
+        }
     }
     return false;
 }
 
 bool Node::is_descendant_of(Node* n) const {
-    if (!parent) return false;
-    if (parent == n) return true;
+    if (!parent) {
+        return false;
+    }
+    if (parent == n) {
+        return true;
+    }
     return parent->is_descendant_of(n);
 }
 
 void Node::update_parents() {
     for (int i = 0; i < size(); i++) {
         Node* n = (*this)[i];
-        //~ debug("Updating parent of %s@%p, parent: %p -> %p%s", n->type, n, n->parent, this, n->parent == this ? " (NO CHANGE)" : "");
+        //~ debug(
+        //~     "Updating parent of %s@%p, parent: %p -> %p%s",
+        //~     n->type,
+        //~     n,
+        //~     n->parent,
+        //~     this,
+        //~     n->parent == this ? " (NO CHANGE)" : ""
+        //~ );
         n->parent = this;
         n->update_parents();
     }
@@ -107,11 +125,15 @@ bool Node::has_post_comment() const {
     return !post_comment.empty();
 }
 
-
-#define CMP(TYPE) if (a.is<TYPE>()) { return *(TYPE*)(&a) == *(TYPE*)(&b); }
+#define CMP(TYPE)                                                                                                      \
+    if (a.is<TYPE>()) {                                                                                                \
+        return *(TYPE*)(&a) == *(TYPE*)(&b);                                                                           \
+    }
 
 bool operator==(const Node& a, const Node& b) {
-    if (a.type != b.type) return false;
+    if (a.type != b.type) {
+        return false;
+    }
     CMP(Action);
     CMP(Alternation);
     CMP(Capture);

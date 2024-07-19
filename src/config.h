@@ -22,24 +22,12 @@ enum Optimization {
     O_ALL = 8191
 };
 
-enum HeaderMode {
-    HM_NEVER = 0,
-    HM_AUTO = 1,
-    HM_ALWAYS = 2
-};
+enum HeaderMode { HM_NEVER = 0, HM_AUTO = 1, HM_ALWAYS = 2 };
 
 struct Config {
-    enum OutputType {
-        OT_FORMAT,
-        OT_AST,
-        OT_GRAPH,
-        OT_PACKCC
-    };
+    enum OutputType { OT_FORMAT, OT_AST, OT_GRAPH, OT_PACKCC };
 
-    enum QuoteType {
-        QT_DOUBLE,
-        QT_SINGLE
-    };
+    enum QuoteType { QT_DOUBLE, QT_SINGLE };
 
     OutputType output_type;
     std::vector<std::string> inputs;
@@ -50,12 +38,7 @@ struct Config {
     typedef int (Config::*MemberFn1)(const std::string&);
     typedef int (Config::*MemberFnOpt1)(const std::string&, int optional);
 
-    enum OptionGroup {
-        OG_BASIC,
-        OG_IO,
-        OG_FORMAT,
-        OG_OPT
-    };
+    enum OptionGroup { OG_BASIC, OG_IO, OG_FORMAT, OG_OPT };
 
     struct Option {
         OptionGroup group;
@@ -67,14 +50,15 @@ struct Config {
 
         template<typename T>
         Option(
-            OptionGroup group,
-            const std::string& shortName,
-            const std::string& longName,
-            T defaultValue,
-            const std::string& description,
-            const std::string& param = ""
-        ) : group(group), shortName(shortName), longName(longName), value(defaultValue), description(description), param(param)
-        {}
+            OptionGroup group, const std::string& shortName, const std::string& longName, T defaultValue,
+            const std::string& description, const std::string& param = ""
+        ):
+            group(group),
+            shortName(shortName),
+            longName(longName),
+            value(defaultValue),
+            description(description),
+            param(param) {}
     };
 
 private:
@@ -107,8 +91,7 @@ private:
     Option& find_option(const std::string& optionName);
 
 public:
-    template<typename T>
-    static const T get(std::string optionName) {
+    template<typename T> static const T get(std::string optionName) {
         return std::any_cast<T>(instance->find_option(optionName).value);
     }
 
@@ -119,5 +102,5 @@ public:
     static std::vector<std::string> get_all_imports_dirs(const std::string& input_file);
     static bool verbose(int level);
 
-    Config(int argc, char **argv);
+    Config(int argc, char** argv);
 };

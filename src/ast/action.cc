@@ -1,12 +1,14 @@
 #include "ast/action.h"
-#include "utils.h"
-#include "log.h"
-#include <regex>
-#include <cstdint>
 
-Action::Action(const std::string& code, Node* parent) : Node("Action", parent), code(code) {}
-Action::Action(const Action& action, Node* parent) : Action(action.code, parent) {}
-Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
+#include "log.h"
+#include "utils.h"
+
+#include <cstdint>
+#include <regex>
+
+Action::Action(const std::string& code, Node* parent): Node("Action", parent), code(code) {}
+Action::Action(const Action& action, Node* parent): Action(action.code, parent) {}
+Action::Action(Parser& p, Node* parent): Node("Action", parent) {
     parse(p);
 }
 

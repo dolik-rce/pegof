@@ -1,23 +1,23 @@
 #include "utils.h"
+
 #include "log.h"
 #include "packcc_wrapper.h"
 
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <numeric>
+#include <random>
+#include <regex>
+#include <sstream>
 #include <string.h>
 #include <unistd.h>
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
-#include <regex>
-#include <numeric>
-#include <random>
-
 #if USE_EXPERIMENTAL_FILESYSTEM
-#include <experimental/filesystem>
+    #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #else
-#include <filesystem>
+    #include <filesystem>
 namespace fs = std::filesystem;
 #endif
 
@@ -83,7 +83,7 @@ std::string find_file(const std::string& name, const std::vector<std::string> di
 
 std::string to_hex(int number, int width) {
     std::stringstream stream;
-    stream << std::setfill ('0') << std::setw(width) << std::hex << number;
+    stream << std::setfill('0') << std::setw(width) << std::hex << number;
     return stream.str();
 }
 
@@ -102,9 +102,9 @@ std::string to_c_string(std::string str, EscapeMode mode) {
         case '\x0d': result += "\\r"; break;
         case '\x09': result += "\\t"; break;
         case '\x0b': result += "\\v"; break;
-        case '\\':   result += "\\\\"; break;
-        case '\'':   result += (mode & ESCAPE_SINGLE_QUOTES) ? "\\'" : "'"; break;
-        case '\"':   result += (mode & ESCAPE_DOUBLE_QUOTES) ? "\\\"" : "\""; break;
+        case '\\': result += "\\\\"; break;
+        case '\'': result += (mode & ESCAPE_SINGLE_QUOTES) ? "\\'" : "'"; break;
+        case '\"': result += (mode & ESCAPE_DOUBLE_QUOTES) ? "\\\"" : "\""; break;
         default:
             if (c >= '\x20' && c < '\x7f') {
                 result += char(c);
@@ -135,25 +135,30 @@ std::string trim(const std::string& str, TrimType type, const char* whitespace) 
     return std::string(str.c_str() + start, end - start);
 }
 
-std::vector<std::string> split(const std::string &s, const std::string& delimiter) {
+std::vector<std::string> split(const std::string& s, const std::string& delimiter) {
     std::regex sep_regex(delimiter);
     std::sregex_token_iterator iter(s.begin(), s.end(), sep_regex, -1);
     std::sregex_token_iterator end;
     return {iter, end};
 }
 
-std::string join(const std::vector<std::string> &v, const std::string& delimiter) {
+std::string join(const std::vector<std::string>& v, const std::string& delimiter) {
     if (v.empty()) {
         return "";
     }
-    return std::accumulate(std::next(v.begin()), v.end(), v[0], [delimiter](const std::string& a, const std::string& b) {
-        return a + delimiter + b;
-    });
+    return std::accumulate(
+        std::next(v.begin()),
+        v.end(),
+        v[0],
+        [delimiter](const std::string& a, const std::string& b) { return a + delimiter + b; }
+    );
 }
 
 bool contains(std::vector<std::string> values, std::string x) {
     for (std::string& v: values) {
-        if (v == x) return true;
+        if (v == x) {
+            return true;
+        }
     }
     return false;
 }

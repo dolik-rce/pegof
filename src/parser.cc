@@ -1,12 +1,20 @@
 #include "parser.h"
-#include "log.h"
-#include "utils.h"
-#include "packcc_wrapper.h"
 
-Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {}
+#include "log.h"
+#include "packcc_wrapper.h"
+#include "utils.h"
+
+Parser::State::State(Parser* p): p(p), saved_pos(p->pos) {}
 
 bool Parser::State::rollback() {
-    if (p->pos != saved_pos) debug("Rollback %lu-%lu: %s", saved_pos, p->pos, to_c_string(p->input.substr(saved_pos, p->pos - saved_pos)).c_str());
+    if (p->pos != saved_pos) {
+        debug(
+            "Rollback %lu-%lu: %s",
+            saved_pos,
+            p->pos,
+            to_c_string(p->input.substr(saved_pos, p->pos - saved_pos)).c_str()
+        );
+    }
     p->pos = saved_pos;
     return false;
 }
@@ -29,7 +37,7 @@ bool Parser::State::commit(const std::string& result) {
     return true;
 }
 
-Parser::Parser(std::string input) : input(input), pos(0) {}
+Parser::Parser(std::string input): input(input), pos(0) {}
 
 Parser::State Parser::save_point() {
     return State(this);
@@ -48,7 +56,9 @@ void Parser::skip_space() {
         }
         break;
     }
-    if (pos != start) debug("Skipped whitespace: %d-%d", start, pos);
+    if (pos != start) {
+        debug("Skipped whitespace: %d-%d", start, pos);
+    }
 }
 
 bool Parser::match(char c) {
@@ -62,7 +72,9 @@ bool Parser::match(char c) {
 
 bool Parser::match(const std::string& str, bool space) {
     State s(this);
-    if (space) skip_space();
+    if (space) {
+        skip_space();
+    }
     if (input.compare(pos, str.size(), str) == 0) {
         pos += str.size();
         return s.commit();
@@ -72,7 +84,9 @@ bool Parser::match(const std::string& str, bool space) {
 
 bool Parser::match_re(const std::string& r, bool space) {
     State s(this);
-    if (space) skip_space();
+    if (space) {
+        skip_space();
+    }
     std::smatch m;
     if (std::regex_search(input.cbegin() + pos, input.cend(), m, std::regex(r))) {
         if (m.position(0) == 0) {
@@ -86,8 +100,12 @@ bool Parser::match_re(const std::string& r, bool space) {
 
 void Parser::skip_rest_of_line(bool continuable) {
     while (!is_eof()) {
-        if (continuable) match("\\\n");
-        if (match('\n')) break;
+        if (continuable) {
+            match("\\\n");
+        }
+        if (match('\n')) {
+            break;
+        }
         pos++;
     }
 }
@@ -110,7 +128,9 @@ bool Parser::match_comment() {
 
 bool Parser::match_block_comment() {
     State s(this);
-    if (!match("/*")) return s.rollback();
+    if (!match("/*")) {
+        return s.rollback();
+    }
     unsigned long start = pos;
     for (; !match("*/"); pos++) {}
     return s.commit(start, pos - 2);
@@ -157,17 +177,16 @@ bool Parser::match_code() {
             error(PARSING_ERROR, "Premature EOF in code block starting @%ul", s.saved_pos);
             return s.rollback();
         }
-        if (
-            match_macro() ||
-            match_line_comment() ||
-            match_block_comment() ||
-            match_string()
-        ) continue;
+        if (match_macro() || match_line_comment() || match_block_comment() || match_string()) {
+            continue;
+        }
         if (match('{')) {
             level++;
         } else if (match('}')) {
             level--;
-            if (level == 0) break;
+            if (level == 0) {
+                break;
+            }
         } else {
             pos++;
         }

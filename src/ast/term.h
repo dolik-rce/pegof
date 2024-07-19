@@ -1,28 +1,28 @@
 #pragma once
-#include <variant>
-
-#include "ast/node.h"
-#include "ast/string.h"
-#include "ast/reference.h"
-#include "ast/character_class.h"
-#include "ast/expand.h"
 #include "ast/action.h"
 #include "ast/capture.h"
+#include "ast/character_class.h"
+#include "ast/expand.h"
 #include "ast/group.h"
+#include "ast/node.h"
+#include "ast/reference.h"
+#include "ast/string.h"
+
+#include <variant>
 
 using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture>;
 
-class Term : public Node {
+class Term: public Node {
     char prefix;
     char quantifier;
     std::optional<Action> error_action;
     Primary primary;
+
 public:
     Term(char prefix, char quantifier, const Primary& primary, const std::optional<Action>& error_action, Node* parent);
     Term(Parser& p, Node* parent);
 
-    template<class T>
-    bool parse(Parser& p);
+    template<class T> bool parse(Parser& p);
 
     virtual void parse(Parser& p) override;
 
@@ -35,11 +35,9 @@ public:
     virtual Node* operator[](int index) override;
     virtual long size() const override;
 
-    template<class T>
-    bool contains() const;
+    template<class T> bool contains() const;
 
-    template<class T>
-    T& get();
+    template<class T> T& get();
 
     bool is_quantified() const;
     bool is_prefixed() const;
@@ -71,12 +69,10 @@ public:
 bool operator==(const Term& a, const Term& b);
 bool operator!=(const Term& a, const Term& b);
 
-template<class T>
-bool Term::contains() const {
+template<class T> bool Term::contains() const {
     return std::holds_alternative<T>(primary);
 }
 
-template<class T>
-T& Term::get() {
+template<class T> T& Term::get() {
     return std::get<T>(primary);
 }

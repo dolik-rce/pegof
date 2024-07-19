@@ -1,8 +1,9 @@
 #include "ast/sequence.h"
+
 #include "log.h"
 
-Sequence::Sequence(const std::vector<Term>& terms, Node* parent) : Node("Sequence", parent), terms(terms) {}
-Sequence::Sequence(Parser& p, Node* parent) : Node("Sequence", parent) {
+Sequence::Sequence(const std::vector<Term>& terms, Node* parent): Node("Sequence", parent), terms(terms) {}
+Sequence::Sequence(Parser& p, Node* parent): Node("Sequence", parent) {
     parse(p);
 }
 
@@ -50,7 +51,9 @@ std::string Sequence::to_string(std::string indent) const {
 std::string Sequence::dump(std::string indent) const {
     std::string result = indent + "SEQ\n";
     for (int i = 0; i < terms.size(); i++) {
-        if (i > 0) result += "\n";
+        if (i > 0) {
+            result += "\n";
+        }
         result += terms[i].dump(indent + "  ");
     }
     return result;
@@ -93,9 +96,8 @@ void Sequence::insert(int index, const Sequence& s) {
 }
 
 void Sequence::erase(Term* term) {
-    std::vector<Term>::iterator it = std::find_if(terms.begin(), terms.end(), [term](const Term& t) {
-        return &t == term;
-    });
+    std::vector<Term>::iterator it =
+        std::find_if(terms.begin(), terms.end(), [term](const Term& t) { return &t == term; });
     terms.erase(it);
 }
 
@@ -104,9 +106,13 @@ void Sequence::erase(int index) {
 }
 
 bool operator==(const Sequence& a, const Sequence& b) {
-    if (a.size() != b.size()) return false;
+    if (a.size() != b.size()) {
+        return false;
+    }
     for (int i = 0; i < a.size(); i++) {
-        if (a.terms[i] != b.terms[i]) return false;
+        if (a.terms[i] != b.terms[i]) {
+            return false;
+        }
     }
     return true;
 }

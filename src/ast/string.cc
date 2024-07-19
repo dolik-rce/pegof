@@ -1,10 +1,11 @@
 #include "ast/string.h"
-#include "utils.h"
+
 #include "config.h"
 #include "log.h"
+#include "utils.h"
 
-String::String(const std::string& content, Node* parent) : Node("String", parent), content(content) {}
-String::String(Parser& p, Node* parent) : Node("String", parent) {
+String::String(const std::string& content, Node* parent): Node("String", parent), content(content) {}
+String::String(Parser& p, Node* parent): Node("String", parent) {
     parse(p);
 }
 

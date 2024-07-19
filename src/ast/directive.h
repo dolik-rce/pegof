@@ -1,10 +1,11 @@
 #pragma once
 #include "ast/node.h"
 
-class Directive : public Node {
+class Directive: public Node {
     std::string name;
     std::string value;
     bool code;
+
 public:
     Directive(const std::string& name, const std::string& value, bool code, Node* parent);
     Directive(Parser& p, Node* parent);

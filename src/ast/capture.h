@@ -5,9 +5,10 @@ class Alternation;
 class Rule;
 class Group;
 
-class Capture : public Node {
+class Capture: public Node {
     std::shared_ptr<Alternation> expression;
     int num;
+
 public:
     Capture(const Alternation& expression, Node* parent);
     Capture(Parser& p, Node* parent);

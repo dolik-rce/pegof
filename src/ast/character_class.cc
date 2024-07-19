@@ -1,23 +1,25 @@
 #include "ast/character_class.h"
+
+#include "log.h"
 #include "packcc_wrapper.h"
 #include "utils.h"
-#include "log.h"
 
 #include <cstring>
-#include <sstream>
 #include <iomanip>
 #include <numeric>
+#include <sstream>
 
-CharacterClass::CharacterClass(const std::string& content, Node* parent) : Node("CharacterClass", parent), content(content), dash(false), negation(false) {
+CharacterClass::CharacterClass(const std::string& content, Node* parent):
+    Node("CharacterClass", parent), content(content), dash(false), negation(false) {
     Parser p(content);
     parse(p);
 }
-CharacterClass::CharacterClass(Parser& p, Node* parent) : Node("CharacterClass", parent), dash(false), negation(false) {
+CharacterClass::CharacterClass(Parser& p, Node* parent): Node("CharacterClass", parent), dash(false), negation(false) {
     parse(p);
 }
 
 static std::string to_char(int c) {
-    if ( c >= 0x80 && c <= 0xffff ) {
+    if (c >= 0x80 && c <= 0xffff) {
         return "\\u" + to_hex(c, 4);
     }
     if (c > 0xffff) {
@@ -99,24 +101,20 @@ void CharacterClass::parse(Parser& p) {
 }
 
 void CharacterClass::update_content() {
-    if (any_char()) return;
+    if (any_char()) {
+        return;
+    }
 
     content = "";
 
-    for (size_t i = 0; i<tokens.size(); i++) {
+    for (size_t i = 0; i < tokens.size(); i++) {
         size_t size = tokens[i].second - tokens[i].first;
         std::string first = (i == 0 && tokens[i].first == '^') ? "\\^" : to_char(tokens[i].first);
         std::string second = to_char(tokens[i].second);
         switch (size) {
-        case 0:
-            content += first;
-            break;
-        case 1:
-            content += first + second;
-            break;
-        default:
-            content += first + '-' + second;
-            break;
+        case 0: content += first; break;
+        case 1: content += first + second; break;
+        default: content += first + '-' + second; break;
         }
     }
 }
@@ -126,8 +124,12 @@ std::string CharacterClass::to_string(std::string indent) const {
         return ".";
     } else {
         std::string result = "[";
-        if(negation) result += '^';
-        if(dash) result += '-';
+        if (negation) {
+            result += '^';
+        }
+        if (dash) {
+            result += '-';
+        }
         result += content + ']';
         return result;
     }
@@ -148,7 +150,7 @@ bool CharacterClass::normalize() {
     std::string original = content;
     sort(tokens.begin(), tokens.end());
     Tokens init(1, tokens[0]);
-    tokens = accumulate(tokens.begin() + 1, tokens.end(), init, [](Tokens& acc, const Token& item){
+    tokens = accumulate(tokens.begin() + 1, tokens.end(), init, [](Tokens& acc, const Token& item) {
         Token& prev = acc.back();
         if (prev.second + 1 < item.first) {
             acc.push_back(item);

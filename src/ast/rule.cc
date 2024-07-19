@@ -1,9 +1,11 @@
 #include "ast/rule.h"
+
 #include "config.h"
 #include "log.h"
 
-Rule::Rule(const std::string& name, const Alternation& expression, Node* parent) : Node("Rule", parent), name(name), expression(expression) {}
-Rule::Rule(Parser& p, Node* parent) : Node("Rule", parent), expression(this) {
+Rule::Rule(const std::string& name, const Alternation& expression, Node* parent):
+    Node("Rule", parent), name(name), expression(expression) {}
+Rule::Rule(Parser& p, Node* parent): Node("Rule", parent), expression(this) {
     parse(p);
 }
 
@@ -68,8 +70,12 @@ const char* Rule::c_str() const {
 }
 
 bool Rule::is_terminal() const {
-    if (expression.size() != 1) return false;
-    if (expression.get_first_sequence().size() != 1) return false;
+    if (expression.size() != 1) {
+        return false;
+    }
+    if (expression.get_first_sequence().size() != 1) {
+        return false;
+    }
     return true;
 }
 
@@ -79,8 +85,8 @@ Group Rule::convert_to_group() const {
 
 bool Rule::contains_alternation() {
     return find_children<Alternation>([](const Alternation& alternation) -> bool {
-        return alternation.size() > 1;
-    }).size() > 0;
+               return alternation.size() > 1;
+           }).size() > 0;
 }
 
 bool Rule::contains_expand() {
@@ -92,17 +98,18 @@ int Rule::count_terms() {
 }
 
 int Rule::count_cc_tokens() {
-    std::vector<CharacterClass*> ccs = find_children<CharacterClass>([](const CharacterClass& cc) -> bool {
-        return !cc.any_char();
-    });
+    std::vector<CharacterClass*> ccs =
+        find_children<CharacterClass>([](const CharacterClass& cc) -> bool { return !cc.any_char(); });
     int count = 0;
-    for (CharacterClass* cc: ccs) count += cc->token_count();
+    for (CharacterClass* cc: ccs) {
+        count += cc->token_count();
+    }
     return count;
 }
 
 void Rule::update_captures() {
     std::vector<Capture*> captures = find_children<Capture>();
     for (int i = 0; i < captures.size(); i++) {
-        captures[i]->num = i+1;
+        captures[i]->num = i + 1;
     }
 }

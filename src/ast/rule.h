@@ -1,12 +1,13 @@
 #pragma once
-#include "ast/node.h"
 #include "ast/alternation.h"
+#include "ast/node.h"
 
 class Group;
 
-class Rule : public Node {
+class Rule: public Node {
     std::string name;
     Alternation expression;
+
 public:
     Rule(const std::string& name, const Alternation& expression, Node* parent);
     Rule(Parser& p, Node* parent);

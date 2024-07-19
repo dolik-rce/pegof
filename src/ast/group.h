@@ -5,8 +5,9 @@ class Alternation;
 class Sequence;
 class Term;
 
-class Group : public Node {
+class Group: public Node {
     std::shared_ptr<Alternation> expression;
+
 public:
     Group(const Alternation& expression, Node* parent);
     Group(Parser& p, Node* parent);

@@ -1,13 +1,15 @@
 #include "ast/alternation.h"
-#include "rule.h"
+
 #include "config.h"
 #include "log.h"
+#include "rule.h"
 
-Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent) : Node("Alternation", parent), sequences(sequences) {}
-Alternation::Alternation(Parser& p, Node* parent) : Node("Alternation", parent) {
+Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent):
+    Node("Alternation", parent), sequences(sequences) {}
+Alternation::Alternation(Parser& p, Node* parent): Node("Alternation", parent) {
     parse(p);
 }
-Alternation::Alternation(Node* parent) : Node("Alternation", parent) {}
+Alternation::Alternation(Node* parent): Node("Alternation", parent) {}
 
 void Alternation::parse(Parser& p) {
     debug("Parsing Alternation");
@@ -47,15 +49,17 @@ std::string Alternation::to_string(std::string indent) const {
 std::string Alternation::dump(std::string indent) const {
     std::string result = indent + "ALTERNATION" + "\n";
     for (int i = 0; i < sequences.size(); i++) {
-        if (i > 0) result += "\n";
+        if (i > 0) {
+            result += "\n";
+        }
         result += sequences[i].dump(indent + "  ");
     }
     return result;
 }
 
 bool Alternation::is_multiline() const {
-    return sequences.size() > Config::get<int>("wrap-limit")
-           || std::any_of(sequences.begin(), sequences.end(), ::is_multiline);
+    return sequences.size() > Config::get<int>("wrap-limit") ||
+           std::any_of(sequences.begin(), sequences.end(), ::is_multiline);
 }
 
 Sequence& Alternation::get(int index) {
@@ -100,9 +104,13 @@ void Alternation::erase(Sequence* s) {
 }
 
 bool operator==(const Alternation& a, const Alternation& b) {
-    if (a.size() != b.size()) return false;
+    if (a.size() != b.size()) {
+        return false;
+    }
     for (int i = 0; i < a.size(); i++) {
-        if (a.sequences[i] != b.sequences[i]) return false;
+        if (a.sequences[i] != b.sequences[i]) {
+            return false;
+        }
     }
     return true;
 }

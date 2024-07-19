@@ -2,7 +2,7 @@
 #include "ast/node.h"
 #include "ast/string.h"
 
-class CharacterClass : public Node {
+class CharacterClass: public Node {
     std::string content;
 
     using Token = std::pair<int, int>;
@@ -15,6 +15,7 @@ class CharacterClass : public Node {
     void parse_content(const std::string& str);
     void tokenize();
     void update_content();
+
 public:
     CharacterClass(const std::string& content, Node* parent);
     CharacterClass(Parser& p, Node* parent);

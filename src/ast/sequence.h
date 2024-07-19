@@ -2,8 +2,9 @@
 #include "ast/node.h"
 #include "ast/term.h"
 
-class Sequence : public Node {
+class Sequence: public Node {
     std::vector<Term> terms;
+
 public:
     Sequence(const std::vector<Term>& terms, Node* parent);
     Sequence(Parser& p, Node* parent);

@@ -1,10 +1,11 @@
 #include "ast/code.h"
-#include "config.h"
-#include "utils.h"
-#include "log.h"
 
-Code::Code(const std::string& content, Node* parent) : Node("Code", parent), content(content) {}
-Code::Code(Parser& p, Node* parent) : Node("Code", parent) {
+#include "config.h"
+#include "log.h"
+#include "utils.h"
+
+Code::Code(const std::string& content, Node* parent): Node("Code", parent), content(content) {}
+Code::Code(Parser& p, Node* parent): Node("Code", parent) {
     parse(p);
 }
 
@@ -31,7 +32,9 @@ void Code::parse(Parser& p) {
 
 std::string Code::to_string(std::string indent) const {
     std::string result = format_comments() + (comments.empty() ? "" : "\n");
-    if (!content.empty()) result += "%%\n";
+    if (!content.empty()) {
+        result += "%%\n";
+    }
     result += content;
     return result;
 }
