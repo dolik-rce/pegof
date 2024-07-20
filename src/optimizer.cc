@@ -5,6 +5,7 @@
 
 #include <set>
 #include <math.h>
+#include <sys/wait.h>
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
 
@@ -523,7 +524,7 @@ Grammar Optimizer::optimize() {
             std::string filename = TempDir::get("pass_" + std::to_string(pass) + ".peg");
             write_file(filename, g.to_string());
             int exit_code;
-            exit_code = system((debug_script + " " + filename).c_str());
+            exit_code = WEXITSTATUS(system((debug_script + " " + filename).c_str()));
             if (exit_code != 0) {
                 error("Debug script failed in pass %d! (exit_code=%d)", pass, exit_code);
             }
