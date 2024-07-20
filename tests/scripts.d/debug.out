@@ -1,0 +1,13 @@
+Running debug script scripts.d/debug.sh...
+Debug script called: /tmp/pegof_<random>/pass_1.peg
+Running debug script scripts.d/debug.sh...
+Debug script called: /tmp/pegof_<random>/pass_2.peg
+Running debug script scripts.d/debug.sh...
+Debug script called: /tmp/pegof_<random>/pass_3.peg
+Detected problem in /tmp/pegof_<random>/pass_3.peg:
+X <- A
+
+A <- B
+
+B <- "x"
+ERROR: Debug script failed in pass 3! (exit_code=42)

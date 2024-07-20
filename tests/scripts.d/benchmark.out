@@ -1,0 +1,9 @@
+Setup called: setup /tmp/pegof_<random>/output
+Teardown called: teardown /tmp/pegof_<random>/output
+Setup called: setup /tmp/pegof_<random>/output
+Teardown called: teardown /tmp/pegof_<random>/output
+         |      lines |      bytes |      rules |      terms |   duration |     memory
+---------+------------+------------+------------+------------+------------+-----------
+input    |   <number> |   <number> |   <number> |   <number> |   <number> |   <number>
+output   |   <number> |   <number> |   <number> |   <number> |   <number> |   <number>
+output % |  <number>% |  <number>% |  <number>% |  <number>% |  <number>% |  <number>%
