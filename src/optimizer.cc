@@ -5,6 +5,8 @@
 
 #include <set>
 #include <math.h>
+#include <errno.h>
+#include <string.h>
 #include <sys/wait.h>
 
 Optimizer::Optimizer(Grammar& g) : g(g) {}
@@ -523,12 +525,24 @@ Grammar Optimizer::optimize() {
             log(0, "Running debug script %s...", debug_script.c_str());
             std::string filename = TempDir::get("pass_" + std::to_string(pass) + ".peg");
             write_file(filename, g.to_string());
-            int exit_code;
-            exit_code = WEXITSTATUS(system((debug_script + " " + filename).c_str()));
-            if (exit_code != 0) {
-                error("Debug script failed in pass %d! (exit_code=%d)", pass, exit_code);
+
+            int ret = system((debug_script + " " + filename).c_str());
+
+            if (ret == -1) {
+                error("Debug script failed in pass %d: %s", pass, strerror(errno));
             }
-            log(2, "Debug script finished successfully.");
+
+            if (ret == 0) {
+                log(2, "Debug script finished successfully.");
+            } else {
+                if (WIFEXITED(ret)) {
+                    error("Debug script failed with exit code %d in pass %d", WEXITSTATUS(ret), pass);
+                } else if (WIFSIGNALED(ret)) {
+                    error("Debug script killed by signal %d in pass %d", WTERMSIG(ret), pass);
+                } else if (WIFSTOPPED(ret)) {
+                    error("Debug script stoped by signal %d in pass %d", WSTOPSIG(ret), pass);
+                }
+            }
         }
         pass++;
     }
