@@ -10,4 +10,4 @@ X <- A
 A <- B
 
 B <- "x"
-ERROR: Debug script failed in pass 3! (exit_code=42)
+ERROR: Debug script failed with exit code 42 in pass 3
