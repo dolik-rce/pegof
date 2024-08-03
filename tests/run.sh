@@ -22,8 +22,9 @@ EOF
     fi
     for CONF in "$1"/*.conf; do
         [ -e "$CONF" ] || continue
+        BASE="$(basename "$CONF" .conf)"
         echo
-        echo "@test \"$(dirname "$CONF") - $(basename "$CONF" .conf)\" {"
+        echo "@test \"$(dirname "$CONF") - $BASE\" {"
         INPUT=""
         [ -e "${CONF//.conf/.in}" ] && INPUT=" < ${CONF//.conf/.in}"
         echo "    run_test \"$CONF\" \"$(get_inputs "$CONF")\"$INPUT"
@@ -31,9 +32,13 @@ EOF
         [ -e "${CONF//.conf/.out}" ] && echo "    check_stdout \"${CONF//.conf/.out}\""
         mapfile -t OUTPUTS <<<"$(get_outputs "$CONF")"
         for OUTPUT in "${OUTPUTS[@]}"; do
-            [ -e "${OUTPUT//.tmp/.expected}" ] || continue
-            echo "    check_file \"${OUTPUT//.tmp/.expected}\" \"$OUTPUT\""
+            if [ -e "$OUTPUT.$BASE.expected" ]; then
+                echo "    check_file \"$OUTPUT.$BASE.expected\" \"$OUTPUT.tmp\""
+            elif [ -e "${OUTPUT//.tmp/.expected}" ]; then
+                echo "    check_file \"${OUTPUT//.tmp/.expected}\" \"$OUTPUT\""
+            fi
         done
+        echo "    clean_up \"$(get_inputs "$CONF")\""
         echo "}"
     done
 }
@@ -57,8 +62,10 @@ main() {
     export PEGOF="${PEGOF:-$BUILDDIR/pegof}"
     cd "$TESTDIR"
 
+    echo "Cleaning files from previous runs..."
     clean
 
+    echo "Generating tests..."
     for DIR in *.d; do
         # Do not generate test file if the directory already contains some
         ls "$DIR"/*.bats &> /dev/null && continue
@@ -66,7 +73,7 @@ main() {
     done
 
     echo "Running tests:"
-    bats "$@" ./*.d
+    bats "$@" "$PWD" "$PWD"/*.d
 }
 
 main "$@"

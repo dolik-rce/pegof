@@ -64,7 +64,7 @@ void process(const Config::OutputType& output_type, const std::string& input, co
         break;
     case Config::OT_AST:
         log(1, "Writing AST ...");
-        write_file(output, g.dump() + "\n");
+        write_file(output, g.dump());
         break;
     case Config::OT_PACKCC:
         if (output.empty()) error("Option -p/--packcc requires output to file, use -o/--output!");
