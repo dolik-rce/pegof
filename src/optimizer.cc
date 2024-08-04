@@ -75,6 +75,7 @@ int Optimizer::concat_character_classes() {
                         log(1, "Merging character classes: %s + %s", STR(t), STR(*prev_term));
                         cc1.merge(cc2);
                         a->erase(i+1);
+                        a->update_parents();
                         optimized++;
                     }
                 }
