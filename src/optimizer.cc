@@ -44,6 +44,7 @@ int Optimizer::concat_strings() {
                     log(1, "Merging adjacent strings: %s + %s", str.c_str(), prev_str->c_str());
                     str.append(prev_str->c_str());
                     s->erase(prev_term);
+                    s->update_parents();
                     optimized++;
                 }
                 prev_str = &str;
@@ -101,6 +102,7 @@ int optimize_repeating_terms(Term& t1, Term& t2) {
         if (a->size() > 1) {
             log(1, "Removing %s from %s", STR(*s), STR(*a));
             a->erase(s);
+            a->update_parents();
             return 0;
         } else {
             Optimizer::warn_once("Detected sequence that will never match: " + t1.to_string() + " " + t2.to_string());
