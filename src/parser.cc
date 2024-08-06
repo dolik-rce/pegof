@@ -59,9 +59,9 @@ bool Parser::match(char c) {
     return false;
 }
 
-bool Parser::match(const std::string& str) {
+bool Parser::match(const std::string& str, bool space) {
     State s(this);
-    skip_space();
+    if (space) skip_space();
     if (input.compare(pos, str.size(), str) == 0) {
         pos += str.size();
         return s.commit();
@@ -143,7 +143,7 @@ bool Parser::match_quoted(const char *left, const char *right) {
     skip_space();
     std::string result;
     if (match(left)) {
-        for (; !match(right); pos++) {
+        for (; !match(right, false); pos++) {
             if (match('\\')) {
                 switch (input[pos]) {
                 case '\x00': result += '\0'; break;
