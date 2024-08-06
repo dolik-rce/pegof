@@ -31,7 +31,7 @@ public:
     void skip_rest_of_line(bool continuable);
 
     bool match(char c);
-    bool match(const std::string& str);
+    bool match(const std::string& str, bool space = true);
     bool match_re(const std::string& r, bool space = true);
     bool match_any();
 

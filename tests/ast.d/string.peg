@@ -1,1 +1,1 @@
-X <- "double quoted" 'single quoted' "\n	"
+X <- "double quoted" 'single quoted' "\n'\"\\	"
