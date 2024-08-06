@@ -11,7 +11,7 @@ String::String(Parser& p, Node* parent) : Node("String", parent) {
 void String::parse(Parser& p) {
     debug("Parsing String");
     DebugIndent _;
-    if (p.match_quoted("\"", "\"") || p.match_quoted("'", "'")) {
+    if (p.match_string()) {
         content = p.last_match;
         valid = true;
     }

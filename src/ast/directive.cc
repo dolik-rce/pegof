@@ -29,7 +29,7 @@ void Directive::parse(Parser& p) {
         valid = true;
     } else if (p.match_re("%(value|auxil|prefix|import)")) {
         name = p.last_re_match.str(1);
-        if (p.match_quoted("\"", "\"") || p.match_quoted("'", "'")) {
+        if (p.match_string()) {
             value = trim(p.last_match);
         }
         code = false;

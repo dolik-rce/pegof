@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "log.h"
 #include "utils.h"
+#include "packcc_wrapper.h"
 
 Parser::State::State(Parser* p) : p(p), saved_pos(p->pos) {}
 
@@ -138,29 +139,14 @@ bool Parser::match_macro() {
     return false;
 }
 
-bool Parser::match_quoted(const char *left, const char *right) {
+bool Parser::match_string() {
     State s(this);
     skip_space();
-    std::string result;
-    if (match(left)) {
-        for (; !match(right, false); pos++) {
-            if (match('\\')) {
-                switch (input[pos]) {
-                case '\x00': result += '\0'; break;
-                case 'f': result += '\f'; break;
-                case 't': result += '\t'; break;
-                case 'v': result += '\v'; break;
-                case 'r': result += '\r'; break;
-                case 'n': result += '\n'; break;
-                case 'a': result += '\a'; break;
-                case 'b': result += '\b'; break;
-                default: result += input[pos];
-                }
-            } else {
-                result += input[pos];
-            }
+    if (peek('"') || peek('\'')) {
+        std::string result;
+        if (pcc_match_quoted(this, &result)) {
+            return s.commit(result);
         }
-        return s.commit(result);
     }
     return s.rollback();
 }
@@ -182,8 +168,7 @@ bool Parser::match_code() {
             match_macro() ||
             match_line_comment() ||
             match_block_comment() ||
-            match_quoted("\"", "\"") ||
-            match_quoted("\'", "\'")
+            match_string()
         ) continue;
         if (match('{')) {
             level++;

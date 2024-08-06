@@ -16,15 +16,6 @@ CharacterClass::CharacterClass(Parser& p, Node* parent) : Node("CharacterClass",
     parse(p);
 }
 
-static std::string unescape(const std::string& s) {
-    char* char_array = new char[s.size() + 1];
-    strcpy(char_array, s.c_str());
-    pcc_unescape_string(char_array, FALSE);
-    std::string result = char_array;
-    delete[] char_array;
-    return result;
-}
-
 static std::string to_char(int c) {
     if (c > 127) {
         std::stringstream ss;
@@ -60,19 +51,11 @@ static int get_char(const std::string& s, int& pos) {
     }
 }
 
-void CharacterClass::parse_content(Parser& p) {
+void CharacterClass::parse_content(const std::string& str) {
+    Parser p(str);
     negation = p.match('^');
     dash = p.match('-');
-    while (!p.is_eof()) {
-        if (p.match(']')) break;
-        content += p.current();
-        if (p.current() == '\\') {
-            p.match_any();
-            content += p.current();
-        }
-        p.match_any();
-    }
-    content = unescape(content);
+    content = str.substr(negation + dash);
     tokenize();
     update_content();
 }
@@ -100,8 +83,10 @@ void CharacterClass::parse(Parser& p) {
     p.skip_space();
     if (p.match('.')) {
         content = ".";
-    } else if (p.match('[')) {
-        parse_content(p);
+    } else if (p.peek('[')) {
+        std::string tmp;
+        pcc_match_quoted(&p, &tmp);
+        parse_content(tmp);
     } else {
         s.rollback();
         return;

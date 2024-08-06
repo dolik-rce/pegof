@@ -12,7 +12,7 @@ class CharacterClass : public Node {
     bool negation;
     Tokens tokens;
 
-    void parse_content(Parser& p);
+    void parse_content(const std::string& str);
     void tokenize();
     void update_content();
 public:
