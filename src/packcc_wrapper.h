@@ -26,4 +26,6 @@ bool_t pcc_unescape_string(char *str, bool_t cls);
 size_t pcc_utf8_to_utf32(const char *seq, int *out);
 
 bool_t pcc_process(const char *ipath, const char *opath, const string_array_t *dirs, const options_t *opts);
+
+bool_t pcc_match_quoted(void* parser, void* result);
 }

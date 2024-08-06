@@ -2,11 +2,17 @@
 #include <string>
 #include <regex>
 
+extern "C" {
+#include "capi.h"
+}
+
 class Parser {
     std::string input;
     unsigned long pos;
 
 public:
+    friend void convert_parser(void* parser, char** input, size_t* len, unsigned long* pos);
+    friend void update_parser(void* parser, unsigned long pos);
 
     struct State {
         Parser* p;
@@ -41,7 +47,7 @@ public:
     bool match_line_comment();
 
     bool match_macro();
-    bool match_quoted(const char *left, const char *right);
+    bool match_string();
     bool match_code();
 
     bool match_number();

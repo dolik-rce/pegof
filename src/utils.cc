@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "log.h"
+#include "packcc_wrapper.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -81,9 +82,13 @@ std::string find_file(const std::string& name, const std::vector<std::string> di
 }
 
 std::string to_c_string(std::string str, EscapeMode mode) {
+    unsigned long pos = 0;
+    int c = 0;
     std::string result;
-    for (int i = 0; i < str.size(); i++) {
-        switch (str[i]) {
+    while (pos < str.size()) {
+        std::stringstream stream;
+        int len = pcc_utf8_to_utf32(str.c_str() + pos, &c);
+        switch (c) {
         case '\x00': result += "\\0"; break;
         case '\x07': result += "\\a"; break;
         case '\x08': result += "\\b"; break;
@@ -96,14 +101,17 @@ std::string to_c_string(std::string str, EscapeMode mode) {
         case '\'':   result += (mode & ESCAPE_SINGLE_QUOTES) ? "\\'" : "'"; break;
         case '\"':   result += (mode & ESCAPE_DOUBLE_QUOTES) ? "\\\"" : "\""; break;
         default:
-            if (str[i] >= '\x20' && str[i] < '\x7f') {
-                result += str[i];
-            } else {
-                std::stringstream stream;
-                stream << std::setfill ('0') << std::setw(2) << std::hex << (int)(unsigned char)str[i];
+            if (c >= '\x20' && c < '\x7f') {
+                result += char(c);
+            } else if (c < '\x20') {
+                stream << std::setfill ('0') << std::setw(2) << std::hex << c;
                 result += "\\x" + stream.str();
+            } else {
+                stream << std::setfill ('0') << std::setw(4) << std::hex << c;
+                result += "\\u" + stream.str();
             }
         }
+        pos += len;
     }
     return result;
 }
@@ -146,4 +154,13 @@ std::string replace(const std::string& input, const std::string& re, const std::
 
 std::string left_pad(const std::string& s, int width) {
     return std::string(width - s.size(), ' ') + s;
+}
+
+std::string unescape(const std::string& s, bool character_class) {
+    char* char_array = new char[s.size() + 1];
+    strcpy(char_array, s.c_str());
+    pcc_unescape_string(char_array, character_class ? TRUE : FALSE);
+    std::string result = char_array;
+    delete[] char_array;
+    return result;
 }
