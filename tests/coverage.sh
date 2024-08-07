@@ -2,14 +2,19 @@
 
 set -e
 
-if ! which gcovr &> /dev/null; then
-    echo "Error: gcovr is not installed!"
+if ! which lcov &> /dev/null; then
+    echo "Error: lcov is not installed!"
     exit 1
 fi
 
 cd "$(dirname "$0")/.."
 tests/run.sh
 
-mkdir -p "tests/coverage"
-gcovr -s --calls -e '.*/packcc.c' -r "$PWD" . --html-details="tests/coverage/report.html"
-echo "Coverage report: file://$PWD/tests/coverage/report.html"
+COVDIR="$PWD/tests/coverage"
+mkdir -p "$COVDIR"
+rm -rf "$COVDIR"/*
+
+lcov --capture --rc lcov_branch_coverage=1 --base-directory "$PWD" --directory ./ --no-external --exclude "$PWD/packcc" --output "$COVDIR/lcov.info"
+genhtml --flat --show-navigation --header-title "Pegof test coverage" --legend -o tests/coverage "$COVDIR/lcov.info"
+
+echo "Coverage report: file://$COVDIR/index.html"

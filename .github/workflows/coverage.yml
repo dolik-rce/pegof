@@ -21,15 +21,23 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install cmake bats g++ gcovr lcov uncrustify
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install cmake bats g++ lcov uncrustify
     - name: Coverage
       run: |
         set -ex
         cmake -B "./build.d"
         cmake --build "./build.d" --target coverage --verbose
-        lcov --capture --base-directory "$PWD" --directory ./build.d --no-external --exclude "$PWD/packcc" --output ./lcov.info
+        mv tests/coverage/lcov.info tests/coverage/lcov_head.info
+    - name: Base branch coverage
+      run: |
+        set -ex
+        git fetch
+        git checkout origin/${{ github.event.pull_request.base.ref }}
+        cmake --build "./build.d" --target coverage --verbose
+        mv tests/coverage/lcov.info tests/coverage/lcov_base.info
     - uses: romeovs/lcov-reporter-action@v0.4.0
       with:
-        lcov-file: ./lcov.info
-        lcov-base: ./lcov.info
+        lcov-file: .tests/coverage/lcov_head.info
+        lcov-base: .tests/coverage/lcov_base.info
+        filter-changed-files: true
         delete-old-comments: true
