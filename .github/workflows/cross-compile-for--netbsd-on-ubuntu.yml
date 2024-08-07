@@ -1,0 +1,53 @@
+name: cross compile for NetBSD on Ubuntu
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://ftp.netbsd.org/pub/NetBSD/
+        netbsd-release-version: ['10.0', '9.4', '9.3', '9.2']
+
+    runs-on: ubuntu-latest
+
+    env:
+      CC:  clang   --target=amd64-unknown-netbsd --sysroot=${{ github.workspace }}/amd64-unknown-netbsd-sysroot
+      CXX: clang++ --target=amd64-unknown-netbsd --sysroot=${{ github.workspace }}/amd64-unknown-netbsd-sysroot
+      CFLAGS:   -fPIC -Os
+      CXXFLAGS: -fPIC -Os
+      LDFLAGS:  -flto -static -stdlib=libc++
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: sudo apt-get -y update
+      - run: sudo apt-get -y install curl cmake make clang
+
+      - run: install -d amd64-unknown-netbsd-sysroot
+
+      - name: install amd64-unknown-netbsd-sysroot
+        run: |
+          for item in base comp
+          do
+            FILENAME="$item.tar.xz"
+            curl -LO "https://ftp.netbsd.org/pub/NetBSD/NetBSD-${{ matrix.netbsd-release-version }}/amd64/binary/sets/$FILENAME"
+            tar vxf "$FILENAME" -C amd64-unknown-netbsd-sysroot
+          done
+
+      - run: printf 'INPUT(-lstdc++ -lgcc_eh)\n' > amd64-unknown-netbsd-sysroot/usr/lib/libc++.a
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON
+
+      - run: cmake --build build
+
+      - run: readelf -h build/pegof
+      - run: readelf -d build/pegof

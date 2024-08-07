@@ -1,0 +1,33 @@
+name: cross compile for Windows on Ubuntu
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build-machine-os: [ubuntu-24.04, ubuntu-22.04]
+        target: [i686-w64-mingw32,x86_64-w64-mingw32]
+
+    runs-on: ${{ matrix.build-machine-os }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-tags: true
+
+      - run: sudo apt-get -y update
+      - run: sudo apt-get -y install cmake make mingw-w64 file
+
+      - run: cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_COLOR_MAKEFILE=ON -DCMAKE_C_COMPILER=${{ matrix.target }}-gcc -DCMAKE_CXX_COMPILER=${{ matrix.target }}-g++
+
+      - run: cmake --build build
+
+      - run: file build/pegof.exe
+      - run: file build/pegof.exe | grep PE32
