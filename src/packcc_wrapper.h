@@ -22,7 +22,6 @@ void pcc_array_init(string_array_t *array);
 void pcc_array_add(string_array_t *array, const char *str, size_t len);
 void pcc_array_term(string_array_t *array);
 
-bool_t pcc_unescape_string(char *str, bool_t cls);
 size_t pcc_utf8_to_utf32(const char *seq, int *out);
 
 bool_t pcc_process(const char *ipath, const char *opath, const string_array_t *dirs, const options_t *opts);

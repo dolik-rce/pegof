@@ -84,13 +84,6 @@ bool Parser::match_re(const std::string& r, bool space) {
     return s.rollback();
 }
 
-bool Parser::match_any() {
-    if (is_eof()) return false;
-    last_match = std::string(1, input[pos]);
-    pos++;
-    return true;
-}
-
 void Parser::skip_rest_of_line(bool continuable) {
     while (!is_eof()) {
         if (continuable) match("\\\n");
@@ -197,20 +190,9 @@ bool Parser::peek(const char c) {
     return result;
 }
 
-bool Parser::peek(const std::string& str) {
-    State s(this);
-    bool result = match(str);
-    s.rollback();
-    return result;
-}
-
 bool Parser::peek_re(const std::string& r, bool space) {
     State s(this);
     bool result = match_re(r, space);
     s.rollback();
     return result;
-}
-
-char Parser::current() const {
-    return input[pos];
 }

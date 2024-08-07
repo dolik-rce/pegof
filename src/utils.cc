@@ -155,12 +155,3 @@ std::string replace(const std::string& input, const std::string& re, const std::
 std::string left_pad(const std::string& s, int width) {
     return std::string(width - s.size(), ' ') + s;
 }
-
-std::string unescape(const std::string& s, bool character_class) {
-    char* char_array = new char[s.size() + 1];
-    strcpy(char_array, s.c_str());
-    pcc_unescape_string(char_array, character_class ? TRUE : FALSE);
-    std::string result = char_array;
-    delete[] char_array;
-    return result;
-}

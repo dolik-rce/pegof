@@ -39,7 +39,6 @@ public:
     bool match(char c);
     bool match(const std::string& str, bool space = true);
     bool match_re(const std::string& r, bool space = true);
-    bool match_any();
 
     bool match_comment();
 
@@ -54,8 +53,5 @@ public:
     bool match_identifier();
 
     bool peek(const char c);
-    bool peek(const std::string& str);
     bool peek_re(const std::string& r, bool space = true);
-
-    char current() const;
 };

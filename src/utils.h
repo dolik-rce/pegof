@@ -38,4 +38,3 @@ std::string join(const std::vector<std::string> &v, const std::string& delimiter
 bool contains(std::vector<std::string> values, std::string x);
 std::string replace(const std::string& input, const std::string& re, const std::string& replace);
 std::string left_pad(const std::string& s, int width);
-std::string unescape(const std::string& s, bool character_class);

@@ -23,10 +23,6 @@ void pcc_array_term(string_array_t *array) {
     string_array__term(array);
 }
 
-bool_t pcc_unescape_string(char *str, bool_t cls) {
-    return unescape_string(str, cls);
-}
-
 size_t pcc_utf8_to_utf32(const char *seq, int *out) {
     return utf8_to_utf32(seq, out);
 }
