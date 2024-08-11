@@ -177,10 +177,6 @@ This application was written with readability and maintainability in mind. Speed
 Some of very big grammars (e.g. for [Kotlin language](https://github.com/universal-ctags/ctags/blob/master/peg/kotlin.peg))
 can take few minutes to process.
 
-### Unicode support
-
-This tool is currently lacking proper unicode support in many places. It might be added later.
-
 ## Building
 
 Pegof uses cmake. To build it just run:
@@ -194,15 +190,29 @@ cmake --build ./build --target test    # optional, but recommended
 Building on non-linux platforms has not been tested and might require some modifications to the process
 or even to the application itself.
 
-## Docker
+## Ready to use solutions
 
-If you just want to give pegof a quick try, without going through the hassle of compilation, you can use a docker image, e.g.:
+If you just want to give pegof a quick try, without going through the hassle of compilation, there are two simple options.
+
+### Online
+
+There is a slightly limited version of pegof running in browser, which you can find at <https://dolik-rce.github.io/pegof>.
+It is only intended as a playground, not for serious work.
+
+It uses the same code as the command-line, just compiled using [emscripten](https://emscripten.org/) to WebAssembly.
+This limits how it can be used, so some features are not available or do not make sense (e.g. operating on multiple files, imports or in-place changes).
+
+### Docker
+
+If you want to try full version of pegof, but still avoid compilation, you can use a docker image, e.g.:
 ```
 docker pull dolik/pegof:latest
 # running without arguments just prints usage information
 docker run dolik/pegof:latest
 # to optimize a grammar you can call it like this:
 docker run -i dolik/pegof:latest --verbose --optimize all < grammar.peg > optimized.peg
+# to format all grammars in a directory, you'll have to mount it:
+docker run -it -v "$PWD/grammars:/grammars" dolik/pegof:latest --verbose --inplace grammars/*.peg
 ```
 
 ## Acknowledgment
