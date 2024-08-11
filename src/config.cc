@@ -321,9 +321,6 @@ int Config::inc_verbosity() {
 }
 
 Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_NONE), verbosity(0), header(HM_AUTO) {
-    if (instance) {
-        error("Internal error, Config instance already exists!");
-    }
     instance = this;
 
     args = {

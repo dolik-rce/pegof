@@ -1,0 +1,6 @@
+start <- d* end 
+a <- "A"
+b <- [B]
+c <- [f-zxa-g]+
+d <- a b / c
+end <- !.

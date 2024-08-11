@@ -1,0 +1,35 @@
+name: Github pages
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Install dependencies
+      shell: bash
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install cmake python3 ca-certificates
+    - name: Build github pages
+      run: ./emscripten.sh build site
+    - name: Upload
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./site
+    - name: Deploy
+      uses: actions/deploy-pages@v4
+      with:
+        token: ${{ github.token }}
