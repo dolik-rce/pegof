@@ -14,7 +14,7 @@ fi
 . "$BUILDDIR"/emsdk/emsdk_env.sh
 
 emcmake cmake -B "$BUILDDIR" -DCMAKE_BUILD_TYPE=Release
-export EMCC_CFLAGS="-sEXPORTED_RUNTIME_METHODS=callMain,FS -Wno-unused-command-line-argument"
+export EMCC_CFLAGS="-sEXPORTED_RUNTIME_METHODS=callMain,FS -sMODULARIZE=1 -Wno-unused-command-line-argument"
 cmake --build "$BUILDDIR" -v
 
 mkdir -p "$SITEDIR"

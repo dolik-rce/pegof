@@ -5,7 +5,6 @@ let load = document.getElementById("load");
 let runBtn = document.getElementById("btnRun");
 let auto = document.getElementById("u");
 let peg = null;
-let loaded = false;
 let verbose = false;
 
 function log(...args) {
@@ -86,7 +85,6 @@ function deserializeState() {
 }
 
 function launch() {
-    FS.writeFile("/tmp/input.peg", input.value);
     output.innerHTML = "";
     logs.innerHTML = "";
 
@@ -104,16 +102,31 @@ function launch() {
     runBtn.innerText = "Running ...";
     serializeState();
     stats("run", "Pegof was run");
-    setTimeout(() => {
-        Module.callMain(options);
-        runBtn.disabled = false;
-        runBtn.innerText = "Run!";
+    setTimeout(async () => {
+        try {
+            let module = await Module({
+                noInitialRun: true,
+                onRuntimeInitialized: () => {
+                    handleException = () => log("Pegof failed");
+                },
+
+                print: line => output.innerHTML += line + "\n",
+                printErr: line => logs.innerHTML += line + "\n"
+            });
+            module.FS.writeFile("/tmp/input.peg", input.value);
+            module.callMain(options);
+        } catch (e) {
+            log("Pegof failed:", e);
+        } finally {
+            runBtn.disabled = false;
+            runBtn.innerText = "Run!";
+        }
     }, 1);
 }
 
 function launchAuto() {
-    log("launchAuto:", auto.checked, loaded, input.value != "");
-    if (auto.checked && loaded && input.value != "") {
+    log("launchAuto:", auto.checked, input.value != "");
+    if (auto.checked && input.value != "") {
         launch();
     }
 }
@@ -123,7 +136,7 @@ function loadPeg() {
     fetch(load.value)
         .then(response => response.text())
         .then(data => {
-            input.innerHTML = data;
+            input.value = data;
             peg = data;
             log("Loaded", load.value, data.substr(0, 50));
             stats("loaded-" + load.value, "Loaded " + load.value);
@@ -139,6 +152,7 @@ function init() {
 
     document.querySelectorAll(".opt").forEach(x => x.addEventListener("change", launchAuto));
     runBtn.addEventListener("click", launch);
+    document.addEventListener("DOMContentLoaded", launchAuto);
 
     let timer = null;
     input.addEventListener("keydown", () => clearTimeout(timer));
@@ -150,23 +164,6 @@ function init() {
             timer = setTimeout(launchAuto, 1000);
         }
     });
-
-    document.addEventListener("DOMContentLoaded", function() {
-    });
 }
-
-var Module = {
-    noInitialRun: true,
-    onRuntimeInitialized: () => {
-        log("Runtime initialized");
-        loaded = true;
-        runBtn.disabled = false;
-        runBtn.innerText = "Run!";
-        launchAuto();
-    },
-
-    print: line => output.innerHTML += line + "\n",
-    printErr: line => logs.innerHTML += line + "\n"
-};
 
 init();
