@@ -354,5 +354,6 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         std::exit(0);
     }
     process_args(arguments, false);
+    log(3, "Running pegof %s with arguments: %s", pegof_version.c_str(), join(arguments, " ").c_str());
     post_process();
 }
