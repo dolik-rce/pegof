@@ -10,7 +10,7 @@
 Grammar parse(const std::string& input, const Checker& checker) {
     std::string content = read_file(input);
     if (content.empty()) {
-        error("Failed to read grammar '%s'", input.c_str());
+        error(PARSING_ERROR, "Failed to read grammar '%s'", input.c_str());
     }
 
     log(1, "Validating input grammar ...");
@@ -20,7 +20,7 @@ Grammar parse(const std::string& input, const Checker& checker) {
     Parser peg(content);
     Grammar g(peg, input);
     if (!g) {
-        error("Failed to parse grammar!");
+        error(PARSING_ERROR, "Failed to parse grammar!");
     }
     return g;
 }
@@ -67,9 +67,11 @@ void process(const Config::OutputType& output_type, const std::string& input, co
         write_file(output, g.dump());
         break;
     case Config::OT_PACKCC:
-        if (output.empty()) error("Option -p/--packcc requires output to file, use -o/--output!");
+        if (output.empty()) error(INVALID_ARG, "Option -p/--packcc requires output to file, use -o/--output!");
         log(1, "Processing with PackCC ...");
-        checker.packcc(result, output);
+        if (!checker.packcc(result, output)) {
+            throw 10;
+        }
         log(1, "Parser was generated in %s.{h,c}", output.c_str());
         break;
     }

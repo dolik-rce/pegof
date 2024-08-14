@@ -57,7 +57,7 @@ std::string Term::to_string(const Primary& x, const std::string& indent) const {
     case 6: return std::get_if<Group>(&x)->as<Group>()->to_string(indent);
     case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string(indent);
     default:
-        error("unsupporrted type!");
+        error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 
@@ -71,7 +71,7 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
     case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
     default:
-        error("unsupporrted type!");
+        error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 
@@ -107,7 +107,7 @@ bool Term::is_multiline() const {
     if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary))->is_multiline();
     if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary))->is_multiline();
     if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary))->is_multiline();
-    error("unsupported type!");
+    error(INTERNAL_ERROR, "unsupported type!");
 }
 
 Node* Term::operator[](int index) {
@@ -119,9 +119,9 @@ Node* Term::operator[](int index) {
         if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
         if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
         if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary));
-        error("unsupported type!");
+        error(INTERNAL_ERROR, "unsupported type!");
     } else {
-        error("index out of bounds!");
+        error(INTERNAL_ERROR, "index out of bounds!");
     }
 }
 

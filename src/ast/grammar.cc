@@ -44,7 +44,7 @@ void Grammar::parse(Parser& p) {
                     ? find_file(name, Config::get_all_imports_dirs(input_file))
                     : name;
                 if (path.empty()) {
-                    error("File '%s' not found", d.get_value().c_str());
+                    error(IO_ERROR, "File '%s' not found", d.get_value().c_str());
                 }
                 log(1, "Importing file '%s'...", path.c_str());
                 Parser parser(read_file(path));
@@ -66,7 +66,7 @@ void Grammar::parse(Parser& p) {
             break;
         }
         debug("Grammar parsed so far:\n%s", dump().c_str());
-        error("Failed to parse grammar!");
+        error(PARSING_ERROR, "Failed to parse grammar!");
     }
     update_parents();
     valid = true;
@@ -85,7 +85,7 @@ std::string to_string(const TopLevel& node) {
     case 1: return std::get_if<Directive>(&node)->as<Directive>()->to_string();
     case 2: return std::get_if<Rule>(&node)->as<Rule>()->to_string();
     default:
-        error("unsupporrted type!");
+        error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 
@@ -94,7 +94,7 @@ std::string dump(const TopLevel& node, std::string indent) {
     case 1: return std::get_if<Directive>(&node)->as<Directive>()->dump(indent);
     case 2: return std::get_if<Rule>(&node)->as<Rule>()->dump(indent);
     default:
-        error("unsupporrted type!");
+        error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 
@@ -138,14 +138,14 @@ bool Grammar::is_multiline() const {
 
 Node* Grammar::operator[](int index) {
     if (index >= nodes.size()) {
-        error("index out of bounds!");
+        error(INTERNAL_ERROR, "index out of bounds!");
     }
     TopLevel& n = nodes[index];
     switch(n.index()) {
     case 1: return std::get_if<Directive>(&n)->as<Directive>();
     case 2: return std::get_if<Rule>(&n)->as<Rule>();
     default:
-        error("unsupporrted type!");
+        error(INTERNAL_ERROR, "unsupported type!");
     }
 }
 

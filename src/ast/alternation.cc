@@ -66,7 +66,7 @@ Node* Alternation::operator[](int index) {
     if (index < sequences.size()) {
         return &(sequences[index]);
     } else {
-        error("index out of bounds!");
+        error(INTERNAL_ERROR, "index out of bounds!");
     }
 }
 

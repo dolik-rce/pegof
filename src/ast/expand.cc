@@ -17,7 +17,7 @@ void Expand::parse(Parser& p) {
     } else if (p.match_number()) {
         content = std::stoi(p.last_match);
     } else {
-        error("expected number!");
+        error(PARSING_ERROR, "expected number!");
     }
     s.commit();
     valid = true;

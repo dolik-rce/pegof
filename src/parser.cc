@@ -154,7 +154,7 @@ bool Parser::match_code() {
     int level = 1;
     while (true) {
         if (is_eof()) {
-            error("Premature EOF in code block starting @%ul", s.saved_pos);
+            error(PARSING_ERROR, "Premature EOF in code block starting @%ul", s.saved_pos);
             return s.rollback();
         }
         if (

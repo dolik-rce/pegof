@@ -16,7 +16,7 @@ void Reference::parse(Parser& p) {
     std::string p1 = p.last_match;
     if (p.match(":")) {
         if (!p.match_identifier()) {
-            error("expected identifier!\n");
+            error(PARSING_ERROR, "expected identifier!\n");
         }
         std::string p2 = p.last_match;
         name = p2;
