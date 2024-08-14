@@ -56,7 +56,7 @@ Node* Capture::operator[](int index) {
     if (index == 0) {
         return (Node*)expression.get();
     } else {
-        error("index out of bounds!");
+        error(INTERNAL_ERROR, "index out of bounds!");
     }
 }
 

@@ -68,7 +68,7 @@ void Config::usage(const std::string& error_msg) {
 
     if (!error_msg.empty()) {
         log(0, "");
-        error("%s", error_msg.c_str());
+        error(INVALID_ARG, "%s", error_msg.c_str());
     }
 }
 
@@ -310,7 +310,7 @@ int Config::parse_header(const std::string& param) {
     } else if (param == "never") {
         header = HM_NEVER;
     } else {
-        error("Unknown value passed to --header: '%s'", param.c_str());
+        error(INVALID_ARG, "Unknown value passed to --header: '%s'", param.c_str());
     }
     return 1;
 }

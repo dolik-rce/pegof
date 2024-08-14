@@ -12,6 +12,14 @@ public:
     static void print();
 };
 
+enum ExitCode {
+    INVALID_ARG = 1,
+    IO_ERROR = 2,
+    SCRIPT_ERROR = 3,
+    INTERNAL_ERROR = 5,
+    PARSING_ERROR = 10
+};
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
 
@@ -40,11 +48,11 @@ void warn(const char* format, T... args) {
 }
 
 template <typename... T>
-void error [[noreturn]] (const char* format, T... args) {
+void error [[noreturn]] (ExitCode exit_code, const char* format, T... args) {
     fprintf(stderr, "ERROR: ");
     fprintf(stderr, format, args...);
     fprintf(stderr, "\n");
-    throw 1;
+    throw (int)exit_code;
 }
 
 #pragma GCC diagnostic pop

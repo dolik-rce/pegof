@@ -33,7 +33,7 @@ TempDir::TempDir() {
             return;
         }
     }
-    error("Failed to create temporary directory in '%s'!", fs::temp_directory_path().c_str());
+    error(IO_ERROR, "Failed to create temporary directory in '%s'!", fs::temp_directory_path().c_str());
 }
 
 TempDir::~TempDir() {

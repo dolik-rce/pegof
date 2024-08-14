@@ -80,7 +80,7 @@ Node* Sequence::operator[](int index) {
     if (index < terms.size()) {
         return &(terms[index]);
     } else {
-        error("index out of bounds!");
+        error(INTERNAL_ERROR, "index out of bounds!");
     }
 }
 

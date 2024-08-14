@@ -51,7 +51,7 @@ Node* Rule::operator[](int index) {
     if (index == 0) {
         return &expression;
     } else {
-        error("index out of bounds!");
+        error(INTERNAL_ERROR, "index out of bounds!");
     }
 }
 

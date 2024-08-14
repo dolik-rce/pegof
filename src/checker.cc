@@ -105,7 +105,7 @@ Stats Checker::stats(Grammar& g) const {
 bool Checker::validate(const std::string& input) const {
     std::string errors;
     if (!call_packcc(input, output, errors)) {
-        error("Failed to parse grammar by packcc:\n%s", errors.c_str());
+        error(PARSING_ERROR, "Failed to parse grammar by packcc:\n%s", errors.c_str());
     }
     return true;
 }
@@ -138,7 +138,7 @@ void Checker::benchmark(int& duration, int& memory) const {
     log(1, "Setting up benchmark environment.");
     exit_code = system((script + " setup " + output).c_str());
     if (exit_code != 0) {
-        error("Benchmark setup failed! (exit_code=%d)", exit_code);
+        error(SCRIPT_ERROR, "Benchmark setup failed! (exit_code=%d)", exit_code);
     }
 
     std::string out = TempDir::get("benchmark.out");
@@ -154,14 +154,13 @@ void Checker::benchmark(int& duration, int& memory) const {
     exit_code = system(cmd.c_str());
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     if (exit_code != 0) {
-        error("%s\n", read_file(out).c_str());
-        error("Benchmark script failed! (exit_code=%d)", exit_code);
+        error(SCRIPT_ERROR, "%s\nBenchmark script failed! (exit_code=%d)", read_file(out).c_str(), exit_code);
     }
 
     log(1, "Tearing down benchmark environment.");
     exit_code = system((script + " teardown " + output).c_str());
     if (exit_code != 0) {
-        error("Benchmark teardown failed! (exit_code=%d)", exit_code);
+        error(SCRIPT_ERROR, "Benchmark teardown failed! (exit_code=%d)", exit_code);
     }
     if (time.size()) {
         std::vector<std::string> lines = split(read_file(out), "\n");
