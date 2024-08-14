@@ -1,8 +1,6 @@
 #!/usr/bin/env bats
 load "$TESTDIR/utils.sh"
 
-PEGOF="${PEGOF/_test/}"
-
 @test "complex.d - kotlin format" {
     if [ -z "$INCLUDE_SLOW_TESTS" ]; then
         skip "slow test (set INCLUDE_SLOW_TESTS=1 to run this)"
