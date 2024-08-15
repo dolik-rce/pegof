@@ -81,12 +81,17 @@ std::string find_file(const std::string& name, const std::vector<std::string> di
     return "";
 }
 
+std::string to_hex(int number, int width) {
+    std::stringstream stream;
+    stream << std::setfill ('0') << std::setw(width) << std::hex << number;
+    return stream.str();
+}
+
 std::string to_c_string(std::string str, EscapeMode mode) {
     unsigned long pos = 0;
     int c = 0;
     std::string result;
     while (pos < str.size()) {
-        std::stringstream stream;
         int len = pcc_utf8_to_utf32(str.c_str() + pos, &c);
         switch (c) {
         case '\x00': result += "\\0"; break;
@@ -104,11 +109,16 @@ std::string to_c_string(std::string str, EscapeMode mode) {
             if (c >= '\x20' && c < '\x7f') {
                 result += char(c);
             } else if (c < '\x20') {
-                stream << std::setfill ('0') << std::setw(2) << std::hex << c;
-                result += "\\x" + stream.str();
+                result += "\\x" + to_hex(c, 2);
+            } else if (c <= 0xFFFF) {
+                // Use basic conversion for BMP characters
+                result += "\\u" + to_hex(c, 4);
             } else {
-                stream << std::setfill ('0') << std::setw(4) << std::hex << c;
-                result += "\\u" + stream.str();
+                // Calculate surrogate pairs for characters beyond BMP
+                int adjusted = c - 0x10000;
+                int high = (adjusted >> 10) + 0xD800;
+                int low = (adjusted & 0x3FF) + 0xDC00;
+                result += "\\u" + to_hex(high, 4) + "\\u" + to_hex(low, 4);
             }
         }
         pos += len;

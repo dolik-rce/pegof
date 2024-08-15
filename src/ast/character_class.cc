@@ -18,9 +18,7 @@ CharacterClass::CharacterClass(Parser& p, Node* parent) : Node("CharacterClass",
 
 static std::string to_char(int c) {
     if (c > 127) {
-        std::stringstream ss;
-        ss << "\\u" << std::setfill('0') << std::setw(4) << std::hex << c;
-        return ss.str();
+        return "\\u" + to_hex(c, 4);
     }
     switch (c) {
     case '\r': return R"(\r)";
