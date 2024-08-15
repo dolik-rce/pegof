@@ -340,7 +340,6 @@ int Optimizer::unused_captures() {
                 continue;
             }
             log(1, "Removing unused capture '%s' in rule %s.", STR(*captures[i]), rule->c_str());
-            ;
             Term* parent = captures[i]->get_parent<Term>();
             parent->set_content(captures[i]->convert_to_group());
             parent->update_parents();
@@ -356,6 +355,29 @@ int Optimizer::unused_captures() {
                     actions[j]->renumber_capture(k, k - 1);
                 }
             }
+            optimized++;
+            return true;
+        }
+        return false;
+    });
+}
+
+int Optimizer::empty_actions() {
+    return apply(O_EMPTY_ACTION, [](Node& node, int& optimized) -> bool {
+        Action* action = node.as<Action>();
+        if (action && action->is_empty()) {
+            Term* t = action->parent->as<Term>();
+            Sequence* s = t->parent->as<Sequence>();
+            log(1, "Removing empty action in '%s'.", STR(*s));
+            s->erase(t);
+            s->update_parents();
+            optimized++;
+            return true;
+        }
+        Term* term = node.as<Term>();
+        if (term && term->has_nonempty_error_action()) {
+            log(1, "Removing empty error action in '%s'.", STR(*term));
+            term->remove_error_action();
             optimized++;
             return true;
         }
@@ -545,6 +567,7 @@ Grammar Optimizer::optimize() {
         opts += concat_character_classes();
         opts += unused_variables();
         opts += unused_captures();
+        opts += empty_actions();
         if (opts) debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, STR(g));
         if (opts > 0 && !debug_script.empty()) {
             log(0, "Running debug script %s...", debug_script.c_str());

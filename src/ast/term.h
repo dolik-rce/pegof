@@ -47,7 +47,7 @@ public:
     bool is_optional() const;
     bool is_simple() const;
     bool is_negative() const;
-    bool has_error_action() const;
+    bool has_nonempty_error_action() const;
     bool error_action_contains_capture(int i) const;
     bool error_action_contains_any_capture() const;
 
@@ -61,6 +61,7 @@ public:
     void copy_prefix(const Term& other);
     void copy_quantifier(const Term& other);
     void copy_content(const Term& other);
+    void remove_error_action();
 
     friend bool operator==(const Term& a, const Term& b);
     friend int optimize_repeating_terms(Term& t1, Term& t2);

@@ -26,6 +26,7 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"concat-char-classes", O_CONCAT_CHAR_CLASSES},
     {"unused-variable", O_UNUSED_VARIABLE},
     {"unused-capture", O_UNUSED_CAPTURE},
+    {"empty-action", O_EMPTY_ACTION},
 };
 
 const std::map<Optimization, const char*> opt_descriptions = {
@@ -42,7 +43,8 @@ const std::map<Optimization, const char*> opt_descriptions = {
     {O_CONCAT_STRINGS, {"String concatenation: Join adjacent string nodes into one. E.g. `\"A\" \"B\"` becomes `\"AB\"`."}},
     {O_CONCAT_CHAR_CLASSES, {"Character class concatenation: Join adjacent character classes in alternations into one. E.g. `[AB] / [CD]` becomes `[ABCD]`."}},
     {O_UNUSED_VARIABLE, {"Removing unused variables: Variables denoted in grammar (e.g. `e:expression`) which are not used in any source oe error block are discarded."}},
-    {O_UNUSED_CAPTURE, {"Removing unused captures: Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded."}}
+    {O_UNUSED_CAPTURE, {"Removing unused captures: Captures denoted in grammar, which are not used in any source block, error block or referenced (via `$n`) are discarded."}},
+    {O_EMPTY_ACTION, {"Removing empty actions: Actions that contain only whitespace are discarded."}}
 };
 
 void Config::usage(const std::string& error_msg) {

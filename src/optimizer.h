@@ -19,6 +19,7 @@ class Optimizer {
     int remove_unnecessary_groups();
     int unused_variables();
     int unused_captures();
+    int empty_actions();
 public:
     static void warn_once(const std::string& warning);
 

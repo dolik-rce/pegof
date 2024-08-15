@@ -47,7 +47,7 @@ void Term::parse(Parser& p) {
     }
     if (p.match("~")) {
         error_action.emplace(p, this);
-        if (!error_action.valid) {
+        if (!error_action->valid) {
             error_action.reset();
             s.rollback();
             return;
@@ -107,8 +107,8 @@ std::string Term::dump(std::string indent) const {
     std::string result = indent + "TERM";
     if (prefix != 0) result += " " + std::string(1, prefix);
     if (quantifier != 0) result += " " + std::string(1, quantifier);
-    if (error_action) result += " " + error_action->dump("ERROR ");
     result += dump_comments() + "\n" + dump(primary, indent + "  ");
+    if (error_action) result += "\n" + error_action->dump(indent + "  ERROR ");
     return result;
 }
 
@@ -160,15 +160,15 @@ bool Term::is_optional() const {
 }
 
 bool Term::is_simple() const {
-    return !(prefix || quantifier || has_error_action());
+    return !(prefix || quantifier || error_action);
 }
 
 bool Term::is_negative() const {
     return prefix == '!';
 }
 
-bool Term::has_error_action() const {
-    return (bool)error_action;
+bool Term::has_nonempty_error_action() const {
+    return error_action && error_action->is_empty();
 }
 
 bool Term::error_action_contains_capture(int i) const {
@@ -213,6 +213,10 @@ void Term::copy_quantifier(const Term& other) {
 
 void Term::copy_content(const Term& other) {
     primary = other.primary;
+}
+
+void Term::remove_error_action() {
+    error_action.reset();
 }
 
 bool operator==(const Term& a, const Term& b) {
