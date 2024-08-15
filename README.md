@@ -86,6 +86,8 @@ as much as possible to reduce number of rules and terms.
 
 - `double-quantification` Removing double quantifications: If a single term is quantified twice, it is always possible to convert this into a single potfix operator with equel meaning (e.g. `(X+)?` -> `X*`).
 
+- `empty-action` Removing empty actions: Actions that contain only whitespace are discarded.
+
 - `inline` Rule inlining: Some simple rules can be inlined directly into rules that reference them. Reducing number of rules improves the speed of generated parser.
 
 - `none` No optimizations: Shorthand option for no optimizations.

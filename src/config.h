@@ -18,7 +18,8 @@ enum Optimization {
     O_CONCAT_CHAR_CLASSES = 512,
     O_UNUSED_VARIABLE = 1024,
     O_UNUSED_CAPTURE = 2048,
-    O_ALL = 4095
+    O_EMPTY_ACTION = 4096,
+    O_ALL = 8191
 };
 
 enum HeaderMode {
