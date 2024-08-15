@@ -6,3 +6,6 @@ GRAMMAR
           STRING X
         TERM
           ACTION printf(\"action!\\n\");
+        TERM
+          STRING Y
+          ERROR ACTION /* error action */

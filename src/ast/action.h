@@ -6,6 +6,7 @@ class Action : public Node {
     std::string code;
 public:
     Action(const std::string& code, Node* parent);
+    Action(const Action& action, Node* parent);
     Action(Parser& p, Node* parent);
 
     virtual void parse(Parser& p) override;
@@ -14,6 +15,7 @@ public:
     virtual std::string dump(std::string = "") const override;
     virtual bool is_multiline() const override;
 
+    bool is_empty() const;
     bool contains_reference(const Reference& ref) const;
     bool contains_capture(int i) const;
     bool contains_any_capture() const;

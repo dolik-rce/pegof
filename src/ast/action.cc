@@ -5,6 +5,7 @@
 #include <cstdint>
 
 Action::Action(const std::string& code, Node* parent) : Node("Action", parent), code(code) {}
+Action::Action(const Action& action, Node* parent) : Action(action.code, parent) {}
 Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
     parse(p);
 }
@@ -42,6 +43,10 @@ std::string Action::to_string(std::string indent) const {
 
 std::string Action::dump(std::string indent) const {
     return indent + "ACTION " + to_c_string(code);
+}
+
+bool Action::is_empty() const {
+    return std::regex_match(code, std::regex("\\s*"));
 }
 
 bool Action::is_multiline() const {
