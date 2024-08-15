@@ -15,9 +15,10 @@ using Primary = std::variant<std::monostate, String, Reference, CharacterClass, 
 class Term : public Node {
     char prefix;
     char quantifier;
+    std::optional<Action> error_action;
     Primary primary;
 public:
-    Term(char prefix, char quantifier, const Primary& primary, Node* parent);
+    Term(char prefix, char quantifier, const Primary& primary, const std::optional<Action>& error_action, Node* parent);
     Term(Parser& p, Node* parent);
 
     template<class T>
@@ -46,6 +47,9 @@ public:
     bool is_optional() const;
     bool is_simple() const;
     bool is_negative() const;
+    bool has_error_action() const;
+    bool error_action_contains_capture(int i) const;
+    bool error_action_contains_any_capture() const;
 
     bool same_prefix(const Term& t);
     bool same_quantifier(const Term& t);

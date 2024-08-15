@@ -1,1 +1,1 @@
-X <- "X" { printf("action!\n"); }
+X <- "X" { printf("action!\n"); } "Y" ~ { /* error action */ }

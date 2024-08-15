@@ -1,7 +1,10 @@
 #include "ast/term.h"
 #include "log.h"
+#include "utils.h"
 
-Term::Term(char prefix, char quantifier, const Primary& primary, Node* parent) : Node("Term", parent), prefix(prefix), quantifier(quantifier), primary(primary) {}
+Term::Term(char prefix, char quantifier, const Primary& primary, const std::optional<Action>& error_action, Node* parent)
+    : Node("Term", parent), prefix(prefix), quantifier(quantifier), error_action(error_action), primary(primary) {}
+
 Term::Term(Parser& p, Node* parent) : Node("Term", parent) {
     parse(p);
 }
@@ -41,6 +44,14 @@ void Term::parse(Parser& p) {
         quantifier = p.last_re_match.str(1)[0];
     } else {
         quantifier = 0;
+    }
+    if (p.match("~")) {
+        error_action.emplace(p, this);
+        if (!error_action.valid) {
+            error_action.reset();
+            s.rollback();
+            return;
+        }
     }
     parse_post_comment(p);
     s.commit();
@@ -83,6 +94,9 @@ std::string Term::to_string(std::string indent) const {
     if (prefix != 0) result += std::string(1, prefix);
     result += to_string(primary, indent);
     if (quantifier != 0) result += std::string(1, quantifier);
+    if (error_action) {
+        result += " ~ " + error_action->to_string();
+    }
     if (!post_comment.empty()) {
         result += " #" + post_comment;
     }
@@ -93,6 +107,7 @@ std::string Term::dump(std::string indent) const {
     std::string result = indent + "TERM";
     if (prefix != 0) result += " " + std::string(1, prefix);
     if (quantifier != 0) result += " " + std::string(1, quantifier);
+    if (error_action) result += " " + error_action->dump("ERROR ");
     result += dump_comments() + "\n" + dump(primary, indent + "  ");
     return result;
 }
@@ -145,11 +160,23 @@ bool Term::is_optional() const {
 }
 
 bool Term::is_simple() const {
-    return !prefix && !quantifier;
+    return !(prefix || quantifier || has_error_action());
 }
 
 bool Term::is_negative() const {
     return prefix == '!';
+}
+
+bool Term::has_error_action() const {
+    return (bool)error_action;
+}
+
+bool Term::error_action_contains_capture(int i) const {
+    return error_action && error_action->contains_capture(0);
+}
+
+bool Term::error_action_contains_any_capture() const {
+    return error_action && error_action->contains_any_capture();
 }
 
 void Term::flip_negation() {

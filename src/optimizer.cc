@@ -30,6 +30,12 @@ int Optimizer::apply(const Optimization& config, const std::function<bool(Node&,
     return optimized;
 }
 
+bool is_in_error_action(Node& node) {
+    return node.find_ancestors<Term>([](const Term& term) -> bool {
+        return term.error_action_contains_any_capture();
+    }).size() > 0;
+}
+
 int Optimizer::concat_strings() {
     // "A" "B" -> "AB"
     return apply(O_CONCAT_STRINGS, [](Node& node, int& optimized) -> bool {
@@ -43,11 +49,15 @@ int Optimizer::concat_strings() {
             if (t.is_simple() && t.contains<String>()) {
                 String& str = t.get<String>();
                 if (prev_str) {
-                    log(1, "Merging adjacent strings: %s + %s", str.c_str(), prev_str->c_str());
-                    str.append(prev_str->c_str());
-                    s->erase(prev_term);
-                    s->update_parents();
-                    optimized++;
+                    if (is_in_error_action(t)) {
+                        log(2, "Not merging adjacent strings (%s + %s), because they might be referenced in error action");
+                    } else {
+                        log(1, "Merging adjacent strings: %s + %s", str.c_str(), prev_str->c_str());
+                        str.append(prev_str->c_str());
+                        s->erase(prev_term);
+                        s->update_parents();
+                        optimized++;
+                    }
                 }
                 prev_str = &str;
                 prev_term = &t;
@@ -75,11 +85,15 @@ int Optimizer::concat_character_classes() {
                     CharacterClass& cc1 = t.get<CharacterClass>();
                     CharacterClass& cc2 = prev_term->get<CharacterClass>();
                     if (cc1.is_negative() == cc2.is_negative() && !cc1.any_char() && !cc1.any_char()) {
-                        log(1, "Merging character classes: %s + %s", STR(t), STR(*prev_term));
-                        cc1.merge(cc2);
-                        a->erase(i+1);
-                        a->update_parents();
-                        optimized++;
+                        if (is_in_error_action(t)) {
+                            log(2, "Not merging character classes (%s + %s), because they might be referenced in error action", STR(t), STR(*prev_term));
+                        } else {
+                            log(1, "Merging character classes: %s + %s", STR(t), STR(*prev_term));
+                            cc1.merge(cc2);
+                            a->erase(i+1);
+                            a->update_parents();
+                            optimized++;
+                        }
                     }
                 }
                 prev_term = &t;
@@ -393,6 +407,14 @@ int Optimizer::inline_rules() {
         }).empty();
         if (contains_full_rule_ref) {
             log(2, "Not inlining %s: rule contains action with '$0'", rule.c_str());
+            continue;
+        }
+
+        bool err_contains_full_rule_ref = !rule.find_children<Term>([rule](const Term& term) -> bool {
+            return term.error_action_contains_capture(0);
+        }).empty();
+        if (err_contains_full_rule_ref) {
+            log(2, "Not inlining %s: rule contains error action with '$0'", rule.c_str());
             continue;
         }
 
