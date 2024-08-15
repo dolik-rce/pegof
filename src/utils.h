@@ -24,6 +24,7 @@ enum EscapeMode {
     ESCAPE_ALL = ESCAPE_SINGLE_QUOTES | ESCAPE_DOUBLE_QUOTES
 };
 
+std::string to_hex(int number, int width);
 std::string to_c_string(std::string str, EscapeMode mode = ESCAPE_ALL);
 
 enum TrimType {
