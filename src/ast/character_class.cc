@@ -17,8 +17,15 @@ CharacterClass::CharacterClass(Parser& p, Node* parent) : Node("CharacterClass",
 }
 
 static std::string to_char(int c) {
-    if (c > 127) {
+    if ( c >= 0x80 && c <= 0xffff ) {
         return "\\u" + to_hex(c, 4);
+    }
+    if (c > 0xffff) {
+        // Calculate surrogate pairs for characters beyond BMP
+        int adjusted = c - 0x10000;
+        int high = (adjusted >> 10) + 0xD800;
+        int low = (adjusted & 0x3FF) + 0xDC00;
+        return "\\u" + to_hex(high, 4) + "\\u" + to_hex(low, 4);
     }
     switch (c) {
     case '\r': return R"(\r)";
@@ -28,10 +35,8 @@ static std::string to_char(int c) {
     case '\f': return R"(\f)";
     case '[': return R"(\[)";
     case ']': return R"(\])";
-    case '^': return R"(\^)";
-    case '-': return R"(\-)";
     case '\\': return R"(\\)";
-    default: return std::string(1, (char)c);
+    default: return (c < 0x20) ? ("\\x" + to_hex(c, 2)) : std::string(1, (char)c);
     }
 }
 
@@ -44,7 +49,7 @@ static int get_char(const std::string& s, int& pos) {
     switch (s[pos]) {
     case '[': pos++; return '[';
     case ']': pos++; return ']';
-    case '\\': pos++; return '\\';
+    case '^': pos++; return '^';
     default: return result;
     }
 }
@@ -100,18 +105,17 @@ void CharacterClass::update_content() {
 
     for (size_t i = 0; i<tokens.size(); i++) {
         size_t size = tokens[i].second - tokens[i].first;
+        std::string first = (i == 0 && tokens[i].first == '^') ? "\\^" : to_char(tokens[i].first);
+        std::string second = to_char(tokens[i].second);
         switch (size) {
         case 0:
-            content += to_char(tokens[i].first);
+            content += first;
             break;
         case 1:
-            content += to_char(tokens[i].first);
-            content += to_char(tokens[i].second);
+            content += first + second;
             break;
         default:
-            content += to_char(tokens[i].first);
-            content += '-';
-            content += to_char(tokens[i].second);
+            content += first + '-' + second;
             break;
         }
     }
