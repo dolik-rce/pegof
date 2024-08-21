@@ -20,7 +20,7 @@ as much as possible to reduce number of rules and terms.
 
 `-c/--conf FILE` Use given configuration file
 
-`-v/--verbose` Verbose logging to stderr (repeat for even more verbose output)
+`-v/--verbose [LEVEL]` Increase verbosity of logging by LEVEL (defaults to 1), may be repeated
 
 `-d/--debug` Output very verbose debug info, implies max verbosity
 

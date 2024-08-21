@@ -47,6 +47,7 @@ struct Config {
 
     typedef int (Config::*MemberFn)();
     typedef int (Config::*MemberFn1)(const std::string&);
+    typedef int (Config::*MemberFnOpt1)(const std::string&, int optional);
 
     enum OptionGroup {
         OG_BASIC,
@@ -98,7 +99,7 @@ private:
     int parse_optimize(const std::string& param);
     int parse_header(const std::string& param);
     int parse_exclude(const std::string& param);
-    int inc_verbosity();
+    int set_verbosity(const std::string& next, int);
 
     Option& find_option(const std::string& optionName);
 

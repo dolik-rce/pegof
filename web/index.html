@@ -70,15 +70,7 @@
                     </tr>
                     <tr title="Verbose logging to stderr">
                         <td>Verbosity:</td>
-                        <td>
-                            <select class="opt">
-                                <option id="v0" value="">Errors only</option>
-                                <option id="v1" value="-v" selected data-default>Low</option>
-                                <option id="v2" value="-v -v">More</option>
-                                <option id="v3" value="-v -v -v">Even more</option>
-                                <option id="v4" value="-v -v -v -v">Highest</option>
-                            </select>
-                        </td>
+                        <td><input id="v" class="opt" type="number" data-opt="-v" data-default="1" value="1" min="0" max="4"></input></td>
                     </tr>
                     <tr title="Output very verbose debug info, implies max verbosity">
                         <td>Debug:</td>

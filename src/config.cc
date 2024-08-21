@@ -165,6 +165,8 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
                     usage(arg + " requires an argument");
                 }
                 i += (this->*(std::any_cast<MemberFn1>(opt.value)))(next);
+            } else if (opt.value.type() == typeid(MemberFnOpt1)) {
+                i += (this->*(std::any_cast<MemberFnOpt1>(opt.value)))(next, 0);
             } else if (opt.value.type() == typeid(OutputType)) {
                 output_type = std::any_cast<OutputType>(opt.value);
             } else if (opt.value.type() == typeid(QuoteType)) {
@@ -317,9 +319,14 @@ int Config::parse_header(const std::string& param) {
     return 1;
 }
 
-int Config::inc_verbosity() {
-    verbosity++;
-    return 0;
+int Config::set_verbosity(const std::string& next, int) {
+    if (next.size() > 0 && std::all_of(next.begin(), next.end(), ::isdigit)) {
+        verbosity += std::stoi(next);
+        return 1;
+    } else {
+        verbosity++;
+        return 0;
+    }
 }
 
 Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_NONE), verbosity(0), header(HM_AUTO) {
@@ -329,7 +336,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_BASIC, "h", "help", &Config::help, "Show help (this text)"),
         Option(OG_BASIC, "V", "version", &Config::version, "Show version and exit"),
         Option(OG_BASIC, "c", "conf", &Config::load_config, "Use given configuration file", "FILE"),
-        Option(OG_BASIC, "v", "verbose", &Config::inc_verbosity, "Verbose logging to stderr (repeat for even more verbose output)"),
+        Option(OG_BASIC, "v", "verbose", &Config::set_verbosity, "Increase verbosity of logging by LEVEL (defaults to 1), may be repeated", "[LEVEL]"),
         Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),
         Option(OG_BASIC, "S", "skip-validation", false, "Skip result validation (useful only for debugging purposes)"),
         Option(OG_BASIC, "b", "benchmark", std::string(), "Benchmarking script, see documentation for details", "SCRIPT"),
