@@ -50,3 +50,10 @@ check_stdout() {
 check_file() {
     diff --strip-trailing-cr -u "$1" "$2"
 }
+
+check_bats_version() {
+    version="$(bats --version | cut -d" " -f2)"
+    major="$(echo "$version" | cut -d. -f1 | grep -oE '[0-9]+$')"
+    minor="$(echo "$version" | cut -d. -f2)"
+    [ "$major" -gt $1 ] || { [ "$major" -eq $1 ] && [ "$minor" -ge $2 ]; }
+}

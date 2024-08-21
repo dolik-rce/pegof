@@ -9,13 +9,6 @@ check_uncrustify_version() {
     [ "$major" -gt 0 ] || { [ "$major" -eq 0 ] && [ "$minor" -ge 72 ]; }
 }
 
-check_bats_version() {
-    version="$(bats --version | cut -d" " -f2)"
-    major="$(echo "$version" | cut -d. -f1 | grep -oE '[0-9]+$')"
-    minor="$(echo "$version" | cut -d. -f2)"
-    [ "$major" -gt 1 ] || { [ "$major" -eq 1 ] && [ "$minor" -ge 11 ]; }
-}
-
 test_code_style() {
     if ! command -v "uncrustify" &> /dev/null; then
         skip "uncrustify is not installed"
@@ -28,7 +21,7 @@ test_code_style() {
     fi
 }
 
-if check_bats_version; then
+if check_bats_version 1 11; then
     # nice looking version, that tests each file separately (requires bats 1.11.0 or newer)
     BTF="bats_test_function"
     for FILE in "$ROOTDIR"/src{,/ast}/*.{h,cc}; do
