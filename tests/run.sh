@@ -23,14 +23,17 @@ EOF
     for CONF in "$1"/*.conf; do
         [ -e "$CONF" ] || continue
         BASE="$(basename "$CONF" .conf)"
+        mapfile -t INPUTS <<<"$(get_inputs "$CONF")"
+        mapfile -t OUTPUTS <<<"$(get_outputs "$CONF")"
         echo
         echo "@test \"$(dirname "$CONF") - $BASE\" {"
+        echo "    # inputs: ${INPUTS[*]}"
+        echo "    # outputs: ${OUTPUTS[*]}"
         INPUT=""
         [ -e "${CONF//.conf/.in}" ] && INPUT=" < ${CONF//.conf/.in}"
         echo "    run_test \"$CONF\" \"$(get_inputs "$CONF")\"$INPUT"
         echo "    check_status ${CONF//.conf/}.status"
         [ -e "${CONF//.conf/.out}" ] && echo "    check_stdout \"${CONF//.conf/.out}\""
-        mapfile -t OUTPUTS <<<"$(get_outputs "$CONF")"
         for OUTPUT in "${OUTPUTS[@]}"; do
             if [ -e "$OUTPUT.$BASE.expected" ]; then
                 echo "    check_file \"$OUTPUT.$BASE.expected\" \"$OUTPUT.tmp\""
@@ -38,7 +41,7 @@ EOF
                 echo "    check_file \"${OUTPUT//.tmp/.expected}\" \"$OUTPUT\""
             fi
         done
-        echo "    clean_up \"$(get_inputs "$CONF")\""
+        echo "    clean_up \"$(IFS=$'\n'; echo "${INPUTS[*]}")\""
         echo "}"
     done
 }

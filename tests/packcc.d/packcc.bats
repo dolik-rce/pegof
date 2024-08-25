@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 load "$TESTDIR/utils.sh"
 
+export BATS_NO_PARALLELIZE_WITHIN_FILE=true
 PCC_TEST_DIR="$PWD/../packcc/tests"
 mapfile -t TESTS < <(cd "$PCC_TEST_DIR"; ls -d -- *.d)
 
