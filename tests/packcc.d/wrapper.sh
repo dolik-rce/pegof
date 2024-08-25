@@ -19,5 +19,4 @@ if [ "$OPTIMIZE" = "1" ]; then
     ARGS+=(-O all)
 fi
 
-echo "RUNNING: $PEGOF ${ARGS[*]}" >> /dev/stderr
 "$PEGOF" "${ARGS[@]}"

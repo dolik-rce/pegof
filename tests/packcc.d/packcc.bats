@@ -14,11 +14,15 @@ if check_bats_version 1 11; then
     BTF="bats_test_function"
     for TEST in "${TESTS[@]}"; do
         if ! ls "$PCC_TEST_DIR/$TEST"/*.peg &> /dev/null; then
-            # There!s no point in running tests that do not have any grammar (e.g. code style).
+            # There's no point in running tests that do not have any grammar (e.g. code style).
             continue
         fi
         if ls "$PCC_TEST_DIR/$TEST"/*.bats &> /dev/null && grep -qEe "--debug|--lines" "$PCC_TEST_DIR/$TEST"/*.bats; then
             # Tests with --lines and --debug can't be used, because the file content is different after pegof processes it
+            continue
+        fi
+        if [ "$TEST" = "issue_78.d" ]; then
+            # This test checks exact error message in the output, which is different, when run via pegof.
             continue
         fi
         $BTF --description "packcc.d - ${TEST/.d/} formatted" -- run_wrapped "$TEST" 0
