@@ -8,7 +8,6 @@ on:
 
 jobs:
   testing:
-
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +21,6 @@ jobs:
       COMPILER: ${{ matrix.compiler }}
       DEBIAN_FRONTEND: noninteractive
       CMAKE_BUILD_TYPE: Release
-
     steps:
     - uses: actions/checkout@v4
       with:
@@ -54,3 +52,37 @@ jobs:
     - name: Test
       shell: bash
       run: cmake --build "./$BUILDDIR" --target test --verbose
+
+  slow_tests:
+    runs-on: 'ubuntu-24.04'
+    env:
+      BUILDDIR: build.d
+      DEBIAN_FRONTEND: noninteractive
+      CMAKE_BUILD_TYPE: Release
+      INCLUDE_SLOW_TESTS: "1"
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Install dependencies
+      shell: bash
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install g++ cmake make parallel curl
+        curl -OL http://azure.archive.ubuntu.com/ubuntu/pool/universe/b/bats/bats_1.11.0-1_all.deb
+        sudo dpkg -i bats_1.11.0-1_all.deb
+    - name: Build
+      shell: bash
+      run: |
+        set -ex
+        cmake -C "g++.cmake" -B "./$BUILDDIR"
+        cmake --build "./$BUILDDIR" --verbose
+    - name: Run all tests
+      shell: bash
+      run: |
+        set -ex
+        git config --global --add safe.directory "$PWD/tests/ctags.d/ctags.git"
+        BUILDDIR="$PWD/$BUILDDIR" ./tests/run.sh -j $(nproc || echo "1")
