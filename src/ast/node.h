@@ -7,7 +7,7 @@
 #include "parser.h"
 
 class Node {
-public:
+protected:
     bool valid;
     Node* parent;
     Node(const char* type, Node* parent);
@@ -17,6 +17,7 @@ public:
     std::vector<std::string> comments;
     std::string post_comment;
 
+public:
     virtual void parse(Parser& p) = 0;
     virtual std::string to_string(std::string indent = "") const = 0;
     virtual std::string dump(std::string indent = "") const = 0;

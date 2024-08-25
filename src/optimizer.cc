@@ -113,7 +113,7 @@ int optimize_repeating_terms(Term& t1, Term& t2) {
     if (t1.is_greedy() && t2.is_optional()) {
         return 2; // delete t2
     } else if (t1.is_greedy() && !t2.is_optional()) {
-        Alternation* a = s->parent->as<Alternation>();
+        Alternation* a = s->get_parent<Alternation>();
         // TODO: implement recursive erase, to avoid this ugly if
         if (a->size() > 1) {
             log(1, "Removing %s from %s", STR(*s), STR(*a));
@@ -282,7 +282,7 @@ int Optimizer::remove_unnecessary_groups() {
         if (t->is_simple()) {
             // A (B C) D -> A B C D
             log(1, "Removing grouping from '%s'", STR(*t));
-            Sequence* s = t->parent->as<Sequence>();
+            Sequence* s = t->get_parent<Sequence>();
             int pos;
             for (pos = 0; pos < s->size(); pos++) {
                 if (&(s->get(pos)) == t) break;
@@ -366,8 +366,8 @@ int Optimizer::empty_actions() {
     return apply(O_EMPTY_ACTION, [](Node& node, int& optimized) -> bool {
         Action* action = node.as<Action>();
         if (action && action->is_empty()) {
-            Term* t = action->parent->as<Term>();
-            Sequence* s = t->parent->as<Sequence>();
+            Term* t = action->get_parent<Term>();
+            Sequence* s = t->get_parent<Sequence>();
             log(1, "Removing empty action in '%s'.", STR(*s));
             s->erase(t);
             s->update_parents();
@@ -471,7 +471,7 @@ int Optimizer::inline_rules() {
 
         log(1, "Inlining rule %s (score %f)", rule.c_str(), best_score);
         for (int j = 0; j < refs.size(); j++) {
-            Term* dest = refs[j]->parent->as<Term>();
+            Term* dest = refs[j]->get_parent<Term>();
             Group group = rule.convert_to_group();
             log(2, "  Inlining %s into %s", STR(group), STR(*dest));
             dest->set_content(group);

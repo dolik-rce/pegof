@@ -47,7 +47,7 @@ void Term::parse(Parser& p) {
     }
     if (p.match("~")) {
         error_action.emplace(p, this);
-        if (!error_action->valid) {
+        if (!*error_action) {
             error_action.reset();
             s.rollback();
             return;
