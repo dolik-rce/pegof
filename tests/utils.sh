@@ -1,20 +1,25 @@
 run_test() {
     echo "CMD: $PEGOF -c $1" > /dev/stderr
-    mapfile -t INPUTS <<<"$2"
-    for INPUT in "${INPUTS[@]}"; do
-        [ "$INPUT" ] || continue
-        cp "$INPUT" "$INPUT".backup
-    done
+    INPLACE="$(grep -q inplace "$1" && echo "1" || echo "0")"
+    if [ "$INPLACE" = 1 ]; then
+        mapfile -t INPUTS <<<"$2"
+        for INPUT in "${INPUTS[@]}"; do
+            [ "$INPUT" ] || continue
+            cp "$INPUT" "$INPUT".backup
+        done
+    fi
     run "$PEGOF" -c "$1"
-    for INPUT in "${INPUTS[@]}"; do
-        [ "$INPUT" ] || continue
-        if ! cmp -s "$INPUT.backup" "$INPUT"; then
-            cp "$INPUT" "$INPUT.tmp"
-            mv -f "$INPUT.backup" "$INPUT"
-        else
-            rm -f "$INPUT.backup"
-        fi
-    done
+    if [ "$INPLACE" = 1 ]; then
+        for INPUT in "${INPUTS[@]}"; do
+            [ "$INPUT" ] || continue
+            if ! cmp -s "$INPUT.backup" "$INPUT"; then
+                cp "$INPUT" "$INPUT.tmp"
+                mv -f "$INPUT.backup" "$INPUT"
+            else
+                rm -f "$INPUT.backup"
+            fi
+        done
+    fi
 }
 
 clean_up() {

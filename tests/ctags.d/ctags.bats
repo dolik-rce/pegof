@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 load "$TESTDIR/utils.sh"
 
+export BATS_NO_PARALLELIZE_WITHIN_FILE=true
 REPO="$PWD/ctags.d/ctags.git"
 CPU="$(nproc || echo 1)"
 
