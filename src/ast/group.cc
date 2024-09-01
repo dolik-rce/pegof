@@ -34,7 +34,7 @@ void Group::parse(Parser& p) {
 std::string Group::to_string(std::string indent) const {
     std::string result;
     if (is_multiline()) {
-        result = "(\n" + expression->to_string(indent + "    ") + "\n" + indent + ")";
+        result = "(\n" + expression->to_string(indent + Config::get_indent()) + "\n" + indent + ")";
     } else {
         result = "(" + expression->to_string(indent) + ")";
     }

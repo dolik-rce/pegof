@@ -83,6 +83,7 @@ private:
     std::vector<Option> args;
     int optimizations;
     int verbosity;
+    std::string indent;
     HeaderMode header;
 
     void usage(const std::string& error);
@@ -95,6 +96,7 @@ private:
     int set_input(const std::string& next);
     int set_output(const std::string& next);
     int set_import(const std::string& next);
+    int set_indent(const std::string& next);
     int load_config(const std::string& next);
     int parse_optimization_config(const std::string& param);
     int parse_optimize(const std::string& param);
@@ -113,6 +115,7 @@ public:
     static bool get(const Optimization& opt);
     static bool get(const HeaderMode& headerMode);
     static const Config& get();
+    static const std::string& get_indent();
     static std::vector<std::string> get_all_imports_dirs(const std::string& input_file);
     static bool verbose(int level);
 

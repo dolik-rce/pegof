@@ -65,6 +65,12 @@ as much as possible to reduce number of rules and terms.
 
 `-w/--wrap-limit N` Wrap alternations with more than N sequences (default 1)
 
+`-t/--indent FORMAT` How to indent long rules
+        FORMAT may start with 's' for space or 't' for tabs, followed by
+        of how many to insert for each level (e.g.: 't1' for single tab)
+        Some sane literal strings are also accepted (e.g.: '    ' or '\t\t')
+        Default is 4 spaces
+
 
 ### Optimization options:
 `-O/--optimize OPT[,...]` Comma separated list of optimizations to apply
