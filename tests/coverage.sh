@@ -14,7 +14,7 @@ COVDIR="$PWD/tests/coverage"
 mkdir -p "$COVDIR"
 rm -rf "$COVDIR"/*
 
-lcov --capture --rc lcov_branch_coverage=1 --base-directory "$PWD" --directory ./ --no-external --exclude "$PWD/packcc" --output "$COVDIR/lcov.info"
+lcov --capture --rc branch_coverage=1 --base-directory "$PWD" --directory ./ --no-external --exclude "$PWD/packcc" --output "$COVDIR/lcov.info"
 genhtml --flat --show-navigation --header-title "Pegof test coverage" --legend -o tests/coverage "$COVDIR/lcov.info"
 
 echo "Coverage report: file://$COVDIR/index.html"
