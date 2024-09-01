@@ -19,6 +19,7 @@ public:
     virtual Node* operator[](int index) override;
     virtual long size() const override;
 
+    std::string get_name() const;
     const char* c_str() const;
     bool is_terminal() const;
     Group convert_to_group() const;

@@ -343,6 +343,7 @@ Config::Config(int argc, char **argv) : output_type(OT_FORMAT), optimizations(O_
         Option(OG_BASIC, "D", "debug-script", std::string(), "Debugging script, see documentation for details", "SCRIPT"),
         Option(OG_IO, "f", "format", OT_FORMAT, "Output formatted grammar (default)"),
         Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
+        Option(OG_IO, "g", "graph", OT_GRAPH, "Output description of the grammar in GraphViz format"),
         Option(OG_IO, "p", "packcc", OT_PACKCC, "Output source files as if the grammar was passed to packcc"),
         Option(OG_IO, "P", "packcc-options", std::string(), "Additional comma separated options passed to packcc.\n        Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'.\n        Note: --lines might not work as expected, because temporary file is used."),
         Option(OG_IO, "n", "inplace", false, "Modify the input files, use with caution"),

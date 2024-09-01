@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "log.h"
 
+#include <set>
+
 Grammar::Grammar(
     const std::vector<TopLevel>& nodes,
     const Code& code,
@@ -158,4 +160,28 @@ void Grammar::erase(Rule* rule) {
         return std::get_if<Rule>(&n) == rule;
     });
     nodes.erase(it);
+}
+
+std::string Grammar::dump_graph(const std::string& title) const {
+    std::string result = "digraph \"" + title + "\" {\n";
+    result += "    labelloc = \"t\";\n";
+    result += "    label = \"" + title + "\";\n";
+    for (const TopLevel& node: nodes) {
+        if (!std::holds_alternative<Rule>(node)) {
+            continue;
+        }
+        Rule* rule = std::get_if<Rule>(&node)->as<Rule>();
+        std::vector<Reference*> refs = rule->find_children<Reference>([](const Reference& ref) {
+            return true;
+        });
+        std::set<std::string> processed_refs;
+        for (Reference* ref : refs) {
+            std::string ref_name = ref->get_name();
+            if (processed_refs.count(ref_name)) continue;
+            result += "    " + rule->get_name() + " -> " + ref_name + "\n";
+            processed_refs.insert(ref_name);
+        }
+    }
+    result += "}\n";
+    return result;
 }

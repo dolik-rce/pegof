@@ -29,4 +29,6 @@ public:
     virtual long size() const override;
 
     void erase(Rule* rule);
+
+    std::string dump_graph(const std::string& title) const;
 };

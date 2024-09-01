@@ -32,6 +32,7 @@ struct Config {
     enum OutputType {
         OT_FORMAT,
         OT_AST,
+        OT_GRAPH,
         OT_PACKCC
     };
 

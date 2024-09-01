@@ -48,6 +48,10 @@ bool Reference::is_multiline() const {
     return false;
 }
 
+std::string Reference::get_name() const {
+    return name;
+}
+
 bool Reference::references(const Rule* rule) const {
     return name == rule->name;
 }

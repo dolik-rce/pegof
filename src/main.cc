@@ -66,6 +66,10 @@ void process(const Config::OutputType& output_type, const std::string& input, co
         log(1, "Writing AST ...");
         write_file(output, g.dump());
         break;
+    case Config::OT_GRAPH:
+        log(1, "Writing graph ...");
+        write_file(output, g.dump_graph(input + (Config::get(O_ALL) ? " (optimized)" : "")));
+        break;
     case Config::OT_PACKCC:
         if (output.empty()) error(INVALID_ARG, "Option -p/--packcc requires output to file, use -o/--output!");
         log(1, "Processing with PackCC ...");
