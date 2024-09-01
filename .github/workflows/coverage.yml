@@ -5,7 +5,7 @@ on:
     branches: [ master, devel ]
 
 jobs:
-  testing:
+  coverage:
     runs-on: ubuntu-24.04
     env:
       DEBIAN_FRONTEND: noninteractive
@@ -27,17 +27,17 @@ jobs:
         set -ex
         cmake -B "./build.d"
         cmake --build "./build.d" --target coverage --verbose
-        mv tests/coverage/lcov.info tests/coverage/lcov_head.info
+        mv tests/coverage tests/coverage_head
     - name: Base branch coverage
       run: |
         set -ex
         git fetch
         git checkout origin/${{ github.event.pull_request.base.ref }}
         cmake --build "./build.d" --target coverage --verbose
-        mv tests/coverage/lcov.info tests/coverage/lcov_base.info
+        mv tests/coverage tests/coverage_base
     - uses: romeovs/lcov-reporter-action@v0.4.0
       with:
-        lcov-file: .tests/coverage/lcov_head.info
-        lcov-base: .tests/coverage/lcov_base.info
+        lcov-file: ./tests/coverage_head/lcov.info
+        lcov-base: ./tests/coverage_base/lcov.info
         filter-changed-files: true
         delete-old-comments: true
