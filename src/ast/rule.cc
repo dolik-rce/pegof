@@ -29,7 +29,7 @@ void Rule::parse(Parser& p) {
 std::string Rule::to_string(std::string indent) const {
     std::string result = format_comments() + (comments.empty() ? "" : "\n") + name + " <-";
     if (is_multiline()) {
-        result += "\n" + expression.to_string("    ");
+        result += "\n" + expression.to_string(Config::get_indent());
     } else {
         result += " " + expression.to_string();
     }
