@@ -59,6 +59,10 @@ long Rule::size() const {
     return 1;
 }
 
+std::string Rule::get_name() const {
+    return name;
+}
+
 const char* Rule::c_str() const {
     return name.c_str();
 }

@@ -16,6 +16,7 @@ public:
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;
 
+    std::string get_name() const;
     bool references(const Rule* rule) const;
     bool has_variable() const;
     void remove_variable();

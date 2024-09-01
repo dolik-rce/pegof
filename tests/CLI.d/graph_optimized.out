@@ -1,0 +1,21 @@
+digraph "CLI.d/graph.peg (optimized)" {
+    labelloc = "t";
+    label = "CLI.d/graph.peg (optimized)";
+    file -> _
+    file -> object
+    file -> array
+    object -> pair
+    object -> _
+    pair -> _
+    pair -> string
+    pair -> value
+    array -> value
+    array -> _
+    value -> _
+    value -> object
+    value -> array
+    value -> boolean
+    value -> number
+    value -> string
+    value -> null
+}

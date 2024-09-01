@@ -36,6 +36,8 @@ as much as possible to reduce number of rules and terms.
 
 `-a/--ast` Output abstract syntax tree representation
 
+`-g/--graph` Output description of the grammar in GraphViz format
+
 `-p/--packcc` Output source files as if the grammar was passed to packcc
 
 `-P/--packcc-options` Additional comma separated options passed to packcc.
