@@ -12,7 +12,7 @@
 #include "capi.h"
 
 void pcc_array_init(string_array_t *array) {
-    string_array__init(array);
+    string_array__initialize(array);
 }
 
 void pcc_array_add(string_array_t *array, const char *str, size_t len) {
@@ -20,7 +20,7 @@ void pcc_array_add(string_array_t *array, const char *str, size_t len) {
 }
 
 void pcc_array_term(string_array_t *array) {
-    string_array__term(array);
+    string_array__finalize(array);
 }
 
 size_t pcc_utf8_to_utf32(const char *seq, int *out) {
@@ -32,7 +32,7 @@ bool_t pcc_match_quoted(void* parser, void* result) {
     size_t len;
     unsigned long pos;
     convert_parser(parser, &input, &len, &pos);
-    char_array_t buf = { input, len, len };
+    char_array_t buf = { len, len, input };
     input_state_t input_state = {
         "tmp",           // char *path;        /* the path name of the PEG file being parsed; "<stdin>" if stdin */
         dev_null(),      // FILE *file;        /* the input file stream of the PEG file */
@@ -48,9 +48,13 @@ bool_t pcc_match_quoted(void* parser, void* result) {
         NULL             // input_state_t *parent; /* the input state of the parent PEG file that imports the input; just a reference */
     };
     bool_t res = FALSE;
-    if (match_quotation_single(&input_state) || match_quotation_double(&input_state) || match_character_class(&input_state)) {
-        char* tmp = strndup_e(input_state.buffer.buf + pos + 1, input_state.bufcur - pos - 2);
-        unescape_string(tmp, FALSE);
+    if (
+        input_state__match_quotation_single(&input_state)
+        || input_state__match_quotation_double(&input_state)
+        || input_state__match_character_class(&input_state)
+    ) {
+        char* tmp = strndup_e(input_state.buffer.p + pos + 1, input_state.bufcur - pos - 2);
+        unescape_string(tmp, FALSE, FALSE);
         store_string(result, tmp);
         free(tmp);
         update_parser(parser, input_state.bufcur);
