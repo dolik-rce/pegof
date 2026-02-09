@@ -59,6 +59,10 @@ void CharacterClass::parse_content(const std::string& str) {
     negation = p.match('^');
     dash = p.match('-');
     content = str.substr(negation + dash);
+    if (str.back() == '-' && !content.empty()) {
+        dash = true;
+        content.resize(content.size() - 1);
+    }
     tokenize();
     update_content();
 }
