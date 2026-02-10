@@ -50,13 +50,14 @@ void Grammar::parse(Parser& p) {
                 }
                 log(1, "Importing file '%s'...", path.c_str());
                 Parser parser(read_file(path));
-                do {
+                while (true) {
                     Rule r(parser, this);
                     if (r) {
                         nodes.push_back(r);
-                        continue;
+                    } else {
+                        break;
                     }
-                } while (false);
+                }
                 log(3, "Import done, returning to previous file.");
             } else {
                 nodes.push_back(d);
