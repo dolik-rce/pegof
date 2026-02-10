@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "log.h"
 
-Directive::Directive(const std::string& name, const std::string& value, bool code, Node* parent) : Node("Directive", parent), name(name), value(value), code(code) {}
+Directive::Directive(const std::string& name, const std::string& value, Directive::Type type, Node* parent) : Node("Directive", parent), name(name), value(value), type(type) {}
 Directive::Directive(Parser& p, Node* parent) : Node("Directive", parent) {
     parse(p);
 }
@@ -25,14 +25,22 @@ void Directive::parse(Parser& p) {
         if(p.match_code()) {
             value = trim(p.last_match);
         }
-        code = true;
+        type = CODE;
         valid = true;
     } else if (p.match_re("%(value|auxil|prefix|import)")) {
         name = p.last_re_match.str(1);
         if (p.match_string()) {
             value = trim(p.last_match);
         }
-        code = false;
+        type = STRING;
+        valid = true;
+    } else if (p.match("%marker")) {
+        name = "marker";
+        // TODO: improve parsing and formating
+        if (p.match_re("@[a-zA-Z]\\S*(\\s+@[a-zA-Z]\\S*)*")) {
+            value = trim(p.last_re_match.str(0));
+        }
+        type = MARKER;
         valid = true;
     }
     parse_post_comment(p);
@@ -47,12 +55,16 @@ std::string Directive::to_string(std::string indent) const {
         result += "\n";
     }
     result += "%" + name;
-    result += code ? " {"  : " \"";
+    switch (type) {
+        case CODE: result += " {"; break;
+        case STRING: result += " \""; break;
+        case MARKER: result += " "; break;
+    }
 
-    if (code && value[0] == '#') {
+    if (type == CODE && value[0] == '#') {
         // PackCC doesn't support single line C directives e.g.: %header { #include "x.h" }
         result += "\n    " + value + "\n";
-    } else if (code) {
+    } else if (type == CODE) {
         std::vector<std::string> lines = split(value, "\\n");
         if (lines.size() > 1) {
             // multiline code
@@ -71,7 +83,11 @@ std::string Directive::to_string(std::string indent) const {
     } else {
         result += value;
     }
-    result += code ? "}"  : "\"";
+    if (type == CODE) {
+        result += "}";
+    } else if (type == STRING) {
+        result += "\"";
+    }
     if (!post_comment.empty()) {
         result += " #" + post_comment;
     }
@@ -81,10 +97,14 @@ std::string Directive::to_string(std::string indent) const {
 std::string Directive::dump(std::string indent) const {
     std::string comments_info = " (" + std::to_string(comments.size()) + " comments)";
     std::string result = indent + "DIRECTIVE " + name + comments_info;
-    result += (code ? " {": " \"" ) + to_c_string(value) + (code ? "}": "\"" );
+    switch (type) {
+        case CODE: result += " {" + to_c_string(value) + "}"; break;
+        case STRING: result += " \"" + to_c_string(value) + "\"";  break;
+        case MARKER: result += to_c_string(value);  break;
+    }
     return result;
 }
 
 bool Directive::is_multiline() const {
-    return !comments.empty() || code;
+    return !comments.empty() || type == CODE;
 }

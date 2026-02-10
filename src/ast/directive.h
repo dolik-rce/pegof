@@ -4,9 +4,10 @@
 class Directive : public Node {
     std::string name;
     std::string value;
-    bool code;
+    enum Type { CODE, STRING, MARKER };
+    Type type;
 public:
-    Directive(const std::string& name, const std::string& value, bool code, Node* parent);
+    Directive(const std::string& name, const std::string& value, Type type, Node* parent);
     Directive(Parser& p, Node* parent);
 
     bool is_import() const;
