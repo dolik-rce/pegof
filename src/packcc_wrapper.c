@@ -49,13 +49,14 @@ bool_t pcc_match_quoted(void* parser, void* result) {
     };
     bool_t res = FALSE;
     if (
-        input_state__match_quotation_single(&input_state)
+        input_state__match_character_class(&input_state)
+        || input_state__match_quotation_single(&input_state)
         || input_state__match_quotation_double(&input_state)
-        || input_state__match_character_class(&input_state)
     ) {
-        char* tmp = strndup_e(input_state.buffer.p + pos + 1, input_state.bufcur - pos - 2);
-        unescape_string(tmp, FALSE, FALSE);
-        store_string(result, tmp);
+        size_t match_len = input_state.bufcur - pos - 2;
+        char* tmp = strndup_e(input_state.buffer.p + pos + 1, match_len);
+        unescape_string(tmp, &match_len, FALSE);
+        store_string(result, tmp, match_len);
         free(tmp);
         update_parser(parser, input_state.bufcur);
         res = TRUE;

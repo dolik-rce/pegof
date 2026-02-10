@@ -23,9 +23,9 @@ void update_parser(void* parser, unsigned long pos) {
     p->pos = pos;
 }
 
-void store_string(void* str, char* value) {
+void store_string(void* str, char* value, size_t length) {
     std::string* s = (std::string*)str;
-    *s = value;
+    s->assign(value, length);
 }
 
 }
