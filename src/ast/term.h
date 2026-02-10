@@ -9,8 +9,9 @@
 #include "ast/action.h"
 #include "ast/capture.h"
 #include "ast/group.h"
+#include "ast/position.h"
 
-using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture>;
+using Primary = std::variant<std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture, Position>;
 
 class Term : public Node {
     char prefix;

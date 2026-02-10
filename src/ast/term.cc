@@ -32,6 +32,7 @@ void Term::parse(Parser& p) {
     if (!(parse<Reference>(p)
           || parse<String>(p)
           || parse<CharacterClass>(p)
+          || parse<Position>(p)
           || parse<Expand>(p)
           || parse<Group>(p)
           || parse<Capture>(p)
@@ -67,6 +68,7 @@ std::string Term::to_string(const Primary& x, const std::string& indent) const {
     case 5: return std::get_if<Action>(&x)->as<Action>()->to_string(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->to_string(indent);
     case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string(indent);
+    case 8: return std::get_if<Position>(&x)->as<Position>()->to_string(indent);
     default:
         error(INTERNAL_ERROR, "unsupported type!");
     }
@@ -81,6 +83,7 @@ std::string Term::dump(const Primary& x, std::string indent) const {
     case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
     case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
     case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
+    case 8: return std::get_if<Position>(&x)->as<Position>()->dump(indent);
     default:
         error(INTERNAL_ERROR, "unsupported type!");
     }
@@ -122,6 +125,7 @@ bool Term::is_multiline() const {
     if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary))->is_multiline();
     if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary))->is_multiline();
     if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary))->is_multiline();
+    if (std::get_if<8>(&primary)) return (Node*)(std::get_if<8>(&primary))->is_multiline();
     error(INTERNAL_ERROR, "unsupported type!");
 }
 
@@ -134,6 +138,7 @@ Node* Term::operator[](int index) {
         if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
         if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
         if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary));
+        if (std::get_if<8>(&primary)) return (Node*)(std::get_if<8>(&primary));
         error(INTERNAL_ERROR, "unsupported type!");
     } else {
         error(INTERNAL_ERROR, "index out of bounds!");

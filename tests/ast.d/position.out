@@ -1,0 +1,12 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          POSITION
+        TERM
+          STRING A
+        TERM !
+          POSITION
+        TERM
+          STRING B
