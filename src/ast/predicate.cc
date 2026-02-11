@@ -1,18 +1,26 @@
-#include "ast/action.h"
+#include "ast/predicate.h"
 #include "utils.h"
+#include "config.h"
 #include "log.h"
-#include <regex>
 #include <cstdint>
 
-Action::Action(const std::string& code, Node* parent) : Node("Action", parent), code(code) {}
-Action::Action(const Action& action, Node* parent) : Action(action.code, parent) {}
-Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
+Predicate::Predicate(Node* parent, std::string code, bool negative) : Node("Predicate", parent), code(code), negative(negative) {}
+Predicate::Predicate(Parser& p, Node* parent) : Node("Predicate", parent) {
     parse(p);
 }
 
-void Action::parse(Parser& p) {
-    debug("Parsing Action");
+void Predicate::parse(Parser& p) {
+    debug("Parsing Predicate");
     DebugIndent _;
+    if (!p.peek_re("[!&]\\{")) {
+        return;
+    }
+    if (p.match('!')) {
+        negative = true;
+    } else {
+        p.match('&');
+        negative = false;
+    }
     if (p.match_code()) {
         code = trim(p.last_match);
         if (is_multiline()) {
@@ -33,42 +41,28 @@ void Action::parse(Parser& p) {
     }
 }
 
-std::string Action::to_string(std::string indent) const {
+std::string Predicate::to_string(std::string indent) const {
     if (is_multiline()) {
-        return "{\n    " + indent + replace(code, "\n", "\n    " + indent) + "\n" + indent + "}";
+        return (negative ? "!{\n    " : "&{\n    ") + indent + replace(code, "\n", "\n    " + indent) + "\n" + indent + "}";
     } else {
-        return "{ " + code + " }";
+        return (negative ? "!{ " : "&{ ") + code + " }";
     }
 }
 
-std::string Action::dump(std::string indent) const {
-    return indent + "ACTION " + to_c_string(code);
+std::string Predicate::dump(std::string indent) const {
+    return indent + "PREDICATE " + (negative ? "! " : "") + to_c_string(code);
 }
 
-bool Action::is_empty() const {
-    return std::regex_match(code, std::regex("\\s*"));
-}
-
-bool Action::is_multiline() const {
+bool Predicate::is_multiline() const {
     return code.find('\n') != std::string::npos || code.substr(0, 1) == "#";
 }
 
-bool Action::contains_reference(const Reference& ref) const {
-    std::regex re("(.|\n)*\\b" + ref.var + "\\b(.|\n)*");
-    return std::regex_match(code, re);
-}
-
-bool Action::contains_capture(int i) const {
+bool Predicate::contains_capture(int i) const {
     std::regex re("(.|\n)*\\$" + std::to_string(i) + "[se]?\\b(.|\n)*");
     return std::regex_match(code, re);
 }
 
-bool Action::contains_any_capture() const {
-    std::regex re("(.|\n)*\\$[0-9]+[se]?\\b(.|\n)*");
-    return std::regex_match(code, re);
-}
-
-void Action::renumber_capture(int from, int to) {
+void Predicate::renumber_capture(int from, int to) {
     if (from == to) {
         return;
     }
@@ -91,10 +85,9 @@ void Action::renumber_capture(int from, int to) {
     code = result;
 }
 
-bool operator==(const Action& a, const Action& b) {
-    return a.code == b.code;
+bool operator==(const Predicate& a, const Predicate& b) {
+    return a.code == b.code && a.negative == b.negative;
 }
-
-bool operator!=(const Action& a, const Action& b) {
+bool operator!=(const Predicate& a, const Predicate& b) {
     return !(a == b);
 }

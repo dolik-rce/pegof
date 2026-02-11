@@ -328,15 +328,19 @@ int Optimizer::unused_captures() {
         if (captures.empty()) return false;
         std::vector<Expand*> expands = rule->find_children<Expand>();
         std::vector<Action*> actions = rule->find_children<Action>();
+        std::vector<Predicate*> predicates = rule->find_children<Predicate>();
 
         for (int i = 0; i < captures.size(); i++) {
-            bool used_in_source = std::any_of(actions.begin(), actions.end(), [i](const Action* action){
+            bool used_in_auction = std::any_of(actions.begin(), actions.end(), [i](const Action* action){
                 return action->contains_capture(i + 1);
+            });
+            bool used_in_predicate = std::any_of(predicates.begin(), predicates.end(), [i](const Predicate* predicate){
+                return predicate->contains_capture(i + 1);
             });
             bool used_in_expand = std::any_of(expands.begin(), expands.end(), [i](const Expand* expand){
                 return *expand == i + 1;
             });
-            if (used_in_source || used_in_expand) {
+            if (used_in_auction || used_in_predicate || used_in_expand) {
                 continue;
             }
             log(1, "Removing unused capture '%s' in rule %s.", STR(*captures[i]), rule->c_str());
@@ -353,6 +357,12 @@ int Optimizer::unused_captures() {
                 for (int k = i+2; k <= captures.size(); k++) {
                     log(2, "Replacing '$%d' -> '$%d' in action %s", k, k-1, STR(*actions[j]));
                     actions[j]->renumber_capture(k, k - 1);
+                }
+            }
+            for (int j = 0; j < predicates.size(); j++) {
+                for (int k = i+2; k <= captures.size(); k++) {
+                    log(2, "Replacing '$%d' -> '$%d' in predicate %s", k, k-1, STR(*predicates[j]));
+                    predicates[j]->renumber_capture(k, k - 1);
                 }
             }
             optimized++;
@@ -487,9 +497,9 @@ int Optimizer::inline_rules() {
                     //  - first iterate over rule,
                     //     - count captures before group (N)
                     //     - skip the inserted group
-                    //     - increment expands and actions after the group by M
+                    //     - increment expands, actions and predicates after the group by M
                     //   - then iterate over the group only
-                    //     - increase expands and actions by before number found in first iteration
+                    //     - increase expands, actions and predicates by before number found in first iteration
                     // example: input:   <1> <2> (<1> <2> <3>) <3> <4>
                     //          shift:            +2  +2  +2   +3  +3
                     //          output:  <1> <2> (<3> <4> <5>) <6> <7>
@@ -510,6 +520,13 @@ int Optimizer::inline_rules() {
                             Expand *e = node.as<Expand>();
                             e->shift(src_captures);
                             log(2, "  Update expand: %s -> %s", prev.c_str(), STR(node));
+                        } else if (after && node.is<Predicate>()) {
+                            std::string prev = node.to_string();
+                            Predicate *p = node.as<Predicate>();
+                            for (int k = dest_captures; k >= 1; k--) {
+                                p->renumber_capture(k, k + src_captures);
+                            }
+                            log(2, "  Update predicate: %s -> %s", prev.c_str(), STR(node));
                         } else if (after && node.is<Action>()) {
                             std::string prev = node.to_string();
                             Action *a = node.as<Action>();
@@ -526,6 +543,13 @@ int Optimizer::inline_rules() {
                             Expand *e = node.as<Expand>();
                             e->shift(shift);
                             log(2, "  Update expand: %s -> %s", prev.c_str(), STR(node));
+                        } else if (node.is<Predicate>()) {
+                            std::string prev = node.to_string();
+                            Predicate *p = node.as<Predicate>();
+                            for (int k = src_captures; k >= 1; k--) {
+                                p->renumber_capture(k, k + shift);
+                            }
+                            log(2, "  Update predicate: %s -> %s", prev.c_str(), STR(node));
                         } else if (node.is<Action>()) {
                             std::string prev = node.to_string();
                             Action *a = node.as<Action>();

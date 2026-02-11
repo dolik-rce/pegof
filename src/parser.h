@@ -36,17 +36,18 @@ public:
     void skip_space();
     void skip_rest_of_line(bool continuable);
 
+    bool match_any_char();
     bool match(char c);
     bool match(const std::string& str, bool space = true);
     bool match_re(const std::string& r, bool space = true);
 
     bool match_comment();
 
-    bool match_block_comment();
-    bool match_line_comment();
+    bool match_block_comment(bool space = true);
+    bool match_line_comment(bool space = true);
 
     bool match_macro();
-    bool match_string();
+    bool match_string(bool space = true);
     bool match_code();
 
     bool match_number();

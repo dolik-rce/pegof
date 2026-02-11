@@ -51,6 +51,14 @@ void Parser::skip_space() {
     if (pos != start) debug("Skipped whitespace: %d-%d", start, pos);
 }
 
+bool Parser::match_any_char() {
+    if (!is_eof()) {
+        last_match = std::string(1, input[pos++]);
+        return true;
+    }
+    return false;
+}
+
 bool Parser::match(char c) {
     if (input[pos] == c) {
         pos++;
@@ -108,16 +116,16 @@ bool Parser::match_comment() {
     return matched;
 }
 
-bool Parser::match_block_comment() {
+bool Parser::match_block_comment(bool space) {
     State s(this);
-    if (!match("/*")) return s.rollback();
+    if (!match("/*", space)) return s.rollback();
     unsigned long start = pos;
     for (; !match("*/"); pos++) {}
     return s.commit(start, pos - 2);
 }
 
-bool Parser::match_line_comment() {
-    if (match("//")) {
+bool Parser::match_line_comment(bool space) {
+    if (match("//", space)) {
         skip_rest_of_line(false);
         return true;
     }
@@ -132,9 +140,11 @@ bool Parser::match_macro() {
     return false;
 }
 
-bool Parser::match_string() {
+bool Parser::match_string(bool space) {
     State s(this);
-    skip_space();
+    if (space) {
+        skip_space();
+    }
     if (peek('"') || peek('\'')) {
         std::string result;
         if (pcc_match_quoted(this, &result)) {

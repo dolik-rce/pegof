@@ -1,0 +1,16 @@
+GRAMMAR
+  RULE X
+    ALTERNATION
+      SEQ
+        TERM
+          PREDICATE @x = 0;
+        TERM *
+          GROUP
+            ALTERNATION
+              SEQ
+                TERM
+                  STRING #
+                TERM
+                  PREDICATE @x++;
+        TERM
+          PREDICATE ! @@ = (@x >= 5);
