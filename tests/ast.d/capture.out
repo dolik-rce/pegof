@@ -7,26 +7,26 @@ GRAMMAR
             ALTERNATION
               SEQ
                 TERM
-                  STRING A
+                  STRING "A"
         TERM
           CAPTURE 2
             ALTERNATION
               SEQ
                 TERM
-                  STRING B
+                  STRING "B"
                 TERM
-                  STRING C
+                  STRING "C"
         TERM
           CAPTURE 3
             ALTERNATION
               SEQ
                 TERM
-                  STRING D
+                  STRING "D"
                 TERM
                   CAPTURE 4
                     ALTERNATION
                       SEQ
                         TERM
-                          STRING E
+                          STRING "E"
                 TERM
-                  STRING F
+                  STRING "F"

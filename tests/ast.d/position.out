@@ -5,8 +5,8 @@ GRAMMAR
         TERM
           POSITION
         TERM
-          STRING A
+          STRING "A"
         TERM !
           POSITION
         TERM
-          STRING B
+          STRING "B"

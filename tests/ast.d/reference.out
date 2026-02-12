@@ -8,4 +8,4 @@ GRAMMAR
     ALTERNATION
       SEQ
         TERM
-          STRING Y
+          STRING "Y"

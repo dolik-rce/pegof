@@ -52,8 +52,8 @@ int Optimizer::concat_strings() {
                     if (is_in_error_action(t)) {
                         log(2, "Not merging adjacent strings (%s + %s), because they might be referenced in error action");
                     } else {
-                        log(1, "Merging adjacent strings: %s + %s", str.c_str(), prev_str->c_str());
-                        str.append(prev_str->c_str());
+                        log(1, "Merging adjacent strings: \"%s\" + \"%s\"", str.to_c_string().c_str(), prev_str->to_c_string().c_str());
+                        str.append(*prev_str);
                         s->erase(prev_term);
                         s->update_parents();
                         optimized++;

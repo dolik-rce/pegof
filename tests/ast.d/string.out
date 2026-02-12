@@ -3,8 +3,8 @@ GRAMMAR
     ALTERNATION
       SEQ
         TERM
-          STRING double quoted
+          STRING "double quoted"
         TERM
-          STRING single quoted
+          STRING "single quoted"
         TERM
-          STRING _\n\'\"\\\t
+          STRING "_\n\'\"\\\t"

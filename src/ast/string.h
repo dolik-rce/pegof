@@ -13,7 +13,8 @@ public:
     virtual bool is_multiline() const override;
 
     const char* c_str() const;
-    void append(const char* str);
+    std::string to_c_string() const;
+    void append(const String& str);
 
     friend bool operator==(const String& a, const String& b);
 };

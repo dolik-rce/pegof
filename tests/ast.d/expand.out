@@ -7,6 +7,6 @@ GRAMMAR
             ALTERNATION
               SEQ
                 TERM
-                  STRING X
+                  STRING "X"
         TERM
           EXPAND 1

@@ -3,9 +3,9 @@ GRAMMAR
     ALTERNATION
       SEQ
         TERM
-          STRING X
+          STRING "X"
         TERM
           ACTION printf(\"action!\\n\");
         TERM
-          STRING Y
+          STRING "Y"
           ERROR ACTION /* error action */

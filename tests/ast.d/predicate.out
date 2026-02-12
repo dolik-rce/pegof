@@ -9,7 +9,7 @@ GRAMMAR
             ALTERNATION
               SEQ
                 TERM
-                  STRING #
+                  STRING "#"
                 TERM
                   PREDICATE @x++;
         TERM

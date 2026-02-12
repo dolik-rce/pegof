@@ -3,8 +3,8 @@ GRAMMAR
     ALTERNATION
       SEQ
         TERM
-          STRING A
+          STRING "A"
         TERM
-          STRING B
+          STRING "B"
         TERM
-          STRING C
+          STRING "C"

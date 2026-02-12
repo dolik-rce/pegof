@@ -19,14 +19,14 @@ void String::parse(Parser& p) {
 
 std::string String::to_string(std::string indent) const {
     if (Config::get<Config::QuoteType>("quotes") == Config::QT_SINGLE) {
-        return '\'' + to_c_string(content, ESCAPE_SINGLE_QUOTES) + '\'';
+        return '\'' + ::to_c_string(content, ESCAPE_SINGLE_QUOTES) + '\'';
     } else {
-        return '"' + to_c_string(content, ESCAPE_DOUBLE_QUOTES) + '"';
+        return '"' + ::to_c_string(content, ESCAPE_DOUBLE_QUOTES) + '"';
     }
 }
 
 std::string String::dump(std::string indent) const {
-    return indent + "STRING " + to_c_string(content);
+    return indent + "STRING \"" + to_c_string() + "\"";
 }
 
 bool String::is_multiline() const {
@@ -37,8 +37,12 @@ const char* String::c_str() const {
     return content.c_str();
 }
 
-void String::append(const char* str) {
-    content += str;
+std::string String::to_c_string() const {
+    return ::to_c_string(content, ESCAPE_ALL);
+}
+
+void String::append(const String& str) {
+    content.append(str.content);
 }
 
 bool operator==(const String& a, const String& b) {
