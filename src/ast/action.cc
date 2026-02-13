@@ -4,6 +4,7 @@
 #include <regex>
 #include <cstdint>
 
+Action::Action(Node* parent) : Node("Action", parent) {}
 Action::Action(const std::string& code, Node* parent) : Node("Action", parent), code(code) {}
 Action::Action(const Action& action, Node* parent) : Action(action.code, parent) {}
 Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
@@ -11,8 +12,11 @@ Action::Action(Parser& p, Node* parent) : Node("Action", parent) {
 }
 
 void Action::parse(Parser& p) {
-    debug("Parsing Action");
-    DebugIndent _;
+    if (is<Action>()) {
+        // Skip this when parsing Predicate to avoid confusion
+        debug("Parsing Action");
+        DebugIndent _;
+    }
     if (p.match_code()) {
         code = trim(p.last_match);
         if (is_multiline()) {
