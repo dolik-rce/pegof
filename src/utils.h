@@ -13,7 +13,7 @@ public:
     static std::string get(const std::string& filename);
 };
 
-std::string read_file(const std::string& filename);
+bool read_file(const std::string& filename, std::string& content);
 void write_file(const std::string& filename, const std::string& content);
 std::string dirname(const std::string& path);
 std::string find_file(const std::string& name, const std::vector<std::string> dirs);

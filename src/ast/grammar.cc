@@ -49,7 +49,12 @@ void Grammar::parse(Parser& p) {
                     error(IO_ERROR, "File '%s' not found", d.get_value().c_str());
                 }
                 log(1, "Importing file '%s'...", path.c_str());
-                Parser parser(read_file(path));
+
+                std::string content;
+                if (!read_file(path, content)) {
+                    error(IO_ERROR, "Failed to read file '%s'", path);
+                };
+                Parser parser(content);
                 while (true) {
                     Rule r(parser, this);
                     if (r) {

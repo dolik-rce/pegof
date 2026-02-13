@@ -8,10 +8,10 @@
 #include "version.h"
 
 Grammar parse(const std::string& input, const Checker& checker) {
-    std::string content = read_file(input);
-    if (content.empty()) {
-        error(PARSING_ERROR, "Failed to read grammar '%s'", input.c_str());
-    }
+    std::string content;
+    if (!read_file(input, content)) {
+        error(IO_ERROR, "Failed to read grammar '%s'", input.c_str());
+    };
 
     log(1, "Validating input grammar ...");
     checker.validate(input, content);

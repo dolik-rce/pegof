@@ -49,10 +49,22 @@ std::string TempDir::get(const std::string& filename) {
     }
 }
 
-std::string read_file(const std::string& filename) {
+bool read_file(const std::string& filename, std::string& content) {
     std::stringstream buffer;
-    buffer << (filename.empty() ? std::cin.rdbuf() : std::ifstream(filename).rdbuf());
-    return buffer.str();
+    if (filename.empty()) {
+        if (!std::cin) {
+            return false;
+        }
+        buffer << std::cin.rdbuf();
+    } else {
+        std::ifstream input = std::ifstream(filename);
+        if (!input) {
+            return false;
+        }
+        buffer << input.rdbuf();
+    }
+    content = buffer.str();
+    return true;
 }
 
 void write_file(const std::string& filename, const std::string& content) {
