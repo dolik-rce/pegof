@@ -25,6 +25,10 @@ if check_bats_version 1 11; then
             # This test checks exact error message in the output, which is different, when run via pegof.
             continue
         fi
+        if [ "$TEST" = "code_indentation.d" ]; then
+            # Pegof tries to improve code indetantion, while packcc tries to preserve it, so this test would never pass.
+            continue
+        fi
         $BTF --description "packcc.d - ${TEST/.d/} formatted" -- run_wrapped "$TEST" 0
         if [ "$TEST" = "debug_macro.d" ]; then
             # The debug macro output is different for optimized grammar, so it can't be tested
