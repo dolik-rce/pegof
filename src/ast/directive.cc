@@ -56,9 +56,9 @@ std::string Directive::to_string(std::string indent) const {
     }
     result += "%" + name;
     switch (type) {
-        case CODE: result += " {"; break;
-        case STRING: result += " \""; break;
-        case MARKER: result += " "; break;
+    case CODE: result += " {"; break;
+    case STRING: result += " \""; break;
+    case MARKER: result += " "; break;
     }
 
     if (type == CODE && value[0] == '#') {
@@ -98,9 +98,9 @@ std::string Directive::dump(std::string indent) const {
     std::string comments_info = " (" + std::to_string(comments.size()) + " comments)";
     std::string result = indent + "DIRECTIVE " + name + comments_info;
     switch (type) {
-        case CODE: result += " {" + to_c_string(value) + "}"; break;
-        case STRING: result += " \"" + to_c_string(value) + "\"";  break;
-        case MARKER: result += to_c_string(value);  break;
+    case CODE: result += " {" + to_c_string(value) + "}"; break;
+    case STRING: result += " \"" + to_c_string(value) + "\"";  break;
+    case MARKER: result += to_c_string(value);  break;
     }
     return result;
 }
