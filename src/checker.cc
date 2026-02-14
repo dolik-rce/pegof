@@ -90,10 +90,7 @@ bool Checker::packcc(const std::string& peg, const std::string& output) const {
 }
 
 Stats Checker::stats(Grammar& g) const {
-    std::string code;
-    if (!read_file(output + ".c", code)) {
-        error(IO_ERROR, "Failed to read file '%s'", output + ".c");
-    };
+    std::string code = read_file(output + ".c");
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
     int rules = g.find_children<Rule>().size();
     int terms = g.find_children<Term>().size();
@@ -157,9 +154,7 @@ void Checker::benchmark(int& duration, int& memory) const {
     exit_code = system(cmd.c_str());
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     if (exit_code != 0) {
-        std::string content;
-        read_file(out, content);
-        error(SCRIPT_ERROR, "%s\nBenchmark script failed! (exit_code=%d)", content.c_str(), exit_code);
+        error(SCRIPT_ERROR, "%s\nBenchmark script failed! (exit_code=%d)", read_file(out).c_str(), exit_code);
     }
 
     log(1, "Tearing down benchmark environment.");
@@ -168,11 +163,7 @@ void Checker::benchmark(int& duration, int& memory) const {
         error(SCRIPT_ERROR, "Benchmark teardown failed! (exit_code=%d)", exit_code);
     }
     if (time.size()) {
-        std::string content;
-        if (!read_file(out, content)) {
-            error(IO_ERROR, "Failed to read file '%s'", out.c_str());
-        }
-        std::vector<std::string> lines = split(content.c_str(), "\n");
+        std::vector<std::string> lines = split(read_file(out).c_str(), "\n");
         memory = stoi(lines.back());
     }
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
