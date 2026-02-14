@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         # https://cdn.openbsd.org/pub/OpenBSD/
-        openbsd-release-version: ['7.5', '7.4', '7.3']
+        openbsd-release-version: ['7.8', '7.7']
 
     runs-on: ubuntu-latest
 
