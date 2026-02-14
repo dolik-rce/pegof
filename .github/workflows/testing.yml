@@ -72,8 +72,8 @@ jobs:
         set -ex
         sudo apt-get update
         sudo apt-get -y --no-install-recommends -o APT::Immediate-Configure=false install g++ cmake make parallel curl
-        curl -OL http://azure.archive.ubuntu.com/ubuntu/pool/universe/b/bats/bats_1.11.0-1_all.deb
-        sudo dpkg -i bats_1.11.0-1_all.deb
+        curl -OL http://azure.archive.ubuntu.com/ubuntu/pool/universe/b/bats/bats_1.11.1-1_all.deb
+        sudo dpkg -i bats_1.11.1-1_all.deb
     - name: Build
       shell: bash
       run: |
