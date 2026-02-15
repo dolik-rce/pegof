@@ -2,6 +2,18 @@
 #include "log.h"
 #include "utils.h"
 
+template<typename T, typename U = const Node>
+struct PrimaryVisitor {
+    PrimaryVisitor(std::function<T(U&)> f) : fn(f) {}
+    std::function<T(U&)> fn;
+    T operator()(U& x) {
+        return fn(x);
+    };
+    T operator()(std::monostate) {
+        error(INTERNAL_ERROR, "Calling function on empty Term!");
+    };
+};
+
 Term::Term(char prefix, char quantifier, const Primary& primary, const std::optional<Action>& error_action, Node* parent)
     : Node("Term", parent), prefix(prefix), quantifier(quantifier), error_action(error_action), primary(primary) {}
 
@@ -66,35 +78,15 @@ void Term::parse(Parser& p) {
 }
 
 std::string Term::to_string(const Primary& x, const std::string& indent) const {
-    switch(x.index()) {
-    case 1: return std::get_if<String>(&x)->as<String>()->to_string(indent);
-    case 2: return std::get_if<Reference>(&x)->as<Reference>()->to_string(indent);
-    case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->to_string(indent);
-    case 4: return std::get_if<Expand>(&x)->as<Expand>()->to_string(indent);
-    case 5: return std::get_if<Action>(&x)->as<Action>()->to_string(indent);
-    case 6: return std::get_if<Group>(&x)->as<Group>()->to_string(indent);
-    case 7: return std::get_if<Capture>(&x)->as<Capture>()->to_string(indent);
-    case 8: return std::get_if<Position>(&x)->as<Position>()->to_string(indent);
-    case 9: return std::get_if<Predicate>(&x)->as<Predicate>()->to_string(indent);
-    default:
-        error(INTERNAL_ERROR, "unsupported type!");
-    }
+    return std::visit(PrimaryVisitor<std::string>([&indent](const Node& x) {
+        return x.to_string(indent);
+    }), primary);
 }
 
 std::string Term::dump(const Primary& x, std::string indent) const {
-    switch(x.index()) {
-    case 1: return std::get_if<String>(&x)->as<String>()->dump(indent);
-    case 2: return std::get_if<Reference>(&x)->as<Reference>()->dump(indent);
-    case 3: return std::get_if<CharacterClass>(&x)->as<CharacterClass>()->dump(indent);
-    case 4: return std::get_if<Expand>(&x)->as<Expand>()->dump(indent);
-    case 5: return std::get_if<Action>(&x)->as<Action>()->dump(indent);
-    case 6: return std::get_if<Group>(&x)->as<Group>()->dump(indent);
-    case 7: return std::get_if<Capture>(&x)->as<Capture>()->dump(indent);
-    case 8: return std::get_if<Position>(&x)->as<Position>()->dump(indent);
-    case 9: return std::get_if<Predicate>(&x)->as<Predicate>()->dump(indent);
-    default:
-        error(INTERNAL_ERROR, "unsupported type!");
-    }
+    return std::visit(PrimaryVisitor<std::string>([&indent](const Node& x) {
+        return x.dump(indent);
+    }), primary);
 }
 
 std::string Term::to_string(std::string indent) const {
@@ -126,30 +118,16 @@ std::string Term::dump(std::string indent) const {
 bool Term::is_multiline() const {
     if (!comments.empty()) return true;
     if (!post_comment.empty()) return true;
-    if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary))->is_multiline();
-    if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary))->is_multiline();
-    if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary))->is_multiline();
-    if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary))->is_multiline();
-    if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary))->is_multiline();
-    if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary))->is_multiline();
-    if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary))->is_multiline();
-    if (std::get_if<8>(&primary)) return (Node*)(std::get_if<8>(&primary))->is_multiline();
-    if (std::get_if<9>(&primary)) return (Node*)(std::get_if<9>(&primary))->is_multiline();
-    error(INTERNAL_ERROR, "unsupported type!");
+    return std::visit(PrimaryVisitor<bool>([](const Node& x) {
+        return x.is_multiline();
+    }), primary);
 }
 
 Node* Term::operator[](int index) {
     if (index == 0) {
-        if (std::get_if<1>(&primary)) return (Node*)(std::get_if<1>(&primary));
-        if (std::get_if<2>(&primary)) return (Node*)(std::get_if<2>(&primary));
-        if (std::get_if<3>(&primary)) return (Node*)(std::get_if<3>(&primary));
-        if (std::get_if<4>(&primary)) return (Node*)(std::get_if<4>(&primary));
-        if (std::get_if<5>(&primary)) return (Node*)(std::get_if<5>(&primary));
-        if (std::get_if<6>(&primary)) return (Node*)(std::get_if<6>(&primary));
-        if (std::get_if<7>(&primary)) return (Node*)(std::get_if<7>(&primary));
-        if (std::get_if<8>(&primary)) return (Node*)(std::get_if<8>(&primary));
-        if (std::get_if<9>(&primary)) return (Node*)(std::get_if<9>(&primary));
-        error(INTERNAL_ERROR, "unsupported type!");
+        return std::visit(PrimaryVisitor<Node*, Node>([](Node& x) {
+            return &x;
+        }), primary);
     } else {
         error(INTERNAL_ERROR, "index out of bounds!");
     }
