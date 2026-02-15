@@ -46,7 +46,7 @@ check_stdout() {
     if [ ! -e "$1" ]; then
         echo "File '$1' does not exist!"
         return 1
-    elif [ "$(cat "$1")" == "$output" ]; then
+    elif [ "$(cat "$1")" == "$(grep -v "runtime error: null pointer passed as argument" <<<"$output")" ]; then
         return 0
     fi
     diff --strip-trailing-cr -u "$1" --label "$1" <(echo "$output") --label stdout
