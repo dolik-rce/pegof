@@ -1,9 +1,11 @@
 #include "ast/capture.h"
+
 #include "ast/alternation.h"
 #include "log.h"
 
-Capture::Capture(const Alternation& expression, Node* parent) : Node("Capture", parent), expression(new Alternation(expression)), num(-1) {}
-Capture::Capture(Parser& p, Node* parent) : Node("Capture", parent) {
+Capture::Capture(const Alternation& expression, Node* parent):
+    Node("Capture", parent), expression(new Alternation(expression)), num(-1) {}
+Capture::Capture(Parser& p, Node* parent): Node("Capture", parent) {
     parse(p);
 }
 

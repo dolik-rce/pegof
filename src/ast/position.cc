@@ -1,10 +1,11 @@
 #include "ast/position.h"
-#include "utils.h"
+
 #include "config.h"
 #include "log.h"
+#include "utils.h"
 
-Position::Position(Node* parent) : Node("Position", parent) {}
-Position::Position(Parser& p, Node* parent) : Node("Position", parent) {
+Position::Position(Node* parent): Node("Position", parent) {}
+Position::Position(Parser& p, Node* parent): Node("Position", parent) {
     parse(p);
 }
 

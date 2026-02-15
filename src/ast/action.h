@@ -2,10 +2,11 @@
 #include "ast/node.h"
 #include "ast/reference.h"
 
-class Action : public Node {
+class Action: public Node {
 protected:
     std::string code;
     Action(Node* parent);
+
 public:
     Action(const std::string& code, Node* parent);
     Action(const Action& action, Node* parent);

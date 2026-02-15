@@ -1,11 +1,12 @@
 #pragma once
 #include "ast/node.h"
 
-class Directive : public Node {
+class Directive: public Node {
     std::string name;
     std::string value;
     enum Type { CODE, STRING, MARKER };
     Type type;
+
 public:
     Directive(const std::string& name, const std::string& value, Type type, Node* parent);
     Directive(Parser& p, Node* parent);

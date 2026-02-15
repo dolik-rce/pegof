@@ -1,20 +1,19 @@
 #include "checker.h"
-#include "packcc_wrapper.h"
-#include "config.h"
-#include "utils.h"
-#include "log.h"
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
+#include "config.h"
+#include "log.h"
+#include "packcc_wrapper.h"
+#include "utils.h"
+
 #include <algorithm>
 #include <chrono>
-
-#include <stdio.h>
-#include <unistd.h>
 #include <cstdarg>
 #include <cstring>
-
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <unistd.h>
 
 std::stringstream packcc_errors;
 
@@ -24,19 +23,20 @@ const int BUFFER_SIZE = 10240;
 
 std::string Stats::compare(const Stats& s) const {
     std::string result;
-    #define COL(X) ((X > 0) ? (" | " + left_pad(#X, COL_WIDTH)) : EMPTY)
+#define COL(X) ((X > 0) ? (" | " + left_pad(#X, COL_WIDTH)) : EMPTY)
     result += "        " + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory) + "\n";
-    #undef COL
-    #define COL(X) ((X > 0) ? "-+-----------" : EMPTY)
+#undef COL
+#define COL(X) ((X > 0) ? "-+-----------" : EMPTY)
     result += "--------" + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory) + "\n";
-    #undef COL
-    #define COL(X) ((X > 0) ? (" | " + left_pad(std::to_string(X), COL_WIDTH)) : EMPTY)
-    result += "input   " + COL(s.lines) + COL(s.bytes) + COL(s.rules) + COL(s.terms) + COL(s.duration) + COL(s.memory) + "\n";
+#undef COL
+#define COL(X) ((X > 0) ? (" | " + left_pad(std::to_string(X), COL_WIDTH)) : EMPTY)
+    result +=
+        "input   " + COL(s.lines) + COL(s.bytes) + COL(s.rules) + COL(s.terms) + COL(s.duration) + COL(s.memory) + "\n";
     result += "output  " + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory) + "\n";
-    #undef COL
-    #define COL(X) ((X > 0) ? (" | " + left_pad(std::to_string(X * 100 / s.X) + "%", COL_WIDTH)) : EMPTY)
+#undef COL
+#define COL(X) ((X > 0) ? (" | " + left_pad(std::to_string(X * 100 / s.X) + "%", COL_WIDTH)) : EMPTY)
     result += "output %" + COL(lines) + COL(bytes) + COL(rules) + COL(terms) + COL(duration) + COL(memory);
-    #undef COL
+#undef COL
     return result;
 }
 
@@ -170,26 +170,26 @@ void Checker::benchmark(int& duration, int& memory) const {
 }
 
 extern "C" {
-int vfprintf_wrapped(FILE *stream, const char *format, va_list args) {
-    int result;
-    if (stream == stderr) {
-        char buffer[BUFFER_SIZE];
-        result = vsnprintf(buffer, BUFFER_SIZE, format, args);
-        packcc_errors << buffer;
-        if (result >= BUFFER_SIZE) {
-            packcc_errors << "...";
+    int vfprintf_wrapped(FILE* stream, const char* format, va_list args) {
+        int result;
+        if (stream == stderr) {
+            char buffer[BUFFER_SIZE];
+            result = vsnprintf(buffer, BUFFER_SIZE, format, args);
+            packcc_errors << buffer;
+            if (result >= BUFFER_SIZE) {
+                packcc_errors << "...";
+            }
+        } else {
+            result = vfprintf(stream, format, args);
         }
-    } else {
-        result = vfprintf (stream, format, args);
+        return result;
     }
-    return result;
-}
 
-int fprintf_wrapped(FILE *stream, const char *format, ...) {
-    va_list args;
-    va_start (args, format);
-    int result = vfprintf_wrapped(stream, format, args);
-    va_end (args);
-    return result;
-}
+    int fprintf_wrapped(FILE* stream, const char* format, ...) {
+        va_list args;
+        va_start(args, format);
+        int result = vfprintf_wrapped(stream, format, args);
+        va_end(args);
+        return result;
+    }
 }

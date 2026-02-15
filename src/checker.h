@@ -1,4 +1,5 @@
 #include "ast/grammar.h"
+
 #include <string>
 
 class Stats {
@@ -8,9 +9,10 @@ class Stats {
     int terms;
     int duration;
     int memory;
+
 public:
-    Stats(int bytes, int lines, int rules, int terms, int duration, int memory)
-        : lines(lines), bytes(bytes), rules(rules), terms(terms), duration(duration), memory(memory) {};
+    Stats(int bytes, int lines, int rules, int terms, int duration, int memory):
+        lines(lines), bytes(bytes), rules(rules), terms(terms), duration(duration), memory(memory) {};
     std::string compare(const Stats& s) const;
 };
 
@@ -20,6 +22,7 @@ class Checker {
     bool call_packcc(const std::string& input, const std::string& output, std::string& errors) const;
     bool validate(const std::string& input) const;
     void benchmark(int& duration, int& memory) const;
+
 public:
     Checker();
     ~Checker();

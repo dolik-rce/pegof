@@ -1,8 +1,9 @@
 #pragma once
 #include "ast/node.h"
 
-class Expand : public Node {
+class Expand: public Node {
     int content;
+
 public:
     Expand(int content, Node* parent);
     Expand(Parser& p, Node* parent);

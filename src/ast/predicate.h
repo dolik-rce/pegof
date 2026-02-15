@@ -1,8 +1,9 @@
 #pragma once
 #include "ast/action.h"
 
-class Predicate : public Action {
+class Predicate: public Action {
     bool negative;
+
 public:
     Predicate(Node* parent, std::string code, bool negative);
     Predicate(Parser& p, Node* parent);

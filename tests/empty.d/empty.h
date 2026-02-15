@@ -7,11 +7,11 @@
 extern "C" {
 #endif
 
-typedef struct pcc_context_tag pcc_context_t;
+    typedef struct pcc_context_tag pcc_context_t;
 
-pcc_context_t *pcc_create(void *auxil);
-int pcc_parse(pcc_context_t *ctx, int *ret);
-void pcc_destroy(pcc_context_t *ctx);
+    pcc_context_t* pcc_create(void* auxil);
+    int pcc_parse(pcc_context_t* ctx, int* ret);
+    void pcc_destroy(pcc_context_t* ctx);
 
 #ifdef __cplusplus
 }

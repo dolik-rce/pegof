@@ -1,7 +1,7 @@
 #pragma once
 #include "ast/node.h"
 
-class Position : public Node {
+class Position: public Node {
 public:
     Position(Node* parent);
     Position(Parser& p, Node* parent);

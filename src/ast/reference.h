@@ -4,9 +4,10 @@
 class Action;
 class Rule;
 
-class Reference : public Node {
+class Reference: public Node {
     std::string name;
     std::string var;
+
 public:
     Reference(const std::string& name, const std::string& var, Node* parent);
     Reference(Parser& p, Node* parent);

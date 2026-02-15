@@ -1,9 +1,11 @@
 #include "ast/group.h"
+
 #include "ast/alternation.h"
 #include "log.h"
 
-Group::Group(const Alternation& expression, Node* parent) : Node("Group", parent), expression(new Alternation(expression)) {}
-Group::Group(Parser& p, Node* parent) : Node("Group", parent) {
+Group::Group(const Alternation& expression, Node* parent):
+    Node("Group", parent), expression(new Alternation(expression)) {}
+Group::Group(Parser& p, Node* parent): Node("Group", parent) {
     parse(p);
 }
 

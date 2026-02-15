@@ -1,22 +1,19 @@
 #pragma once
+#include "ast/code.h"
+#include "ast/directive.h"
 #include "ast/node.h"
 #include "ast/reference.h"
-#include "ast/directive.h"
 #include "ast/rule.h"
-#include "ast/code.h"
 
 using TopLevel = std::variant<std::monostate, Directive, Rule>;
 
-class Grammar : public Node {
+class Grammar: public Node {
     std::vector<TopLevel> nodes;
     Code code;
     std::string input_file;
+
 public:
-    Grammar(
-        const std::vector<TopLevel>& nodes,
-        const Code& code,
-        const std::string& input_file
-    );
+    Grammar(const std::vector<TopLevel>& nodes, const Code& code, const std::string& input_file);
     Grammar(Parser& p, const std::string& input_file);
     Grammar(const std::string& p, const std::string& input_file);
 

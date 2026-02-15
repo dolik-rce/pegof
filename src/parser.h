@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <regex>
+#include <string>
 
 extern "C" {
 #include "capi.h"

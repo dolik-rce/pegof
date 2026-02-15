@@ -1,9 +1,10 @@
 #include "ast/predicate.h"
-#include "utils.h"
-#include "log.h"
 
-Predicate::Predicate(Node* parent, std::string code, bool negative) : Action(code, parent), negative(negative) {}
-Predicate::Predicate(Parser& p, Node* parent) : Action(parent) {
+#include "log.h"
+#include "utils.h"
+
+Predicate::Predicate(Node* parent, std::string code, bool negative): Action(code, parent), negative(negative) {}
+Predicate::Predicate(Parser& p, Node* parent): Action(parent) {
     parse(p);
 }
 
@@ -24,7 +25,8 @@ void Predicate::parse(Parser& p) {
 
 std::string Predicate::to_string(std::string indent) const {
     if (is_multiline()) {
-        return (negative ? "!{\n    " : "&{\n    ") + indent + replace(code, "\n", "\n    " + indent) + "\n" + indent + "}";
+        return (negative ? "!{\n    " : "&{\n    ") + indent + replace(code, "\n", "\n    " + indent) + "\n" + indent
+            + "}";
     } else {
         return (negative ? "!{ " : "&{ ") + code + " }";
     }

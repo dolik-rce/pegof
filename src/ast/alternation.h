@@ -2,8 +2,9 @@
 #include "ast/node.h"
 #include "ast/sequence.h"
 
-class Alternation : public Node {
+class Alternation: public Node {
     std::vector<Sequence> sequences;
+
 public:
     Alternation(const std::vector<Sequence>& sequences, Node* parent);
     Alternation(Parser& p, Node* parent);

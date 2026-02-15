@@ -1,10 +1,10 @@
 #pragma once
-#include <string>
+#include "parser.h"
+
 #include <optional>
 #include <regex>
+#include <string>
 #include <variant>
-
-#include "parser.h"
 
 class Node {
 protected:
@@ -25,17 +25,13 @@ public:
 
     operator bool() const;
 
-    template<class U>
-    bool is() const;
+    template<class U> bool is() const;
 
-    template<class U>
-    U* as() const;
+    template<class U> U* as() const;
 
-    template<class U>
-    U* get_parent() const;
+    template<class U> U* get_parent() const;
 
-    template <class U>
-    U* get_ancestor() const;
+    template<class U> U* get_ancestor() const;
 
     bool is_descendant_of(Node* n) const;
 
@@ -45,17 +41,19 @@ public:
 
     void update_parents();
 
-    template <class U>
-    std::vector<U*> find_children(const std::function<bool(const U&)>& predicate=[] (const U & node)->bool { return true; });
+    template<class U>
+    std::vector<U*> find_children(const std::function<bool(const U&)>& predicate = [](const U& node) -> bool {
+        return true;
+    });
 
-    template <class U>
-    void find_children(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
+    template<class U> void find_children(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
 
-    template <class U>
-    std::vector<U*> find_ancestors(const std::function<bool(const U&)>& predicate=[] (const U & node)->bool { return true; });
+    template<class U>
+    std::vector<U*> find_ancestors(const std::function<bool(const U&)>& predicate = [](const U& node) -> bool {
+        return true;
+    });
 
-    template <class U>
-    void find_ancestors(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
+    template<class U> void find_ancestors(std::vector<U*>& result, const std::function<bool(const U&)>& predicate);
 
     bool map(const std::function<bool(Node&)>& transform);
 
@@ -70,26 +68,28 @@ public:
     friend bool operator==(const Node& a, const Node& b);
 };
 
-template<class U>
-bool Node::is() const {
+template<class U> bool Node::is() const {
     return typeid(*this) == typeid(U);
 }
 
-template<class U>
-U* Node::as() const {
-    if (!is<U>()) return nullptr;
+template<class U> U* Node::as() const {
+    if (!is<U>()) {
+        return nullptr;
+    }
     return (U*)this;
 }
 
-template<class U>
-U* Node::get_parent() const {
-    if (!parent) return nullptr;
+template<class U> U* Node::get_parent() const {
+    if (!parent) {
+        return nullptr;
+    }
     return parent->as<U>();
 }
 
-template<class U>
-U* Node::get_ancestor() const {
-    if (!parent) return nullptr;
+template<class U> U* Node::get_ancestor() const {
+    if (!parent) {
+        return nullptr;
+    }
     if (parent->is<U>()) {
         return parent->as<U>();
     } else {
@@ -97,15 +97,13 @@ U* Node::get_ancestor() const {
     }
 }
 
-template <class U>
-std::vector<U*> Node::find_children(const std::function<bool(const U&)>& predicate) {
+template<class U> std::vector<U*> Node::find_children(const std::function<bool(const U&)>& predicate) {
     std::vector<U*> result;
     find_children(result, predicate);
     return result;
 }
 
-template <class U>
-void Node::find_children(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
+template<class U> void Node::find_children(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
     if (is<U>() && predicate(*(U*)this)) {
         result.push_back((U*)(this));
     }
@@ -115,15 +113,13 @@ void Node::find_children(std::vector<U*>& result, const std::function<bool(const
     }
 }
 
-template <class U>
-std::vector<U*> Node::find_ancestors(const std::function<bool(const U&)>& predicate) {
+template<class U> std::vector<U*> Node::find_ancestors(const std::function<bool(const U&)>& predicate) {
     std::vector<U*> result;
     find_ancestors(result, predicate);
     return result;
 }
 
-template <class U>
-void Node::find_ancestors(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
+template<class U> void Node::find_ancestors(std::vector<U*>& result, const std::function<bool(const U&)>& predicate) {
     if (is<U>() && predicate(*(U*)this)) {
         result.push_back((U*)(this));
     }
