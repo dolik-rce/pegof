@@ -4,14 +4,14 @@ on:
   push:
     branches: [ master, devel ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, devel ]
 
 jobs:
   testing:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04]
+        os: [ubuntu-24.04, ubuntu-22.04]
         compiler: [g++, clang]
 
     runs-on: ${{ matrix.os }}
@@ -54,7 +54,7 @@ jobs:
       run: cmake --build "./$BUILDDIR" --target test --verbose
 
   slow_tests:
-    runs-on: 'ubuntu-24.04'
+    runs-on: 'ubuntu-latest'
     env:
       BUILDDIR: build.d
       DEBIAN_FRONTEND: noninteractive
