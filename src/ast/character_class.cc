@@ -147,6 +147,10 @@ bool CharacterClass::is_multiline() const {
     return false;
 }
 
+size_t CharacterClass::hash() const {
+    return combine(dash + 2 * negation, content);
+}
+
 bool CharacterClass::normalize() {
     if (tokens.empty()) {
         return false;

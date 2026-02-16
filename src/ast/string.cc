@@ -34,6 +34,12 @@ bool String::is_multiline() const {
     return false;
 }
 
+const size_t STRING_HASH = std::hash<const char*> {}("string");
+
+size_t String::hash() const {
+    return combine(STRING_HASH, content);
+}
+
 const char* String::c_str() const {
     return content.c_str();
 }

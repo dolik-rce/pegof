@@ -27,6 +27,12 @@ bool Position::is_multiline() const {
     return false;
 }
 
+const size_t POSITION_HASH = std::hash<const char*> {}("position");
+
+size_t Position::hash() const {
+    return POSITION_HASH;
+}
+
 bool operator==(const Position& a, const Position& b) {
     return true;
 }

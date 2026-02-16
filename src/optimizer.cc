@@ -453,6 +453,40 @@ static double calculate_score(int term_count, int ref_count) {
     return 1.0 / sqrt(term_count * ref_count);
 }
 
+int Optimizer::same_rules() {
+    if (!Config::get(O_SAME_RULES)) {
+        return 0;
+    }
+    std::vector<Rule*> rules = g.find_children<Rule>();
+    std::map<size_t, Rule*> hashes;
+    for (Rule* rule: rules) {
+        size_t hash = rule->hash();
+        if (hashes.find(hash) == hashes.end()) {
+            // We didn't see this hash yet, just note it and keep looking...
+            hashes[hash] = rule;
+            continue;
+        } else {
+            // We've found a duplicate rule
+            const std::string keep = hashes[hash]->get_name();
+            const std::string eliminate = rule->get_name();
+            log(1, "Found identical rules, replacing %s by %s", eliminate.c_str(), keep.c_str());
+            log(4, "  Keep:      %s", rule->to_string().c_str());
+            log(4, "  Eliminate: %s", hashes[hash]->to_string().c_str());
+            std::vector<Reference*> refs =
+                g.find_children<Reference>([eliminate](const Reference& ref) { return ref.get_name() == eliminate; });
+            for (Reference* ref: refs) {
+                Rule* parent = ref->get_ancestor<Rule>();
+                log(2, "  Replacing reference to %s in rule %s", eliminate.c_str(), parent->get_name().c_str());
+                ref->set_name(keep);
+            }
+            g.erase(rule);
+            g.update_parents();
+            return refs.size();
+        }
+    }
+    return 0;
+}
+
 int Optimizer::inline_rules() {
     if (!Config::get(O_INLINE)) {
         return 0;
@@ -628,6 +662,7 @@ Grammar Optimizer::optimize() {
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
         opts = normalize_character_classes();
+        opts += same_rules();
         opts += inline_rules();
         opts += remove_unnecessary_groups();
         opts += single_char_character_classes();

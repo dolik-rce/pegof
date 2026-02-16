@@ -181,3 +181,7 @@ std::string replace(const std::string& input, const std::string& re, const std::
 std::string left_pad(const std::string& s, int width) {
     return std::string(width - s.size(), ' ') + s;
 }
+
+size_t combine(const size_t a, const size_t b) {
+    return a ^ (b + 0x9e3779b9 + (a << 6) + (a >> 2));
+}

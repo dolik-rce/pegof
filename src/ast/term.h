@@ -34,6 +34,7 @@ public:
     std::string dump(const Primary& x, std::string indent) const;
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;
+    virtual size_t hash() const override;
 
     virtual Node* operator[](int index) override;
     virtual long size() const override;

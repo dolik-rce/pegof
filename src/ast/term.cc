@@ -125,6 +125,16 @@ bool Term::is_multiline() const {
     return std::visit(PrimaryVisitor<bool>([](const Node& x) { return x.is_multiline(); }), primary);
 }
 
+size_t Term::hash() const {
+    size_t hash = std::visit(PrimaryVisitor<size_t>([](const Node& x) { return x.hash(); }), primary);
+    hash = combine(hash, prefix);
+    hash = combine(hash, quantifier);
+    if (error_action) {
+        hash = combine(hash, error_action->hash());
+    }
+    return hash;
+}
+
 Node* Term::operator[](int index) {
     if (index == 0) {
         return std::visit(PrimaryVisitor<Node*, Node>([](Node& x) { return &x; }), primary);

@@ -2,6 +2,7 @@
 
 #include "ast/alternation.h"
 #include "log.h"
+#include "utils.h"
 
 Group::Group(const Alternation& expression, Node* parent):
     Node("Group", parent), expression(new Alternation(expression)) {}
@@ -52,6 +53,12 @@ std::string Group::dump(std::string indent) const {
 
 bool Group::is_multiline() const {
     return expression->is_multiline();
+}
+
+const size_t GROUP_HASH = std::hash<const char*> {}("group");
+
+size_t Group::hash() const {
+    return combine(GROUP_HASH, expression->hash());
 }
 
 Node* Group::operator[](int index) {

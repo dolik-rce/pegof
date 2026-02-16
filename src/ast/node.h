@@ -22,6 +22,7 @@ public:
     virtual std::string to_string(std::string indent = "") const = 0;
     virtual std::string dump(std::string indent = "") const = 0;
     virtual bool is_multiline() const = 0;
+    virtual size_t hash() const = 0;
 
     operator bool() const;
 

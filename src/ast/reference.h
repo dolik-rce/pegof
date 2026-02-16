@@ -16,8 +16,10 @@ public:
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string indent = "") const override;
     virtual bool is_multiline() const override;
+    virtual size_t hash() const override;
 
     std::string get_name() const;
+    void set_name(const std::string& new_name);
     bool references(const Rule* rule) const;
     bool has_variable() const;
     void remove_variable();

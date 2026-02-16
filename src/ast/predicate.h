@@ -11,6 +11,7 @@ public:
     virtual void parse(Parser& p) override;
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
+    virtual size_t hash() const override;
 
     friend bool operator==(const Predicate& a, const Predicate& b);
 };

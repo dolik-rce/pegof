@@ -47,6 +47,10 @@ bool Code::is_multiline() const {
     return true;
 }
 
+size_t Code::hash() const {
+    return std::hash<std::string> {}(content);
+}
+
 bool Code::empty() const {
     return comments.empty() && content.empty();
 }

@@ -17,6 +17,7 @@ public:
     virtual std::string to_string(std::string indent = "") const override;
     virtual std::string dump(std::string = "") const override;
     virtual bool is_multiline() const override;
+    virtual size_t hash() const override;
 
     bool is_empty() const;
     bool contains_reference(const Reference& ref) const;

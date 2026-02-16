@@ -133,6 +133,10 @@ bool Grammar::is_multiline() const {
     return true;
 }
 
+size_t Grammar::hash() const {
+    return 0; // no need to compute hash of full grammar
+}
+
 Node* Grammar::operator[](int index) {
     if (index >= nodes.size()) {
         error(INTERNAL_ERROR, "index out of bounds!");

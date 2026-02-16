@@ -28,6 +28,7 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"unused-variable", O_UNUSED_VARIABLE},
     {"unused-capture", O_UNUSED_CAPTURE},
     {"empty-action", O_EMPTY_ACTION},
+    {"same-rules", O_SAME_RULES},
 };
 
 const std::map<Optimization, const char*> opt_descriptions = {
@@ -36,6 +37,7 @@ const std::map<Optimization, const char*> opt_descriptions = {
     {O_INLINE,
      {"Rule inlining: Some simple rules can be inlined directly into rules that reference them. Reducing number of "
       "rules improves the speed of generated parser."}},
+    {O_SAME_RULES, {"Eliminate same rules: If there are two rules with same content they will be merged into one."}},
     {O_NORMALIZE_CHAR_CLASS,
      {"Character class optimization: Normalize character classes to avoid duplicities and use ranges where possible. "
       "E.g. `[ABCDEFX0-53-9X]` becomes `[0-9A-FX]`."}},

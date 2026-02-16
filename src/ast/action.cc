@@ -59,6 +59,10 @@ bool Action::is_multiline() const {
     return code.find('\n') != std::string::npos || code.substr(0, 1) == "#";
 }
 
+size_t Action::hash() const {
+    return std::hash<std::string> {}(code);
+}
+
 bool Action::contains_reference(const Reference& ref) const {
     std::regex re("(.|\n)*\\b" + ref.var + "\\b(.|\n)*");
     return std::regex_match(code, re);

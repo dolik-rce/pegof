@@ -113,3 +113,7 @@ std::string Directive::dump(std::string indent) const {
 bool Directive::is_multiline() const {
     return !comments.empty() || type == CODE;
 }
+
+size_t Directive::hash() const {
+    return combine(std::hash<std::string> {}(name), std::hash<std::string> {}(value));
+}

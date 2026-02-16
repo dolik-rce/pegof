@@ -36,6 +36,12 @@ std::string Predicate::dump(std::string indent) const {
     return indent + "PREDICATE " + (negative ? "! " : "") + to_c_string(code);
 }
 
+const size_t PREDICATE_HASH = std::hash<const char*> {}("predicate");
+
+size_t Predicate::hash() const {
+    return combine(PREDICATE_HASH + negative, Action::hash());
+}
+
 bool operator==(const Predicate& a, const Predicate& b) {
     return a.code == b.code && a.negative == b.negative;
 }

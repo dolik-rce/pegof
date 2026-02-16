@@ -1,6 +1,7 @@
 #include "ast/sequence.h"
 
 #include "log.h"
+#include "utils.h"
 
 Sequence::Sequence(const std::vector<Term>& terms, Node* parent): Node("Sequence", parent), terms(terms) {}
 Sequence::Sequence(Parser& p, Node* parent): Node("Sequence", parent) {
@@ -61,6 +62,14 @@ std::string Sequence::dump(std::string indent) const {
 
 bool Sequence::is_multiline() const {
     return std::any_of(terms.begin(), terms.end(), ::is_multiline);
+}
+
+size_t Sequence::hash() const {
+    size_t hash = 0;
+    for (const Term& t: terms) {
+        hash = combine(hash, t.hash());
+    }
+    return hash;
 }
 
 bool Sequence::has_single_term() const {

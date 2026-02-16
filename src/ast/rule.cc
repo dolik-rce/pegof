@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "utils.h"
 
 Rule::Rule(const std::string& name, const Alternation& expression, Node* parent):
     Node("Rule", parent), name(name), expression(expression) {}
@@ -47,6 +48,12 @@ bool Rule::is_multiline() const {
         return false;
     }
     return expression.is_multiline();
+}
+
+const size_t RULE_HASH = std::hash<const char*> {}("rule");
+
+size_t Rule::hash() const {
+    return combine(RULE_HASH, expression.hash());
 }
 
 Node* Rule::operator[](int index) {

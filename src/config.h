@@ -19,7 +19,8 @@ enum Optimization {
     O_UNUSED_VARIABLE = 1024,
     O_UNUSED_CAPTURE = 2048,
     O_EMPTY_ACTION = 4096,
-    O_ALL = 8191
+    O_SAME_RULES = 8192,
+    O_ALL = 16383
 };
 
 enum HeaderMode { HM_NEVER = 0, HM_AUTO = 1, HM_ALWAYS = 2 };

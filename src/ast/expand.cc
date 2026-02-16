@@ -36,6 +36,10 @@ bool Expand::is_multiline() const {
     return false;
 }
 
+size_t Expand::hash() const {
+    return std::hash<int> {}(content);
+}
+
 void Expand::shift(int n) {
     content += n;
 }

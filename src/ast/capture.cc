@@ -2,6 +2,7 @@
 
 #include "ast/alternation.h"
 #include "log.h"
+#include "utils.h"
 
 Capture::Capture(const Alternation& expression, Node* parent):
     Node("Capture", parent), expression(new Alternation(expression)), num(-1) {}
@@ -60,6 +61,12 @@ Node* Capture::operator[](int index) {
     } else {
         error(INTERNAL_ERROR, "index out of bounds!");
     }
+}
+
+const size_t CAPTURE_HASH = std::hash<const char*> {}("capture");
+
+size_t Capture::hash() const {
+    return combine(CAPTURE_HASH, expression->hash());
 }
 
 long Capture::size() const {

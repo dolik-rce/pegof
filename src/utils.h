@@ -36,3 +36,9 @@ std::string join(const std::vector<std::string>& v, const std::string& delimiter
 bool contains(std::vector<std::string> values, std::string x);
 std::string replace(const std::string& input, const std::string& re, const std::string& replace);
 std::string left_pad(const std::string& s, int width);
+
+size_t combine(const size_t a, const size_t b);
+
+template<typename T> size_t combine(const size_t a, const T b) {
+    return combine(a, std::hash<T> {}(b));
+}

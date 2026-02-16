@@ -3,6 +3,7 @@
 #include "config.h"
 #include "log.h"
 #include "rule.h"
+#include "utils.h"
 
 Alternation::Alternation(const std::vector<Sequence>& sequences, Node* parent):
     Node("Alternation", parent), sequences(sequences) {}
@@ -60,6 +61,14 @@ std::string Alternation::dump(std::string indent) const {
 bool Alternation::is_multiline() const {
     return sequences.size() > Config::get<int>("wrap-limit")
         || std::any_of(sequences.begin(), sequences.end(), ::is_multiline);
+}
+
+size_t Alternation::hash() const {
+    size_t hash = 0;
+    for (const Sequence& s: sequences) {
+        hash = combine(hash, s.hash());
+    }
+    return hash;
 }
 
 Sequence& Alternation::get(int index) {

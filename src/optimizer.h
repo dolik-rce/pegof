@@ -7,6 +7,7 @@ class Optimizer {
 
     int apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform);
 
+    int same_rules();
     int inline_rules();
     int concat_strings();
     int concat_character_classes();

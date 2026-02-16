@@ -2,6 +2,7 @@
 
 #include "ast/rule.h"
 #include "log.h"
+#include "utils.h"
 
 Reference::Reference(const std::string& name, const std::string& var, Node* parent):
     Node("Reference", parent), name(name), var(var) {}
@@ -50,8 +51,16 @@ bool Reference::is_multiline() const {
     return false;
 }
 
+size_t Reference::hash() const {
+    return combine(std::hash<std::string> {}(name), std::hash<std::string> {}(var));
+}
+
 std::string Reference::get_name() const {
     return name;
+}
+
+void Reference::set_name(const std::string& new_name) {
+    name = new_name;
 }
 
 bool Reference::references(const Rule* rule) const {
