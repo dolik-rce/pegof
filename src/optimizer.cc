@@ -659,22 +659,32 @@ Grammar Optimizer::optimize() {
     int pass = 1;
     std::string debug_script = Config::get<std::string>("debug-script");
     debug("Input grammar:\n%s", STR(g));
+
+    static OptFuncPtr optimization_order[] = {
+        &Optimizer::normalize_character_classes,
+        &Optimizer::remove_unnecessary_groups,
+        &Optimizer::same_rules,
+        &Optimizer::inline_rules,
+        &Optimizer::single_char_character_classes,
+        // &Optimizer::character_class_negations,
+        &Optimizer::double_negations,
+        &Optimizer::double_quantifications,
+        &Optimizer::simplify_repeats,
+        &Optimizer::concat_strings,
+        &Optimizer::concat_character_classes,
+        &Optimizer::unused_variables,
+        &Optimizer::unused_captures,
+        &Optimizer::empty_actions
+    };
+
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
-        opts = normalize_character_classes();
-        opts += same_rules();
-        opts += inline_rules();
-        opts += remove_unnecessary_groups();
-        opts += single_char_character_classes();
-        //~ opts += character_class_negations();
-        opts += double_negations();
-        opts += double_quantifications();
-        opts += simplify_repeats();
-        opts += concat_strings();
-        opts += concat_character_classes();
-        opts += unused_variables();
-        opts += unused_captures();
-        opts += empty_actions();
+        for (OptFuncPtr func: optimization_order) {
+            opts = (this->*func)();
+            if (opts) {
+                break;
+            }
+        }
         if (opts) {
             debug("Grammar after pass %d (%d optimizations):\n%s", pass, opts, STR(g));
         }

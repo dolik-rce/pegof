@@ -4,10 +4,14 @@ Running debug script scripts.d/debug.sh...
 Debug script called: /tmp/pegof_<random>/pass_2.peg
 Running debug script scripts.d/debug.sh...
 Debug script called: /tmp/pegof_<random>/pass_3.peg
-Detected problem in /tmp/pegof_<random>/pass_3.peg:
+Running debug script scripts.d/debug.sh...
+Debug script called: /tmp/pegof_<random>/pass_4.peg
+Running debug script scripts.d/debug.sh...
+Debug script called: /tmp/pegof_<random>/pass_5.peg
+Detected problem in /tmp/pegof_<random>/pass_5.peg:
 X <- A
 
 A <- B
 
-B <- "x"
-ERROR: Debug script failed with exit code 42 in pass 3
+B <- ("x")
+ERROR: Debug script failed with exit code 42 in pass 5

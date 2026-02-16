@@ -5,6 +5,8 @@
 class Optimizer {
     Grammar& g;
 
+    typedef int (Optimizer::*OptFuncPtr)();
+
     int apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform);
 
     int same_rules();
