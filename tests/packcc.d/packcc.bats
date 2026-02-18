@@ -6,13 +6,25 @@ PCC_TEST_DIR="$PWD/../packcc/tests"
 mapfile -t TESTS < <(cd "$PCC_TEST_DIR"; ls -d -- *.d)
 
 run_wrapped() {
-    [ "$INCLUDE_SLOW_TESTS" ] || skip "slow test (set INCLUDE_SLOW_TESTS=1 to run this)"
     (OPTIMIZE="$2" PACKCC="$PWD/packcc.d/wrapper.sh" "$PCC_TEST_DIR"/test.sh -f "$1")
+}
+
+do_skip() {
+    skip "slow test (set INCLUDE_SLOW_TESTS=1 to run this)"
+}
+
+check_skip() {
+    if [ "$INCLUDE_SLOW_TESTS" != 1 ]; then
+        $BTF --description "packcc.d - ${TEST/.d/} formatted" -- do_skip "$TEST formatted"
+        $BTF --description "packcc.d - ${TEST/.d/} optimized" -- do_skip "$TEST optimized"
+        return 1
+    fi
 }
 
 if check_bats_version 1 11; then
     BTF="bats_test_function"
     for TEST in "${TESTS[@]}"; do
+        check_skip || continue
         if ! ls "$PCC_TEST_DIR/$TEST"/*.peg &> /dev/null; then
             # There's no point in running tests that do not have any grammar (e.g. code style).
             continue
