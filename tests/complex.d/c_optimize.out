@@ -277,16 +277,16 @@ Statement <-
         / Statement
     )* "}" Spacing
     / ArgumentExpressionList? ";" Spacing
-    / "if" !IdChar Spacing LPAR ArgumentExpressionList RPAR Statement ("else" !IdChar Spacing Statement)?
-    / "switch" !IdChar Spacing LPAR ArgumentExpressionList RPAR Statement
-    / "while" !IdChar Spacing LPAR ArgumentExpressionList RPAR Statement
-    / "do" !IdChar Spacing Statement "while" !IdChar Spacing LPAR ArgumentExpressionList RPAR ";" Spacing
-    / "for" !IdChar Spacing LPAR ArgumentExpressionList? ";" Spacing ArgumentExpressionList? ";" Spacing ArgumentExpressionList? RPAR Statement
-    / "for" !IdChar Spacing LPAR Declaration ArgumentExpressionList? ";" Spacing ArgumentExpressionList? RPAR Statement
-    / "goto" !IdChar Spacing Identifier ";" Spacing
-    / "continue" !IdChar Spacing ";" Spacing
-    / "break" !IdChar Spacing ";" Spacing
-    / "return" !IdChar Spacing ArgumentExpressionList? ";" Spacing
+    / "if" !IdChar Spacing LPAR <ArgumentExpressionList> RPAR Statement ("else" !IdChar Spacing Statement)? { printf("IF: %s\n", $1); }
+    / "switch" !IdChar Spacing LPAR <ArgumentExpressionList> RPAR Statement { printf("SWITCH: %s\n", $2); }
+    / "while" !IdChar Spacing LPAR <ArgumentExpressionList> RPAR Statement { printf("WHILE: %s\n", $3); }
+    / "do" !IdChar Spacing Statement "while" !IdChar Spacing LPAR <ArgumentExpressionList> RPAR ";" Spacing { printf("DO WHILE: %s\n", $4); }
+    / "for" !IdChar Spacing LPAR <ArgumentExpressionList? ";" Spacing ArgumentExpressionList? ";" Spacing ArgumentExpressionList?> RPAR Statement { printf("FOR: %s\n", $5); }
+    / "for" !IdChar Spacing LPAR <Declaration ArgumentExpressionList? ";" Spacing ArgumentExpressionList?> RPAR Statement { printf("FOR: %s\n", $6); }
+    / "goto" !IdChar Spacing <Identifier> ";" Spacing { printf("GOTO: %s\n", $7); }
+    / "continue" !IdChar Spacing ";" Spacing { printf("CONTINUE\n"); }
+    / "break" !IdChar Spacing ";" Spacing { printf("BREAK\n"); }
+    / "return" !IdChar Spacing <ArgumentExpressionList>? ";" Spacing { printf("RETURN: %s\n", $8); }
 
 ArgumentExpressionList <- AssignmentExpression ("," Spacing AssignmentExpression)*
 
@@ -446,6 +446,7 @@ LogicalANDExpression <- ExclusiveORExpression ("|" !"=" Spacing ExclusiveORExpre
 ConditionalExpression <- LogicalANDExpression ("||" Spacing LogicalANDExpression)* ("?" Spacing ArgumentExpressionList ":" !">" Spacing LogicalANDExpression ("||" Spacing LogicalANDExpression)*)*
 
 AssignmentExpression <-
+    <
     UnaryExpression (
         "=" !"=" Spacing
         / "*=" Spacing
@@ -458,7 +459,8 @@ AssignmentExpression <-
         / "&=" Spacing
         / "^=" Spacing
         / "|=" Spacing
-    ) AssignmentExpression
+    )
+> AssignmentExpression { printf("ASSIGNMENT: %s\n", $1); }
     / ConditionalExpression
 
 #-------------------------------------------------------------------------

@@ -293,20 +293,23 @@ CompoundStatement <- LWING ( Declaration / Statement )* RWING
 ExpressionStatement <- Expression? SEMI
 
 SelectionStatement
-   <- IF LPAR Expression RPAR Statement (ELSE Statement)?
-    / SWITCH LPAR Expression RPAR Statement
+   <- IF LPAR <Expression> RPAR Statement (ELSE Statement)? { printf("IF: %s\n", $1); }
+    / SWITCH LPAR <Expression> RPAR Statement { printf("SWITCH: %s\n", $2); }
+
 
 IterationStatement
-   <- WHILE LPAR Expression RPAR Statement
-    / DO Statement WHILE LPAR Expression RPAR SEMI
-    / FOR LPAR Expression? SEMI Expression? SEMI Expression? RPAR Statement
-    / FOR LPAR Declaration Expression? SEMI Expression? RPAR Statement
+   <- WHILE LPAR <Expression> RPAR Statement { printf("WHILE: %s\n", $1); }
+    / DO Statement WHILE LPAR <Expression> RPAR SEMI { printf("DO WHILE: %s\n", $2); }
+    / FOR LPAR <Expression? SEMI Expression? SEMI Expression?> RPAR Statement { printf("FOR: %s\n", $3); }
+    / FOR LPAR <Declaration Expression? SEMI Expression?> RPAR Statement { printf("FOR: %s\n", $4); }
+
 
 JumpStatement
-   <- GOTO Identifier SEMI
-    / CONTINUE SEMI
-    / BREAK SEMI
-    / RETURN Expression? SEMI
+   <- GOTO <Identifier> SEMI { printf("GOTO: %s\n", $1); }
+    / CONTINUE SEMI { printf("CONTINUE\n"); }
+    / BREAK SEMI { printf("BREAK\n"); }
+    / RETURN <Expression>? SEMI { printf("RETURN: %s\n", $2); }
+
 
 
 #-------------------------------------------------------------------------
@@ -373,7 +376,7 @@ LogicalORExpression <- LogicalANDExpression (OROR LogicalANDExpression)*
 ConditionalExpression <- LogicalORExpression (QUERY Expression COLON LogicalORExpression)*
 
 AssignmentExpression
-   <- UnaryExpression AssignmentOperator AssignmentExpression
+   <- <UnaryExpression AssignmentOperator> AssignmentExpression  { printf("ASSIGNMENT: %s\n", $1); }
     / ConditionalExpression
 
 AssignmentOperator

@@ -1,35 +1,3 @@
-# Copyright (c) 2021 Jan Dolinár
-#
-# This source code is released for free distribution under the terms of the
-# GNU General Public License version 2.
-#
-# This file contains description of Kotlin grammar based on the ANTLR grammar
-# from https://github.com/Kotlin/kotlin-grammar-gpl2.
-#
-# Notes:
-#   1. This file was originally derived from files (reference grammar files) in https://github.com/Kotlin/kotlin-spec
-#   2. Kotlin/kotlin-spec is distributed under Apache2 license
-#   3. I have requested the original developers to "re-license or dual-license" (see https://github.com/Kotlin/kotlin-spec/issues/70)
-#   4. The request was accepted and the original developer made a new repository https://github.com/Kotlin/kotlin-grammar-gpl2
-#      for redistributing the reference grammar files under GPLv2 license.
-#   5. This file is now derived from Kotlin/kotlin-grammar-gpl2 repository.
-#   6. Unlike many other files in Universal Ctags, this source code is released strictly under GPLv2
-#      and should not be relicensed to later versions of GPL.
-
-%prefix "pkotlin"
-
-%auxil "struct parserCtx *"
-
-%earlysource {
-    #include "general.h"
-}
-
-%header { struct parserCtx; }
-
-%source {
-    #include "kotlin_pre.h"
-}
-
 file <-
     shebangLine? NL* fileAnnotation* _* packageHeader* _* importList* _* (
         filePart
@@ -41,9 +9,9 @@ filePart <-
     (
         topLevelObject
         / (statement _* semi)
-    ) { resetFailure(auxil, $0s); }
+    )
 
-unparsable <- [^\n]+ NL* { reportFailure(auxil, $0s); }
+unparsable <- [^\n]+ NL* { printf("Syntax error at byte %d\n", $0s); }
 
 ### Converted from peg/kotlin/KotlinParser.g4
 #
@@ -62,7 +30,7 @@ fileAnnotation <-
         / unescapedAnnotation
     ) _* NL*
 
-packageHeader <- PACKAGE { PUSH_KIND(auxil, K_PACKAGE); } _ <identifier> { makeKotlinTag(auxil, $1, $1s, true); } _* semi?
+packageHeader <- PACKAGE _ <identifier> { printf("%s", $1); } _* semi?
 
 importList <- importHeader+
 
@@ -77,10 +45,10 @@ importAlias <- _ AS _ simpleIdentifier
 topLevelObject <- declaration _* semis?
 
 typeAlias <-
-    modifiers? _* TYPE_ALIAS { PUSH_KIND(auxil, K_TYPEALIAS); } (
+    modifiers? _* TYPE_ALIAS (
         _
         / NL
-    )* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, false); } _* (__* typeParameters)? __* ASSIGNMENT __* type
+    )* <simpleIdentifier> { printf("%s\n", $1); } _* (__* typeParameters)? __* ASSIGNMENT __* type
 
 declaration <-
     classDeclaration
@@ -92,12 +60,12 @@ declaration <-
 # // SECTION: classes
 classDeclaration <-
     modifiers? (
-        CLASS { PUSH_KIND(auxil, K_CLASS); }
-        / (FUN __*)? INTERFACE { PUSH_KIND(auxil, K_INTERFACE); }
-    ) _ NL* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } (__* typeParameters)? (__* primaryConstructor)? (__* COLON __* delegationSpecifiers)? (__* typeConstraints)? (
+        CLASS
+        / (FUN __*)? INTERFACE
+    ) _ NL* <simpleIdentifier> { printf("%s\n", $1); } (__* typeParameters)? (__* primaryConstructor)? (__* COLON __* delegationSpecifiers)? (__* typeConstraints)? (
         __* classBody
         / __* enumClassBody
-    )? { POP_SCOPE(auxil); }
+    )?
 
 primaryConstructor <- (modifiers? CONSTRUCTOR __*)? classParameters
 
@@ -107,10 +75,10 @@ classParameters <- LPAREN __* (classParameter (__* COMMA __* classParameter)* (_
 
 classParameter <-
     (
-        modifiers? _* VAL { PUSH_KIND(auxil, K_CONSTANT); }
-        / modifiers? _* VAR { PUSH_KIND(auxil, K_VARIABLE); }
-        / modifiers? { PUSH_KIND(auxil, K_IGNORE); } _*
-    )? __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } _* COLON __* type (__* ASSIGNMENT __* expression)? { POP_SCOPE(auxil); }
+        modifiers? _* VAL
+        / modifiers? _* VAR
+        / modifiers? _*
+    )? __* <simpleIdentifier> { printf("%s\n", $1); } _* COLON __* type (__* ASSIGNMENT __* expression)?
 
 delegationSpecifiers <- annotatedDelegationSpecifier (__* COMMA __* annotatedDelegationSpecifier)*
 
@@ -120,7 +88,7 @@ delegationSpecifier <-
     / userType
     / functionType
 
-constructorInvocation <- userType __* valueArguments
+constructorInvocation <- userType _* valueArguments
 
 annotatedDelegationSpecifier <- annotation* __* delegationSpecifier
 
@@ -149,26 +117,26 @@ classMemberDeclaration <-
 
 anonymousInitializer <- INIT __* block
 
-companionObject <- modifiers? COMPANION __* (DATA __*)? OBJECT { PUSH_KIND(auxil, K_OBJECT); } <(__* simpleIdentifier)?> { makeKotlinTag(auxil, $1e-$1s != 0 ? $1 : "Companion", $1s, true); } (__* COLON __* delegationSpecifiers)? (__* classBody)? { POP_SCOPE(auxil); }
+companionObject <- modifiers? COMPANION __* OBJECT <(__* simpleIdentifier)?> { printf("%s\n", $1e-$1s != 0 ? $1 : "Companion"); } (__* COLON __* delegationSpecifiers)? (__* classBody)?
 
 functionValueParameters <- LPAREN __* (functionValueParameter (__* COMMA __* functionValueParameter)* (__* COMMA)?)? __* RPAREN
 
 functionValueParameter <- parameterModifiers? _* parameter (__* ASSIGNMENT __* expression)?
 
-functionDeclaration <- modifiers? _* FUN { PUSH_KIND(auxil, K_METHOD); } _* (__* typeParameters)? _* (__* receiverTypeAndDot)? __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } __* functionValueParameters _* (__* COLON __* type)? _* (__* typeConstraints)? _* (__* functionBody)? { POP_SCOPE(auxil); }
+functionDeclaration <- modifiers? _* FUN _* (__* typeParameters)? _* (__* receiverTypeAndDot)? __* <simpleIdentifier> { printf("%s\n", $1); } __* functionValueParameters _* (__* COLON __* type)? _* (__* typeConstraints)? _* (__* functionBody)?
 
 functionBody <-
     block
     / ASSIGNMENT __* expression
 
-variableDeclaration <- annotation* __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, false); } (__* COLON __* type)?
+variableDeclaration <- annotation* __* <simpleIdentifier> { printf("%s\n", $1); } (__* COLON __* type)?
 
 multiVariableDeclaration <- LPAREN __* variableDeclaration _* (__* COMMA __* variableDeclaration)* _* (__* COMMA)? __* RPAREN
 
 propertyDeclaration <-
     modifiers? _* (
-        VAL { PUSH_KIND(auxil, K_CONSTANT); }
-        / VAR { PUSH_KIND(auxil, K_VARIABLE); }
+        VAL
+        / VAR
     ) _ (__* typeParameters)? (__* receiverTypeAndDot)? (
         __* (
             multiVariableDeclaration
@@ -201,7 +169,7 @@ parameterWithOptionalType <- parameterModifiers? simpleIdentifier __* (COLON __*
 
 parameter <- simpleIdentifier __* COLON __* type
 
-objectDeclaration <- modifiers? _* OBJECT { PUSH_KIND(auxil, K_OBJECT); } __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } (__* COLON __* delegationSpecifiers)? (__* classBody)? { POP_SCOPE(auxil); }
+objectDeclaration <- modifiers? _* OBJECT __* <simpleIdentifier> { printf("%s\n", $1); } (__* COLON __* delegationSpecifiers)? (__* classBody)?
 
 secondaryConstructor <- modifiers? CONSTRUCTOR __* functionValueParameters (__* COLON __* constructorDelegationCall)? __* block?
 
@@ -374,13 +342,7 @@ elvis <- QUEST_NO_WS COLON
 
 infixFunctionCall <- rangeExpression (_* simpleIdentifier __* rangeExpression)*
 
-rangeExpression <-
-    additiveExpression (
-        _* (
-            RANGE_UNTIL
-            / RANGE
-        ) __* additiveExpression
-    )*
+rangeExpression <- additiveExpression (_* RANGE __* additiveExpression)*
 
 additiveExpression <- multiplicativeExpression (_* additiveOperator __* multiplicativeExpression)*
 
@@ -644,8 +606,8 @@ inside_valueArgument <- annotation? __* (simpleIdentifier __* ASSIGNMENT __*)? M
 #characterLiteral <- "'" (UniCharacterLiteral / EscapedIdentifier / [^\n\r'\\]) "'"
 #stringChar <- [^"]
 lambdaLiteral <-
-    LCURL { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<lambda>", $0s, true); } __* statements __* RCURL { POP_SCOPE(auxil); }
-    / LCURL { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<lambda>", 8, true); } __* lambdaParameters? __* ARROW __* statements __* RCURL { POP_SCOPE(auxil); }
+    LCURL { printf("<lambda>\n"); } __* statements __* RCURL
+    / LCURL { printf("<lambda>\n"); } __* lambdaParameters? __* ARROW __* statements __* RCURL
 
 lambdaParameters <- lambdaParameter (__* COMMA __* lambdaParameter)* (__* COMMA)?
 
@@ -653,7 +615,7 @@ lambdaParameter <-
     variableDeclaration
     / multiVariableDeclaration (__* COLON __* type)?
 
-anonymousFunction <- (SUSPEND __*)? FUN { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<anonymous>", $0s, true); } (__* type __* DOT)? __* parametersWithOptionalType (__* COLON __* type)? (__* typeConstraints)? (__* functionBody)? { POP_SCOPE(auxil); }
+anonymousFunction <- (SUSPEND __*)? FUN { printf("annonymous function\n"); } (__* type __* DOT)? __* parametersWithOptionalType (__* COLON __* type)? (__* typeConstraints)? (__* functionBody)?
 
 functionLiteral <-
     lambdaLiteral
@@ -1813,4 +1775,10 @@ NL <-
 EOF <- !.
 
 %%
-#include "kotlin_post.h"
+int main(int argc, char **argv) {
+    int ret;
+    pcc_context_t *ctx = pcc_create(NULL);
+    while (pcc_parse(ctx, &ret));
+    pcc_destroy(ctx);
+    return 0;
+}

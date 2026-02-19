@@ -1,0 +1,21 @@
+ASSIGNMENT: result += 
+WHILE: i < b
+RETURN: result
+ASSIGNMENT: i = 
+ASSIGNMENT: sum += 
+FOR: i = 0; i < len; i++
+RETURN: sum
+ASSIGNMENT: p->x += 
+ASSIGNMENT: p->y += 
+ASSIGNMENT: p->color = 
+IF: p
+ASSIGNMENT: d->i = 
+BREAK
+ASSIGNMENT: d->f = 
+BREAK
+ASSIGNMENT: d->c = 
+BREAK
+SWITCH: mode
+ASSIGNMENT: global_counter += 
+DO WHILE: countdown > 0
+RETURN: value + p1.x + p1.y + p1.color + global_counter

@@ -3,19 +3,13 @@
 case "$1" in
 setup)
     ${CC:-cc} ${CFLAGS:--O2} "$2.c" -o "$2.tmp"
-    sed '
-        /__attribute__/d;
-        s/" FMT_LU "/%lu/g;
-        s/DECLSPEC_IMPORT//g;
-        s/WINAPI//g;
-    ' "packcc/src/packcc.c" > "$2.input"
     ;;
 benchmark)
     for i in {1..10}; do
-        "$2.tmp" < "$2.input" > /dev/null
+        "$2.tmp" < "benchmark/inputs/example.c" > /dev/null
     done
     ;;
 teardown)
-    rm -f "$2.tmp" "$2.input"
+    rm -f "$2.tmp"
     ;;
 esac

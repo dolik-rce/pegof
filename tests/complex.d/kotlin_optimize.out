@@ -1,35 +1,3 @@
-# Copyright (c) 2021 Jan Dolinár
-#
-# This source code is released for free distribution under the terms of the
-# GNU General Public License version 2.
-#
-# This file contains description of Kotlin grammar based on the ANTLR grammar
-# from https://github.com/Kotlin/kotlin-grammar-gpl2.
-#
-# Notes:
-#   1. This file was originally derived from files (reference grammar files) in https://github.com/Kotlin/kotlin-spec
-#   2. Kotlin/kotlin-spec is distributed under Apache2 license
-#   3. I have requested the original developers to "re-license or dual-license" (see https://github.com/Kotlin/kotlin-spec/issues/70)
-#   4. The request was accepted and the original developer made a new repository https://github.com/Kotlin/kotlin-grammar-gpl2
-#      for redistributing the reference grammar files under GPLv2 license.
-#   5. This file is now derived from Kotlin/kotlin-grammar-gpl2 repository.
-#   6. Unlike many other files in Universal Ctags, this source code is released strictly under GPLv2
-#      and should not be relicensed to later versions of GPL.
-
-%prefix "pkotlin"
-
-%auxil "struct parserCtx *"
-
-%earlysource {
-    #include "general.h"
-}
-
-%header { struct parserCtx; }
-
-%source {
-    #include "kotlin_pre.h"
-}
-
 file <-
     ("#!" [^\n\r]* _* NL+)? NL* (
         (
@@ -43,10 +11,10 @@ file <-
             / UnicodeDigit
         ) NL* ":" _* NL* (
             "[" _* (
-                userType __* valueArguments
+                userType _* valueArguments
                 / userType
             )+ _* "]"
-            / userType __* valueArguments
+            / userType _* valueArguments
             / userType
         ) _* NL*
     )* _* packageHeader* _* (
@@ -61,31 +29,26 @@ file <-
             ) _ simpleIdentifier
         )? _* semi? _*
     )* _* (
-        filePart
+        declaration _* semis?
+        / statement _* semi
         / _
         / unparsable
     )* !.
 
-filePart <-
-    (
-        declaration _* semis?
-        / statement _* semi
-    ) { resetFailure(auxil, $0s); }
-
-unparsable <- [^\n]+ NL* { reportFailure(auxil, $0s); }
+unparsable <- [^\n]+ NL* { printf("Syntax error at byte %d\n", $0s); }
 
 packageHeader <-
     "package" !(
         Letter
         / UnicodeDigit
-    ) { PUSH_KIND(auxil, K_PACKAGE); } _ <simpleIdentifier (__* "." simpleIdentifier)*> { makeKotlinTag(auxil, $1, $1s, true); } _* semi?
+    ) _ <simpleIdentifier (__* "." simpleIdentifier)*> { printf("%s", $1); } _* semi?
 
 declaration <-
     modifiers? (
         "class" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_CLASS); }
+        )
         / (
             "fun" !(
                 Letter
@@ -94,8 +57,8 @@ declaration <-
         )? "interface" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_INTERFACE); }
-    ) _ NL* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } (__* typeParameters)? (
+        )
+    ) _ NL* <simpleIdentifier> { printf("%s\n", $1); } (__* typeParameters)? (
         __* (
             modifiers? "constructor" !(
                 Letter
@@ -105,29 +68,29 @@ declaration <-
     )? (__* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*)? (__* typeConstraints)? (
         __* classBody
         / __* "{" __* ((modifiers __*)? simpleIdentifier (__* valueArguments)? (__* classBody)? (__* "," __* (modifiers __*)? simpleIdentifier (__* valueArguments)? (__* classBody)?)* __* ","?)? (__* ";" __* (classMemberDeclaration semis?)*)? __* "}"
-    )? { POP_SCOPE(auxil); }
+    )?
     / modifiers? _* "object" !(
         Letter
         / UnicodeDigit
-    ) { PUSH_KIND(auxil, K_OBJECT); } __* <simpleIdentifier> { makeKotlinTag(auxil, $2, $2s, true); } (__* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*)? (__* classBody)? { POP_SCOPE(auxil); }
+    ) __* <simpleIdentifier> { printf("%s\n", $2); } (__* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*)? (__* classBody)?
     / modifiers? _* "fun" !(
         Letter
         / UnicodeDigit
-    ) { PUSH_KIND(auxil, K_METHOD); } _* (__* typeParameters)? _* (__* receiverTypeAndDot)? __* <simpleIdentifier> { makeKotlinTag(auxil, $3, $3s, true); } __* functionValueParameters _* (__* ":" __* type)? _* (__* typeConstraints)? _* (
+    ) _* (__* typeParameters)? _* (__* receiverTypeAndDot)? __* <simpleIdentifier> { printf("%s\n", $3); } __* functionValueParameters _* (__* ":" __* type)? _* (__* typeConstraints)? _* (
         __* (
             block
             / "=" !"=" __* expression
         )
-    )? { POP_SCOPE(auxil); }
+    )?
     / modifiers? _* (
         "val" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_CONSTANT); }
+        )
         / "var" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_VARIABLE); }
+        )
     ) _ (__* typeParameters)? (__* receiverTypeAndDot)? __* (
         multiVariableDeclaration
         / variableDeclaration
@@ -146,10 +109,10 @@ declaration <-
     / modifiers? _* "typealias" !(
         Letter
         / UnicodeDigit
-    ) { PUSH_KIND(auxil, K_TYPEALIAS); } (
+    ) (
         _
         / NL
-    )* <simpleIdentifier> { makeKotlinTag(auxil, $4, $4s, false); } _* (__* typeParameters)? __* "=" !"=" __* type
+    )* <simpleIdentifier> { printf("%s\n", $4); } _* (__* typeParameters)? __* "=" !"=" __* type
 
 classBody <- "{" __* (classMemberDeclaration semis?)* __* "}"
 
@@ -158,17 +121,17 @@ classParameter <-
         modifiers? _* "val" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_CONSTANT); }
+        )
         / modifiers? _* "var" !(
             Letter
             / UnicodeDigit
-        ) { PUSH_KIND(auxil, K_VARIABLE); }
-        / modifiers? { PUSH_KIND(auxil, K_IGNORE); } _*
-    )? __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, true); } _* ":" __* type (__* "=" !"=" __* expression)? { POP_SCOPE(auxil); }
+        )
+        / modifiers? _*
+    )? __* <simpleIdentifier> { printf("%s\n", $1); } _* ":" __* type (__* "=" !"=" __* expression)?
 
 annotatedDelegationSpecifier <-
     annotation* __* (
-        userType __* valueArguments
+        userType _* valueArguments
         / (
             userType
             / functionType
@@ -230,15 +193,10 @@ classMemberDeclaration <-
     / modifiers? "companion" !(
         Letter
         / UnicodeDigit
-    ) __* (
-        "data" !(
-            Letter
-            / UnicodeDigit
-        ) __*
-    )? "object" !(
+    ) __* "object" !(
         Letter
         / UnicodeDigit
-    ) { PUSH_KIND(auxil, K_OBJECT); } <(__* simpleIdentifier)?> { makeKotlinTag(auxil, $1e-$1s != 0 ? $1 : "Companion", $1s, true); } (__* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*)? (__* classBody)? { POP_SCOPE(auxil); }
+    ) <(__* simpleIdentifier)?> { printf("%s\n", $1e-$1s != 0 ? $1 : "Companion"); } (__* ":" __* annotatedDelegationSpecifier (__* "," __* annotatedDelegationSpecifier)*)? (__* classBody)?
     / declaration
 
 functionValueParameters <- "(" __* (functionValueParameter (__* "," __* functionValueParameter)* (__* ",")?)? __* ")"
@@ -260,7 +218,7 @@ functionValueParameter <-
         )
     )* _* simpleIdentifier __* ":" __* type (__* "=" !"=" __* expression)?
 
-variableDeclaration <- annotation* __* <simpleIdentifier> { makeKotlinTag(auxil, $1, $1s, false); } (__* ":" __* type)?
+variableDeclaration <- annotation* __* <simpleIdentifier> { printf("%s\n", $1); } (__* ":" __* type)?
 
 multiVariableDeclaration <- "(" __* variableDeclaration _* (__* "," __* variableDeclaration)* _* (__* ",")? __* ")"
 
@@ -521,38 +479,31 @@ equality <-
     )*
 
 genericCallLikeComparison <-
-    elvisExpression (
-        _* inOperator __* elvisExpression
+    infixFunctionCall (__* "?:" __* infixFunctionCall)* (
+        _* inOperator __* infixFunctionCall (__* "?:" __* infixFunctionCall)*
         / _* isOperator __* type
     )* (_* callSuffix)*
 
-elvisExpression <- rangeExpression (_* simpleIdentifier __* rangeExpression)* (__* "?:" __* rangeExpression (_* simpleIdentifier __* rangeExpression)*)*
+infixFunctionCall <- additiveExpression (_* ".." __* additiveExpression)* (_* simpleIdentifier __* additiveExpression (_* ".." __* additiveExpression)*)*
 
-rangeExpression <-
-    multiplicativeExpression (
-        _* (
-            "+"
-            / "-"
-        ) __* multiplicativeExpression
-    )* (
-        _* (
-            "..<"
-            / ".."
-        ) __* multiplicativeExpression (
-            _* (
-                "+"
-                / "-"
-            ) __* multiplicativeExpression
-        )*
-    )*
-
-multiplicativeExpression <-
+additiveExpression <-
     asExpression (
         _* (
             "*"
             / "/"
             / "%"
         ) __* asExpression
+    )* (
+        _* (
+            "+"
+            / "-"
+        ) __* asExpression (
+            _* (
+                "*"
+                / "/"
+                / "%"
+            ) __* asExpression
+        )*
     )*
 
 asExpression <-
@@ -812,7 +763,15 @@ primaryExpression <-
         / FieldIdentifier
     )* "\""
     / lambdaLiteral
-    / anonymousFunction
+    / (SUSPEND __*)? "fun" !(
+        Letter
+        / UnicodeDigit
+    ) { printf("annonymous function\n"); } (__* type __* ".")? __* "(" __* (parameterWithOptionalType (__* "," __* parameterWithOptionalType)* (__* ",")?)? __* ")" (__* ":" __* type)? (__* typeConstraints)? (
+        __* (
+            block
+            / "=" !"=" __* expression
+        )
+    )?
     / (
         "data" !(
             Letter
@@ -1005,8 +964,8 @@ inside_postfixUnaryExpression <-
 #characterLiteral <- "'" (UniCharacterLiteral / EscapedIdentifier / [^\n\r'\\]) "'"
 #stringChar <- [^"]
 lambdaLiteral <-
-    "{" { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<lambda>", $0s, true); } __* statements __* "}" { POP_SCOPE(auxil); }
-    / "{" { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<lambda>", 8, true); } __* (
+    "{" { printf("<lambda>\n"); } __* statements __* "}"
+    / "{" { printf("<lambda>\n"); } __* (
         (
             variableDeclaration
             / multiVariableDeclaration (__* ":" __* type)?
@@ -1016,18 +975,7 @@ lambdaLiteral <-
                 / multiVariableDeclaration (__* ":" __* type)?
             )
         )* (__* ",")?
-    )? __* "->" __* statements __* "}" { POP_SCOPE(auxil); }
-
-anonymousFunction <-
-    (SUSPEND __*)? "fun" !(
-        Letter
-        / UnicodeDigit
-    ) { PUSH_KIND(auxil, K_METHOD); makeKotlinTag(auxil, "<anonymous>", $0s, true); } (__* type __* ".")? __* "(" __* (parameterWithOptionalType (__* "," __* parameterWithOptionalType)* (__* ",")?)? __* ")" (__* ":" __* type)? (__* typeConstraints)? (
-        __* (
-            block
-            / "=" !"=" __* expression
-        )
-    )? { POP_SCOPE(auxil); }
+    )? __* "->" __* statements __* "}"
 
 inOperator <-
     "in" !(
@@ -1162,7 +1110,7 @@ modifiers <-
 annotation <-
     (
         annotationUseSiteTarget __* (
-            userType __* valueArguments
+            userType _* valueArguments
             / userType
         )
         / (
@@ -1172,11 +1120,11 @@ annotation <-
                 / NL
             ) "@"
         ) (
-            userType __* valueArguments
+            userType _* valueArguments
             / userType
         )
         / annotationUseSiteTarget __* "[" (
-            userType __* valueArguments
+            userType _* valueArguments
             / userType
         )+ "]"
         / (
@@ -1186,7 +1134,7 @@ annotation <-
                 / NL
             ) "@"
         ) "[" (
-            userType __* valueArguments
+            userType _* valueArguments
             / userType
         )+ "]"
     ) __*
@@ -1796,4 +1744,10 @@ NL <-
     ) _*
 
 %%
-#include "kotlin_post.h"
+int main(int argc, char **argv) {
+    int ret;
+    pcc_context_t *ctx = pcc_create(NULL);
+    while (pcc_parse(ctx, &ret));
+    pcc_destroy(ctx);
+    return 0;
+}

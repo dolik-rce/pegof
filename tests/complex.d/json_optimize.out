@@ -3,27 +3,25 @@
 file <-
     _ (
         object
-        / array
+        / "[" (
+            value ("," value)*
+            / _
+        ) "]"
     ) _
 
 object <-
     "{" (
-        pair ("," pair)*
+        _ string _ ":" value ("," _ string _ ":" value)*
         / _
     ) "}"
-
-pair <- _ string _ ":" value
-
-array <-
-    "[" (
-        value ("," value)*
-        / _
-    ) "]"
 
 value <-
     _ (
         object
-        / array
+        / "[" (
+            value ("," value)*
+            / _
+        ) "]"
         / boolean
         / number
         / string
@@ -38,7 +36,7 @@ number <-
     "-"? (
         "0"
         / [1-9] [0-9]*
-    ) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? { printf("NUMBER: %s\n", $0); }
+    ) ("." [0-9]+)? ([Ee] [-+]? [0-9]+)? { printf("NUMBER: %s\n", $0); }
 
 string <-
     "\"" (
@@ -48,7 +46,7 @@ string <-
 
 null <- "null" { printf("NULL: %s\n", $0); }
 
-_ <- [ \n\r\t]*
+_ <- [\t\n\r ]*
 
 %%
 int main() {
