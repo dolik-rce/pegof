@@ -51,7 +51,7 @@ void Checker::set_input_file(const std::string& input) {
 }
 
 bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
-    if (Config::get<bool>("skip-validation")) {
+    if (Config::get<bool>("skip-validation") && Config::get().output_type != Config::OT_PACKCC) {
         log(2, "Skipping validation due to --skip-validation");
         return true;
     }
@@ -86,7 +86,10 @@ bool Checker::packcc(const std::string& peg, const std::string& output) const {
     std::string err;
     std::string input = TempDir::get("tmp.peg");
     write_file(input, peg);
-    return call_packcc(input, output, err);
+    if (!call_packcc(input, output, err)) {
+        error(PARSING_ERROR, "Failed to parse grammar by packcc:\n%s", err.c_str());
+    };
+    return true;
 }
 
 Stats Checker::stats(Grammar& g) const {

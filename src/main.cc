@@ -22,6 +22,17 @@ Grammar parse(const std::string& input, const Checker& checker) {
     return g;
 }
 
+void process_with_packcc(const Checker& checker, const std::string& grammar, const std::string& output) {
+    if (output.empty()) {
+        error(INVALID_ARG, "Option -p/--packcc requires output to file, use -o/--output!");
+    }
+    log(1, "Processing with PackCC ...");
+    if (!checker.packcc(grammar, output)) {
+        throw 10;
+    }
+    log(1, "Parser was generated in %s.{h,c}", output.c_str());
+};
+
 void process(
     const Config::OutputType& output_type, const std::string& input, const std::string& output, const Checker& checker
 ) {
@@ -29,6 +40,12 @@ void process(
         "Processing file %s, storing output to %s ...",
         input.empty() ? "stdin" : input.c_str(),
         output.empty() ? "stdout" : output.c_str());
+
+    if (output_type == Config::OT_PACKCC && !Config::get(O_ALL)) {
+        // Fast path if we're called just to produce code without any optimizations - no need to parse the grammar
+        process_with_packcc(checker, read_file(input), output);
+        return;
+    }
 
     Grammar g = parse(input, checker);
     g.update_parents();
@@ -71,16 +88,7 @@ void process(
         log(1, "Writing graph ...");
         write_file(output, g.dump_graph(input + (Config::get(O_ALL) ? " (optimized)" : "")));
         break;
-    case Config::OT_PACKCC:
-        if (output.empty()) {
-            error(INVALID_ARG, "Option -p/--packcc requires output to file, use -o/--output!");
-        }
-        log(1, "Processing with PackCC ...");
-        if (!checker.packcc(result, output)) {
-            throw 10;
-        }
-        log(1, "Parser was generated in %s.{h,c}", output.c_str());
-        break;
+    case Config::OT_PACKCC: process_with_packcc(checker, result, output); break;
     }
 }
 

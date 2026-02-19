@@ -6,7 +6,7 @@ PCC_TEST_DIR="$PWD/../packcc/tests"
 mapfile -t TESTS < <(cd "$PCC_TEST_DIR"; ls -d -- *.d)
 
 run_wrapped() {
-    (OPTIMIZE="$2" PACKCC="$PWD/packcc.d/wrapper.sh" "$PCC_TEST_DIR"/test.sh -f "$1")
+    (OPTIMIZE="$2" PACKCC="$PWD/packcc.d/wrapper.sh" "$PCC_TEST_DIR"/test.sh -f "$1" --verbose-run -x --show-output-of-passing-tests)
 }
 
 do_skip() {
