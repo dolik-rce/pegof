@@ -23,12 +23,12 @@ enum Optimization {
     O_ALL = 16383
 };
 
-enum HeaderMode { HM_NEVER = 0, HM_AUTO = 1, HM_ALWAYS = 2 };
+enum HeaderMode { HM_UNSET = -1, HM_NEVER = 0, HM_AUTO = 1, HM_ALWAYS = 2 };
 
 struct Config {
-    enum OutputType { OT_FORMAT, OT_AST, OT_GRAPH, OT_PACKCC };
+    enum OutputType { OT_UNSET, OT_FORMAT, OT_AST, OT_GRAPH, OT_PACKCC };
 
-    enum QuoteType { QT_DOUBLE, QT_SINGLE };
+    enum QuoteType { QT_UNSET, QT_DOUBLE, QT_SINGLE };
 
     OutputType output_type;
     std::vector<std::string> inputs;
@@ -46,18 +46,34 @@ struct Config {
         std::string shortName;
         std::string longName;
         std::any value;
+        std::any unsetValue;
+        std::any defaultValue;
         std::string description;
         std::string param;
 
         template<typename T>
         Option(
-            OptionGroup group, const std::string& shortName, const std::string& longName, T defaultValue,
+            OptionGroup group, const std::string& shortName, const std::string& longName, T unsetValue, T defaultValue,
             const std::string& description, const std::string& param = ""
         ):
             group(group),
             shortName(shortName),
             longName(longName),
-            value(defaultValue),
+            value(unsetValue),
+            unsetValue(unsetValue),
+            defaultValue(defaultValue),
+            description(description),
+            param(param) {}
+
+        template<typename T>
+        Option(
+            OptionGroup group, const std::string& shortName, const std::string& longName, T setterFunction,
+            const std::string& description, const std::string& param
+        ):
+            group(group),
+            shortName(shortName),
+            longName(longName),
+            value(setterFunction),
             description(description),
             param(param) {}
     };
@@ -90,6 +106,20 @@ private:
     int set_verbosity(const std::string& next, int);
 
     Option& find_option(const std::string& optionName);
+
+    template<typename T> T check_conflict(const std::string& option, T previous_value, T unset, T new_value) {
+        if (previous_value != unset && previous_value != new_value) {
+            usage("Conflicting value for " + option + ".");
+        }
+        return new_value;
+    }
+
+    template<typename T> void set_default(const char* optionName) {
+        Option& opt = find_option(optionName);
+        if (std::any_cast<T>(opt.value) == std::any_cast<T>(opt.unsetValue)) {
+            opt.value = opt.defaultValue;
+        }
+    }
 
 public:
     template<typename T> static const T get(std::string optionName) {

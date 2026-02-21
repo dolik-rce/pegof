@@ -9,8 +9,10 @@
 #include <iterator>
 #include <string.h>
 
+using namespace std::string_literals;
+
 Config* Config::instance = NULL;
-static Config::Option UNKNOWN_OPTION(Config::OptionGroup::OG_BASIC, "", "", nullptr, "");
+static Config::Option UNKNOWN_OPTION(Config::OptionGroup::OG_BASIC, "", "", "", "", "");
 
 const std::map<std::string, Optimization> opt_mapping = {
     {"all", O_ALL},
@@ -157,6 +159,7 @@ int Config::set_import(const std::string& next) {
 }
 
 int Config::set_indent(const std::string& next) {
+    std::string new_indent;
     char chr = 0;
     switch (next[0]) {
     case 'S':
@@ -164,11 +167,15 @@ int Config::set_indent(const std::string& next) {
     case 'T':
     case 't': chr = '\t'; break;
     case ' ':
-    case '\t': indent = next; return 1;
+    case '\t': new_indent = next; break;
     default: usage("Unsupported indent format '" + next + "'.");
     }
-    int num = std::atoi(next.c_str() + 1);
-    indent = std::string(num > 0 ? num : 1, chr);
+    if (chr) {
+        int num = std::atoi(next.c_str() + 1);
+        new_indent = std::string(num > 0 ? num : 1, chr);
+    }
+    static std::string name("indent");
+    indent = check_conflict<std::string>(name, indent, "", new_indent);
     return 1;
 }
 
@@ -224,12 +231,18 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
             } else if (opt.value.type() == typeid(MemberFnOpt1)) {
                 i += (this->*(std::any_cast<MemberFnOpt1>(opt.value)))(next, 0);
             } else if (opt.value.type() == typeid(OutputType)) {
-                output_type = std::any_cast<OutputType>(opt.value);
+                output_type = check_conflict(arg, output_type, OT_UNSET, std::any_cast<OutputType>(opt.value));
             } else if (opt.value.type() == typeid(QuoteType)) {
+                Config::Option& quotes = find_option("quotes");
                 if (next.empty() || (next != "single" && next != "double")) {
                     usage("Option '" + arg + "' requires argument 'single' or 'double'");
                 }
-                find_option("quotes").value = next[0] == 's' ? QT_SINGLE : QT_DOUBLE;
+                quotes.value = check_conflict(
+                    arg,
+                    std::any_cast<QuoteType>(quotes.value),
+                    QT_UNSET,
+                    next[0] == 's' ? QT_SINGLE : QT_DOUBLE
+                );
                 i++;
             } else if (opt.value.type() == typeid(bool)) {
                 opt.value = !std::any_cast<bool>(opt.value);
@@ -237,27 +250,39 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
                 if (next.empty()) {
                     usage("Option '" + arg + "' requires an argument");
                 }
-                opt.value = next;
+                opt.value = check_conflict(arg, std::any_cast<std::string>(opt.value), std::any_cast<std::string>(opt.unsetValue), next);
                 i++;
             } else if (opt.value.type() == typeid(int)) {
                 if (next.empty()) {
                     usage("Option '" + arg + "' requires an integer argument");
                 }
                 size_t s = 0;
-                opt.value = std::stoi(next, &s);
+                int new_int_value = std::stoi(next, &s);
                 if (s != next.size()) {
                     usage("Option '" + arg + "' requires an integer argument, got '" + next + "'");
                 }
+                opt.value = check_conflict(
+                    arg,
+                    std::any_cast<int>(opt.value),
+                    std::any_cast<int>(opt.unsetValue),
+                    new_int_value
+                );
                 i++;
             } else if (opt.value.type() == typeid(double)) {
                 if (next.empty()) {
                     usage("Option '" + arg + "' requires an double argument");
                 }
                 size_t s = 0;
-                opt.value = std::stod(next, &s);
+                double new_double_value = std::stod(next, &s);
                 if (s != next.size()) {
                     usage("Option '" + arg + "' requires an double argument, got '" + next + "'");
                 }
+                opt.value = check_conflict(
+                    arg,
+                    std::any_cast<double>(opt.value),
+                    std::any_cast<double>(opt.unsetValue),
+                    new_double_value
+                );
                 i++;
             } else {
                 usage("Internal error!");
@@ -267,6 +292,23 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
         // treat anything not starting with dash as input
         inputs.push_back(arg);
     }
+
+    // set defaults
+    if (output_type == OT_UNSET) {
+        output_type = OT_FORMAT;
+    }
+    if (header == HM_UNSET) {
+        header = HM_AUTO;
+    }
+    if (indent.empty()) {
+        indent = "    ";
+    }
+    set_default<QuoteType>("quotes");
+    set_default<int>("wrap-limit");
+    set_default<double>("inline-limit");
+    set_default<std::string>("benchmark");
+    set_default<std::string>("debug-script");
+    set_default<std::string>("packcc-options");
 }
 
 void Config::post_process() {
@@ -367,6 +409,7 @@ int Config::parse_exclude(const std::string& param) {
 }
 
 int Config::parse_header(const std::string& param) {
+    HeaderMode previous = header;
     if (param == "auto") {
         header = HM_AUTO;
     } else if (param == "always") {
@@ -375,6 +418,9 @@ int Config::parse_header(const std::string& param) {
         header = HM_NEVER;
     } else {
         error(INVALID_ARG, "Unknown value passed to --header: '%s'", param.c_str());
+    }
+    if (previous != HM_UNSET && previous != header) {
+        usage("Conflicting values for --header.");
     }
     return 1;
 }
@@ -389,13 +435,12 @@ int Config::set_verbosity(const std::string& next, int) {
     }
 }
 
-Config::Config(int argc, char** argv):
-    output_type(OT_FORMAT), optimizations(O_NONE), verbosity(0), indent("    "), header(HM_AUTO) {
+Config::Config(int argc, char** argv): output_type(OT_UNSET), optimizations(O_NONE), verbosity(0), header(HM_UNSET) {
     instance = this;
 
     args = {
-        Option(OG_BASIC, "h", "help", &Config::help, "Show help (this text)"),
-        Option(OG_BASIC, "V", "version", &Config::version, "Show version and exit"),
+        Option(OG_BASIC, "h", "help", &Config::help, "Show help (this text)", ""),
+        Option(OG_BASIC, "V", "version", &Config::version, "Show version and exit", ""),
         Option(OG_BASIC, "c", "conf", &Config::load_config, "Use given configuration file", "FILE"),
         Option(
             OG_BASIC,
@@ -405,12 +450,20 @@ Config::Config(int argc, char** argv):
             "Increase verbosity of logging by LEVEL (defaults to 1), may be repeated",
             "[LEVEL]"
         ),
-        Option(OG_BASIC, "d", "debug", false, "Output very verbose debug info, implies max verbosity"),
-        Option(OG_BASIC, "S", "skip-validation", false, "Skip result validation (useful only for debugging purposes)"),
+        Option(OG_BASIC, "d", "debug", false, false, "Output very verbose debug info, implies max verbosity", ""),
+        Option(
+            OG_BASIC,
+            "S",
+            "skip-validation",
+            false,
+            false,
+            "Skip result validation (useful only for debugging purposes)"
+        ),
         Option(
             OG_BASIC,
             "b",
             "benchmark",
+            std::string('\0', 1),
             std::string(),
             "Benchmarking script, see documentation for details",
             "SCRIPT"
@@ -419,24 +472,27 @@ Config::Config(int argc, char** argv):
             OG_BASIC,
             "D",
             "debug-script",
+            std::string('\0', 1),
             std::string(),
             "Debugging script, see documentation for details",
             "SCRIPT"
         ),
-        Option(OG_IO, "f", "format", OT_FORMAT, "Output formatted grammar (default)"),
-        Option(OG_IO, "a", "ast", OT_AST, "Output abstract syntax tree representation"),
-        Option(OG_IO, "g", "graph", OT_GRAPH, "Output description of the grammar in GraphViz format"),
-        Option(OG_IO, "p", "packcc", OT_PACKCC, "Output source files as if the grammar was passed to packcc"),
+        Option(OG_IO, "f", "format", OT_FORMAT, OT_UNSET, "Output formatted grammar (default)"),
+        Option(OG_IO, "a", "ast", OT_AST, OT_UNSET, "Output abstract syntax tree representation"),
+        Option(OG_IO, "g", "graph", OT_GRAPH, OT_UNSET, "Output description of the grammar in GraphViz format"),
+        Option(OG_IO, "p", "packcc", OT_PACKCC, OT_UNSET, "Output source files as if the grammar was passed to packcc"),
         Option(
             OG_IO,
             "P",
             "packcc-options",
+            std::string('\0', 1),
             std::string(),
             "Additional comma separated options passed to packcc\n"
             "        Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'\n"
-            "        Note: --lines might not work as expected, because temporary file is used"
+            "        Note: --lines might not work as expected, because temporary file is used",
+            ""
         ),
-        Option(OG_IO, "n", "inplace", false, "Modify the input files, use with caution"),
+        Option(OG_IO, "n", "inplace", false, false, "Modify the input files, use with caution"),
         Option(
             OG_IO,
             "i",
@@ -472,17 +528,19 @@ Config::Config(int argc, char** argv):
             "header",
             &Config::parse_header,
             "Whether to write \"Generated by pegof\" header\n"
-            "        Possible values are 'never, 'always' or 'auto' (which is the default)"
+            "        Possible values are 'never, 'always' or 'auto' (which is the default)",
+            ""
         ),
         Option(
             OG_FORMAT,
             "q",
             "quotes",
+            QT_UNSET,
             QT_DOUBLE,
             "Switch between double and single quoted strings (defaults to double)",
             "single/double"
         ),
-        Option(OG_FORMAT, "w", "wrap-limit", 1, "Wrap alternations with more than N sequences (default 1)", "N"),
+        Option(OG_FORMAT, "w", "wrap-limit", -1, 1, "Wrap alternations with more than N sequences (default 1)", "N"),
         Option(
             OG_FORMAT,
             "t",
@@ -514,6 +572,7 @@ Config::Config(int argc, char** argv):
             OG_OPT,
             "l",
             "inline-limit",
+            -1.0,
             0.2,
             "Minimum inlining score needed for rule to be inlined\n"
             "        Number between 0.0 (inline everything) and 1.0 (most conservative)\n"
@@ -521,7 +580,7 @@ Config::Config(int argc, char** argv):
             "        Only applied when inlining is enabled",
             "N"
         ),
-        Option(OG_OPT, "N", "no-follow", false, "Do not inline imported files while optimizing"),
+        Option(OG_OPT, "N", "no-follow", false, false, "Do not inline imported files while optimizing"),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
     if (argc == 2 && strcmp(argv[1], "--usage-markdown") == 0) {

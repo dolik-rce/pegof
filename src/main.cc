@@ -89,6 +89,7 @@ void process(
         write_file(output, g.dump_graph(input + (Config::get(O_ALL) ? " (optimized)" : "")));
         break;
     case Config::OT_PACKCC: process_with_packcc(checker, result, output); break;
+    case Config::OT_UNSET: error(INTERNAL_ERROR, "output type not set!");
     }
 }
 
