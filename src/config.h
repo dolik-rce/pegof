@@ -132,6 +132,7 @@ public:
 
     static bool get(const Optimization& opt);
     static bool get(const HeaderMode& headerMode);
+    static std::string get_opt_name(const Optimization& opt);
     static const Config& get();
     static const std::string& get_indent();
     static const std::set<char>& get_packcc_options();

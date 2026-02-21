@@ -708,6 +708,7 @@ Grammar Optimizer::optimize() {
         {O_EMPTY_ACTION, &Optimizer::empty_actions}
     };
 
+    std::map<Optimization, int> optimization_stats;
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
         for (Mapping optimization: optimization_order) {
@@ -716,6 +717,11 @@ Grammar Optimizer::optimize() {
             }
             opts = (this->*(optimization.function))();
             if (opts) {
+                if (optimization_stats.count(optimization.optimization)) {
+                    optimization_stats[optimization.optimization] += 1;
+                } else {
+                    optimization_stats[optimization.optimization] = 1;
+                }
                 break;
             }
         }
@@ -746,6 +752,11 @@ Grammar Optimizer::optimize() {
             }
         }
         pass++;
+    }
+    log(1, "Optimization finished.");
+    log(2, "Final optimization stats:");
+    for (auto& [optimization, count]: optimization_stats) {
+        log(2, "  %s: %d", Config::get_opt_name(optimization).c_str(), count);
     }
     return g;
 }

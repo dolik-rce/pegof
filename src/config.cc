@@ -367,6 +367,15 @@ bool Config::get(const HeaderMode& headerMode) {
     return instance->header == headerMode;
 }
 
+std::string Config::get_opt_name(const Optimization& opt) {
+    for (auto& [name, optimization]: opt_mapping) {
+        if (optimization == opt) {
+            return name;
+        }
+    }
+    error(INTERNAL_ERROR, "Unknown optimization");
+}
+
 const Config& Config::get() {
     return *instance;
 }
