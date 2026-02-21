@@ -7,7 +7,12 @@ class Optimizer {
 
     typedef int (Optimizer::*OptFuncPtr)();
 
-    int apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform);
+    struct Mapping {
+        Optimization optimization;
+        OptFuncPtr function;
+    };
+
+    int apply(const std::function<bool(Node&, int&)>& transform);
 
     int same_rules();
     int inline_rules();

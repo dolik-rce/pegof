@@ -20,10 +20,7 @@ void Optimizer::warn_once(const std::string& warning) {
     }
 }
 
-int Optimizer::apply(const Optimization& config, const std::function<bool(Node&, int&)>& transform) {
-    if (!Config::get(config)) {
-        return 0;
-    }
+int Optimizer::apply(const std::function<bool(Node&, int&)>& transform) {
     int optimized = 0;
     g.map([&optimized, transform](Node& node) mutable -> bool { return transform(node, optimized); });
     return optimized;
@@ -38,7 +35,7 @@ bool is_in_error_action(Node& node) {
 
 int Optimizer::concat_strings() {
     // "A" "B" -> "AB"
-    return apply(O_CONCAT_STRINGS, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Sequence* s = node.as<Sequence>();
         if (!s) {
             return false;
@@ -78,7 +75,7 @@ int Optimizer::concat_strings() {
 
 int Optimizer::concat_character_classes() {
     // [AB] / [CD] -> [ABCD]
-    return apply(O_CONCAT_CHAR_CLASSES, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Alternation* a = node.as<Alternation>();
         if (!a) {
             return false;
@@ -159,7 +156,7 @@ int Optimizer::simplify_repeats() {
     // +       X+ X* -> X+        X+ X? -> X+        X+ X+ -> WARN      X+ X -> WARN
     // ?       X? X* -> X*        X? X? -> X? X?     X? X+ -> X X+      X? X -> X X?
     // ""      X  X* -> X+        X  X? -> X X?      X  X+ -> X X+      X  X -> X X
-    return apply(O_REPEATS, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Sequence* s = node.as<Sequence>();
         if (!s) {
             return false;
@@ -181,7 +178,7 @@ int Optimizer::simplify_repeats() {
 }
 
 int Optimizer::normalize_character_classes() {
-    return apply(O_NORMALIZE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->any_char()) {
             return false;
@@ -195,7 +192,7 @@ int Optimizer::normalize_character_classes() {
 
 int Optimizer::single_char_character_classes() {
     // [A] -> "A"
-    return apply(O_SINGLE_CHAR_CLASS, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         CharacterClass* cc = node.as<CharacterClass>();
         if (!cc || cc->any_char() || cc->is_negative() || !cc->is_single_char()) {
             return false;
@@ -215,7 +212,7 @@ int Optimizer::single_char_character_classes() {
 //~ int Optimizer::character_class_negations() {
 //~     // ![A] -> [^A]
 //~     // ![^A] -> [A]
-//~     return apply(O_CHAR_CLASS_NEGATION, [](Node& node, int& optimized) -> bool {
+//~     return apply([](Node& node, int& optimized) -> bool {
 //~         Term* t = node.as<Term>();
 //~         if (!t || !t->contains<CharacterClass>() || !t->is_negative()) return false;
 //~         CharacterClass cc = t->get<CharacterClass>();
@@ -232,7 +229,7 @@ int Optimizer::single_char_character_classes() {
 
 int Optimizer::double_negations() {
     // !(!A) -> A
-    return apply(O_DOUBLE_NEGATION, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || !t->is_negative()) {
             return false;
@@ -263,7 +260,7 @@ int Optimizer::double_quantifications() {
     //  A* | A* | A* | A*
     //  A? | A* | A? | A*
     //  A+ | A* | A* | A+   e.g.: (A?)? -> A?
-    return apply(O_DOUBLE_QUANTIFICATION, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Term* t = node.as<Term>();
         if (!t || !t->contains<Group>() || !t->is_quantified()) {
             return false;
@@ -286,7 +283,7 @@ int Optimizer::double_quantifications() {
 }
 
 int Optimizer::remove_unnecessary_groups() {
-    return apply(O_REMOVE_GROUP, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Alternation* a = node.as<Alternation>();
         if (a) {
             for (int pos = 0; pos < a->size(); pos++) {
@@ -345,7 +342,7 @@ int Optimizer::remove_unnecessary_groups() {
 }
 
 int Optimizer::unused_variables() {
-    return apply(O_UNUSED_VARIABLE, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Reference* r = node.as<Reference>();
         if (!r || !r->has_variable()) {
             return false;
@@ -364,7 +361,7 @@ int Optimizer::unused_variables() {
 }
 
 int Optimizer::unused_captures() {
-    return apply(O_UNUSED_CAPTURE, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Rule* rule = node.as<Rule>();
         if (!rule) {
             return false;
@@ -421,7 +418,7 @@ int Optimizer::unused_captures() {
 }
 
 int Optimizer::empty_actions() {
-    return apply(O_EMPTY_ACTION, [](Node& node, int& optimized) -> bool {
+    return apply([](Node& node, int& optimized) -> bool {
         Action* action = node.as<Action>();
         if (action && action->is_empty()) {
             Term* t = action->get_parent<Term>();
@@ -444,9 +441,6 @@ int Optimizer::empty_actions() {
 }
 
 int Optimizer::repeated_sequence() {
-    if (!Config::get(O_REPEATED_SEQUENCE)) {
-        return 0;
-    }
     std::vector<Alternation*> alternations = g.find_children<Alternation>();
     for (Alternation* alternation: alternations) {
         std::map<size_t, Sequence*> hashes;
@@ -481,9 +475,6 @@ int Optimizer::repeated_sequence() {
 }
 
 int Optimizer::same_rules() {
-    if (!Config::get(O_SAME_RULES)) {
-        return 0;
-    }
     std::vector<Rule*> rules = g.find_children<Rule>();
     std::map<size_t, Rule*> hashes;
     for (Rule* rule: rules) {
@@ -530,9 +521,6 @@ static double calculate_score(int term_count, int ref_count) {
 }
 
 int Optimizer::inline_rules() {
-    if (!Config::get(O_INLINE)) {
-        return 0;
-    }
     double best_score = 0;
     int candidate = -1;
     double min_score = Config::get<double>("inline-limit");
@@ -702,28 +690,31 @@ Grammar Optimizer::optimize() {
     std::string debug_script = Config::get<std::string>("debug-script");
     debug("Input grammar:\n%s", STR(g));
 
-    static OptFuncPtr optimization_order[] = {
-        &Optimizer::normalize_character_classes,
-        &Optimizer::remove_unnecessary_groups,
-        &Optimizer::same_rules,
-        &Optimizer::inline_rules,
-        &Optimizer::single_char_character_classes,
-        // &Optimizer::character_class_negations,
-        &Optimizer::double_negations,
-        &Optimizer::double_quantifications,
-        &Optimizer::simplify_repeats,
-        &Optimizer::repeated_sequence,
-        &Optimizer::concat_strings,
-        &Optimizer::concat_character_classes,
-        &Optimizer::unused_variables,
-        &Optimizer::unused_captures,
-        &Optimizer::empty_actions
+    static Mapping optimization_order[] = {
+        {O_NORMALIZE_CHAR_CLASS, &Optimizer::normalize_character_classes},
+        {O_REMOVE_GROUP, &Optimizer::remove_unnecessary_groups},
+        {O_SAME_RULES, &Optimizer::same_rules},
+        {O_INLINE, &Optimizer::inline_rules},
+        {O_SINGLE_CHAR_CLASS, &Optimizer::single_char_character_classes},
+        // {O_CHAR_CLASS_NEGATION, &Optimizer::character_class_negations},
+        {O_DOUBLE_NEGATION, &Optimizer::double_negations},
+        {O_DOUBLE_QUANTIFICATION, &Optimizer::double_quantifications},
+        {O_REPEATS, &Optimizer::simplify_repeats},
+        {O_REPEATED_SEQUENCE, &Optimizer::repeated_sequence},
+        {O_CONCAT_STRINGS, &Optimizer::concat_strings},
+        {O_CONCAT_CHAR_CLASSES, &Optimizer::concat_character_classes},
+        {O_UNUSED_VARIABLE, &Optimizer::unused_variables},
+        {O_UNUSED_CAPTURE, &Optimizer::unused_captures},
+        {O_EMPTY_ACTION, &Optimizer::empty_actions}
     };
 
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
-        for (OptFuncPtr func: optimization_order) {
-            opts = (this->*func)();
+        for (Mapping optimization: optimization_order) {
+            if (!Config::get(optimization.optimization)) {
+                continue;
+            }
+            opts = (this->*(optimization.function))();
             if (opts) {
                 break;
             }
