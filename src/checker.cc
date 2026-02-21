@@ -59,12 +59,9 @@ bool Checker::call_packcc(const std::string& input, const std::string& output, s
     log(2, "Processing %s with PackCC, storing output to %s.{h,c}", input.c_str(), output.c_str());
 
     // Call PackCC
-    std::vector<std::string> options = split(Config::get<std::string>("packcc-options"));
-    options_t opts = {
-        (contains(options, "ascii") || contains(options, "a")) ? TRUE : FALSE,
-        (contains(options, "lines") || contains(options, "l")) ? TRUE : FALSE,
-        (contains(options, "debug") || contains(options, "d")) ? TRUE : FALSE
-    };
+    const std::set<char>& options = Config::get_packcc_options();
+    options_t opts =
+        {options.count('a') ? TRUE : FALSE, options.count('l') ? TRUE : FALSE, options.count('d') ? TRUE : FALSE};
 
     string_array_t dirs;
     pcc_array_init(&dirs);

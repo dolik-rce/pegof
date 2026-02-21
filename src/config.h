@@ -1,6 +1,7 @@
 #pragma once
 #include <any>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -86,6 +87,7 @@ private:
     int verbosity;
     std::string indent;
     HeaderMode header;
+    std::set<char> packcc_options;
 
     void usage(const std::string& error);
     void usage_markdown();
@@ -98,6 +100,7 @@ private:
     int set_output(const std::string& next);
     int set_import(const std::string& next);
     int set_indent(const std::string& next);
+    int set_packcc_options(const std::string& next);
     int load_config(const std::string& next);
     int parse_optimization_config(const std::string& param);
     int parse_optimize(const std::string& param);
@@ -130,6 +133,7 @@ public:
     static bool get(const HeaderMode& headerMode);
     static const Config& get();
     static const std::string& get_indent();
+    static const std::set<char>& get_packcc_options();
     static std::vector<std::string> get_all_imports_dirs(const std::string& input_file);
     static bool verbose(int level);
 

@@ -179,6 +179,22 @@ int Config::set_indent(const std::string& next) {
     return 1;
 }
 
+int Config::set_packcc_options(const std::string& next) {
+    std::vector<std::string> options = split(next);
+    for (int i = 0; i < options.size(); i++) {
+        if (options[i] == "ascii" || options[i] == "a") {
+            packcc_options.emplace('a');
+        } else if (options[i] == "debug" || options[i] == "d") {
+            packcc_options.emplace('d');
+        } else if (options[i] == "lines" || options[i] == "l") {
+            packcc_options.emplace('l');
+        } else {
+            error(INVALID_ARG, "Unknown PackCC option '%s'", options[i].c_str());
+        }
+    }
+    return 1;
+}
+
 int Config::load_config(const std::string& next) {
     std::vector<std::string> arguments;
     std::ifstream file(next);
@@ -250,7 +266,12 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
                 if (next.empty()) {
                     usage("Option '" + arg + "' requires an argument");
                 }
-                opt.value = check_conflict(arg, std::any_cast<std::string>(opt.value), std::any_cast<std::string>(opt.unsetValue), next);
+                opt.value = check_conflict(
+                    arg,
+                    std::any_cast<std::string>(opt.value),
+                    std::any_cast<std::string>(opt.unsetValue),
+                    next
+                );
                 i++;
             } else if (opt.value.type() == typeid(int)) {
                 if (next.empty()) {
@@ -308,7 +329,6 @@ void Config::process_args(const std::vector<std::string>& arguments, const bool 
     set_default<double>("inline-limit");
     set_default<std::string>("benchmark");
     set_default<std::string>("debug-script");
-    set_default<std::string>("packcc-options");
 }
 
 void Config::post_process() {
@@ -349,6 +369,10 @@ const Config& Config::get() {
 
 const std::string& Config::get_indent() {
     return instance->indent;
+}
+
+const std::set<char>& Config::get_packcc_options() {
+    return instance->packcc_options;
 }
 
 std::vector<std::string> Config::get_all_imports_dirs(const std::string& input_file) {
@@ -485,12 +509,12 @@ Config::Config(int argc, char** argv): output_type(OT_UNSET), optimizations(O_NO
             OG_IO,
             "P",
             "packcc-options",
-            std::string('\0', 1),
-            std::string(),
+            &Config::set_packcc_options,
             "Additional comma separated options passed to packcc\n"
             "        Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'\n"
+            "        If supplied multiple times, all arguments are merged.\n"
             "        Note: --lines might not work as expected, because temporary file is used",
-            ""
+            "OPT[,...]"
         ),
         Option(OG_IO, "n", "inplace", false, false, "Modify the input files, use with caution"),
         Option(

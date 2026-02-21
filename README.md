@@ -40,8 +40,9 @@ as much as possible to reduce number of rules and terms.
 
 `-p/--packcc` Output source files as if the grammar was passed to packcc
 
-`-P/--packcc-options` Additional comma separated options passed to packcc  
+`-P/--packcc-options OPT[,...]` Additional comma separated options passed to packcc  
     Supported options are 'lines', 'ascii' and 'debug' and also their short forms 'a', 'l' and 'd'  
+    If supplied multiple times, all arguments are merged.  
     Note: --lines might not work as expected, because temporary file is used
 
 `-n/--inplace` Modify the input files, use with caution
