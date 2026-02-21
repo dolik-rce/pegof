@@ -340,7 +340,6 @@ UnaryExpression <-
             Escape
             / ![\n'\\] .
         )* "'" Spacing
-        / Identifier
         / LPAR ArgumentExpressionList RPAR
         / LPAR (
             TypeQualifier* Identifier #{&TypedefName}

@@ -119,3 +119,11 @@ void Rule::update_captures() {
         captures[i]->num = i + 1;
     }
 }
+
+bool operator==(const Rule& a, const Rule& b) {
+    return a.expression == b.expression;
+}
+
+bool operator!=(const Rule& a, const Rule& b) {
+    return !(a == b);
+}

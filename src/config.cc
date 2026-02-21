@@ -31,6 +31,7 @@ const std::map<std::string, Optimization> opt_mapping = {
     {"unused-capture", O_UNUSED_CAPTURE},
     {"empty-action", O_EMPTY_ACTION},
     {"same-rules", O_SAME_RULES},
+    {"repeated-sequence", O_REPEATED_SEQUENCE},
 };
 
 const std::map<Optimization, const char*> opt_descriptions = {
@@ -71,7 +72,10 @@ const std::map<Optimization, const char*> opt_descriptions = {
     {O_UNUSED_CAPTURE,
      {"Removing unused captures: Captures denoted in grammar, which are not used in any source block, error block or "
       "referenced (via `$n`) are discarded."}},
-    {O_EMPTY_ACTION, {"Removing empty actions: Actions that contain only whitespace are discarded."}}
+    {O_EMPTY_ACTION, {"Removing empty actions: Actions that contain only whitespace are discarded."}},
+    {O_REPEATED_SEQUENCE,
+     {"Removing repeated sequences in alternation: If the same sequence appears twice "
+      "in alterantion, only the first can be ever matched, so the second one can be removed."}}
 };
 
 void Config::usage(const std::string& error_msg) {

@@ -11,6 +11,7 @@ class Optimizer {
 
     int same_rules();
     int inline_rules();
+    int repeated_sequence();
     int concat_strings();
     int concat_character_classes();
     int normalize_character_classes();

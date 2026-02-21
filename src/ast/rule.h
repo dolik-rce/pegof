@@ -33,4 +33,8 @@ public:
     void update_captures();
 
     friend class Reference;
+    friend bool operator==(const Rule& a, const Rule& b);
 };
+
+bool operator==(const Rule& a, const Rule& b);
+bool operator!=(const Rule& a, const Rule& b);

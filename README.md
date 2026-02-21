@@ -106,6 +106,8 @@ as much as possible to reduce number of rules and terms.
 
 - `remove-group` Remove unnecessary groups: Some parenthesis can be safely removed without changeing the meaning of the grammar. E.g.: `A (B C) D` becomes `A B C D` or `X (Y)* Z` becomes `X Y* Z`.
 
+- `repeated-sequence` Removing repeated sequences in alternation: If the same sequence appears twice in alterantion, only the first can be ever matched, so the second one can be removed.
+
 - `repeats` Removing unnecessary repeats: Joins repeated rules to single quantity. E.g. "A A*" -> "A+", "B* B*" -> "B*" etc.
 
 - `same-rules` Eliminate same rules: If there are two rules with same content they will be merged into one.

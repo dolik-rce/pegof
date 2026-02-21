@@ -1,0 +1,43 @@
+X <-
+    A
+    / B
+    / C
+    / D
+
+# Simple case
+A <-
+    "1"
+    / "2"
+
+# More than two repetitions
+B <-
+    "1"
+    / "2"
+
+# Repeated in sub-alternation
+C <-
+    "1"
+    / (
+        "2"
+        / "3"
+    )
+    / "4"
+
+# Non-trivial sequences
+D <-
+    "1"
+    / (
+        "2"
+        / "3"
+    ) "4"
+    / "5"
+    / "6"
+
+# Same sequences on different levels should not be eliminated
+E <-
+    "1"
+    / "2" "3"
+    / (
+        "4"
+        / "2" "3"
+    )

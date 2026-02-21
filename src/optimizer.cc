@@ -443,14 +443,41 @@ int Optimizer::empty_actions() {
     });
 }
 
-static double calculate_score(int term_count, int ref_count) {
-    if (term_count == 1) {
-        return 1;
+int Optimizer::repeated_sequence() {
+    if (!Config::get(O_REPEATED_SEQUENCE)) {
+        return 0;
     }
-    if (ref_count <= 1) {
-        return 1;
+    std::vector<Alternation*> alternations = g.find_children<Alternation>();
+    for (Alternation* alternation: alternations) {
+        std::map<size_t, Sequence*> hashes;
+        for (int i = 0; i < alternation->size(); i++) {
+            Sequence* sequence = (Sequence*)(*alternation)[i];
+            size_t hash = sequence->hash();
+            if (hashes.find(hash) == hashes.end()) {
+                // We didn't see this hash yet, just note it and keep looking...
+                hashes[hash] = sequence;
+                continue;
+            } else {
+                const std::string eliminate = sequence->to_string();
+                if (*hashes[hash] != *sequence) {
+                    // Hash colission, sequences are not really the same
+                    log(6,
+                        "Found hash collision between sequences %s and %s",
+                        eliminate.c_str(),
+                        hashes[hash]->to_string().c_str());
+                    continue;
+                }
+                // We've found a duplicate sequence
+                log(1,
+                    "Found identical sequences '%s' in single alternation, erasing second occurence",
+                    eliminate.c_str());
+                alternation->erase(i);
+                alternation->update_parents();
+                return 1;
+            }
+        }
     }
-    return 1.0 / sqrt(term_count * ref_count);
+    return 0;
 }
 
 int Optimizer::same_rules() {
@@ -466,9 +493,14 @@ int Optimizer::same_rules() {
             hashes[hash] = rule;
             continue;
         } else {
-            // We've found a duplicate rule
             const std::string keep = hashes[hash]->get_name();
             const std::string eliminate = rule->get_name();
+            if (*hashes[hash] != *rule) {
+                // Hash colission, rules are not really the same
+                log(6, "Found hash collision between rules %s by %s", eliminate.c_str(), keep.c_str());
+                continue;
+            }
+            // We've found a duplicate rule
             log(1, "Found identical rules, replacing %s by %s", eliminate.c_str(), keep.c_str());
             log(4, "  Keep:      %s", rule->to_string().c_str());
             log(4, "  Eliminate: %s", hashes[hash]->to_string().c_str());
@@ -485,6 +517,16 @@ int Optimizer::same_rules() {
         }
     }
     return 0;
+}
+
+static double calculate_score(int term_count, int ref_count) {
+    if (term_count == 1) {
+        return 1;
+    }
+    if (ref_count <= 1) {
+        return 1;
+    }
+    return 1.0 / sqrt(term_count * ref_count);
 }
 
 int Optimizer::inline_rules() {
@@ -670,6 +712,7 @@ Grammar Optimizer::optimize() {
         &Optimizer::double_negations,
         &Optimizer::double_quantifications,
         &Optimizer::simplify_repeats,
+        &Optimizer::repeated_sequence,
         &Optimizer::concat_strings,
         &Optimizer::concat_character_classes,
         &Optimizer::unused_variables,
