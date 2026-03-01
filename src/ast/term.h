@@ -4,6 +4,7 @@
 #include "ast/character_class.h"
 #include "ast/expand.h"
 #include "ast/group.h"
+#include "ast/marker.h"
 #include "ast/node.h"
 #include "ast/position.h"
 #include "ast/predicate.h"
@@ -13,7 +14,7 @@
 #include <variant>
 
 using Primary = std::variant<
-    std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture, Position, Predicate>;
+    std::monostate, String, Reference, CharacterClass, Expand, Action, Group, Capture, Position, Predicate, Marker>;
 
 class Term: public Node {
     char prefix;

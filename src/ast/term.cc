@@ -49,7 +49,7 @@ void Term::parse(Parser& p) {
         prefix = 0;
     }
     if (!(parse<Reference>(p) || parse<String>(p) || parse<CharacterClass>(p) || parse<Position>(p) || parse<Expand>(p)
-          || parse<Group>(p) || parse<Capture>(p) || parse<Action>(p))) {
+          || parse<Group>(p) || parse<Capture>(p) || parse<Action>(p) || parse<Marker>(p))) {
         s.rollback();
         return;
     }

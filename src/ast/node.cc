@@ -137,6 +137,7 @@ bool operator==(const Node& a, const Node& b) {
     CMP(Grammar);
     CMP(Group);
     CMP(CharacterClass);
+    CMP(Marker);
     CMP(Position);
     CMP(Reference);
     CMP(Rule);
