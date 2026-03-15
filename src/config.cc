@@ -618,6 +618,17 @@ Config::Config(int argc, char** argv): output_type(OT_UNSET), optimizations(O_NO
             "N"
         ),
         Option(OG_OPT, "N", "no-follow", false, false, "Do not inline imported files while optimizing"),
+        Option(
+            OG_OPT,
+            "T",
+            "timeout",
+            0.0,
+            0.0,
+            "Maximum time to spend in optimization phase\n"
+            "        Non-negative number in seconds, value of 0.0 means no timeout\n"
+            "        Default is 0.0",
+            "N"
+        ),
     };
     std::vector<std::string> arguments(argv + 1, argv + argc);
     if (argc == 2 && strcmp(argv[1], "--usage-markdown") == 0) {

@@ -85,6 +85,10 @@ as much as possible to reduce number of rules and terms.
 
 `-N/--no-follow` Do not inline imported files while optimizing
 
+`-T/--timeout N` Maximum time to spend in optimization phase  
+    Non-negative number in seconds, value of 0.0 means no timeout  
+    Default is 0.0
+
 ### Supported values for --optimize and --exclude options:
 - `all` All optimizations: Shorthand option for combination of all available optimizations.
 

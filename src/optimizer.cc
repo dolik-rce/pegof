@@ -4,6 +4,7 @@
 #include "log.h"
 #include "utils.h"
 
+#include <chrono>
 #include <errno.h>
 #include <math.h>
 #include <set>
@@ -684,6 +685,11 @@ int Optimizer::inline_rules() {
     return false;
 }
 
+std::chrono::steady_clock::time_point get_deadline(const double& seconds) {
+    return std::chrono::steady_clock::now()
+        + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(seconds));
+}
+
 Grammar Optimizer::optimize() {
     int opts = 1;
     int pass = 1;
@@ -708,6 +714,8 @@ Grammar Optimizer::optimize() {
         {O_EMPTY_ACTION, &Optimizer::empty_actions}
     };
 
+    double timeout = Config::get<double>("timeout");
+    std::chrono::steady_clock::time_point deadline = get_deadline(timeout);
     std::map<Optimization, int> optimization_stats;
     while (opts > 0) {
         log(2, "Optimization pass %d", pass);
@@ -750,6 +758,10 @@ Grammar Optimizer::optimize() {
                     error(SCRIPT_ERROR, "Debug script stoped by signal %d in pass %d", WSTOPSIG(ret), pass);
                 }
             }
+        }
+        if (timeout != 0.0 && std::chrono::steady_clock::now() > deadline) {
+            log(1, "Optimization timeout exceeded.");
+            break;
         }
         pass++;
     }
