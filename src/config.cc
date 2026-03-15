@@ -488,6 +488,7 @@ Config::Config(int argc, char** argv): output_type(OT_UNSET), optimizations(O_NO
             "[LEVEL]"
         ),
         Option(OG_BASIC, "d", "debug", false, false, "Output very verbose debug info, implies max verbosity", ""),
+        Option(OG_BASIC, "s", "timestamp", false, false, "Add timestamp to each log line"),
         Option(
             OG_BASIC,
             "S",

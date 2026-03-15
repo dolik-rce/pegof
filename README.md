@@ -24,6 +24,8 @@ as much as possible to reduce number of rules and terms.
 
 `-d/--debug` Output very verbose debug info, implies max verbosity
 
+`-s/--timestamp` Add timestamp to each log line
+
 `-S/--skip-validation` Skip result validation (useful only for debugging purposes)
 
 `-b/--benchmark SCRIPT` Benchmarking script, see documentation for details
