@@ -1,4 +1,5 @@
 GRAMMAR
+  DIRECTIVE marker (0 comments) @x
   RULE X
     ALTERNATION
       SEQ

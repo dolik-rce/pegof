@@ -4,14 +4,16 @@
 class Directive: public Node {
     std::string name;
     std::string value;
-    enum Type { CODE, STRING, MARKER };
+    std::string version;
+    enum Type { CODE, IMPORT, STRING, MARKER, VERSION };
     Type type;
 
 public:
-    Directive(const std::string& name, const std::string& value, Type type, Node* parent);
+    Directive(const std::string& name, const std::string& value, const std::string& version, Type type, Node* parent);
     Directive(Parser& p, Node* parent);
 
     bool is_import() const;
+    bool is_version() const;
     std::string get_value() const;
 
     virtual void parse(Parser& p) override;

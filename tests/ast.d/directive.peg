@@ -22,4 +22,9 @@ earlysource
     lines
 }
 
+%version 9.8.7
+
+%marker @a @marker
+
 %import "string.peg"
+%import "import.peg" == 0.0.1

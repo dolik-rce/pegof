@@ -8,4 +8,7 @@ GRAMMAR
   DIRECTIVE earlyheader (0 comments) {earlyheader}
   DIRECTIVE earlysource (0 comments) {earlysource}
   DIRECTIVE earlycommon (0 comments) {earlycommon\n    multiple\n    lines}
+  DIRECTIVE version (0 comments) 9.8.7
+  DIRECTIVE marker (0 comments) @a @marker
   DIRECTIVE import (0 comments) "string.peg"
+  DIRECTIVE import (0 comments) "import.peg" == 0.0.1

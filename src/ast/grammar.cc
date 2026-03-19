@@ -50,9 +50,17 @@ void Grammar::parse(Parser& p) {
                     Rule r(parser, this);
                     if (r) {
                         nodes.push_back(r);
-                    } else {
-                        break;
+                        continue;
                     }
+                    Directive d(parser, this);
+                    if (d) {
+                        // version directives are relevant only within their file
+                        if (!d.is_version()) {
+                            nodes.push_back(d);
+                        }
+                        continue;
+                    }
+                    break;
                 }
                 log(3, "Import done, returning to previous file.");
             } else {

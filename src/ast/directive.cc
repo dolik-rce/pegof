@@ -3,14 +3,20 @@
 #include "log.h"
 #include "utils.h"
 
-Directive::Directive(const std::string& name, const std::string& value, Directive::Type type, Node* parent):
-    Node("Directive", parent), name(name), value(value), type(type) {}
+Directive::Directive(
+    const std::string& name, const std::string& value, const std::string& version, Directive::Type type, Node* parent
+):
+    Node("Directive", parent), name(name), value(value), version(version), type(type) {}
 Directive::Directive(Parser& p, Node* parent): Node("Directive", parent) {
     parse(p);
 }
 
 bool Directive::is_import() const {
-    return name == "import";
+    return type == IMPORT;
+}
+
+bool Directive::is_version() const {
+    return type == VERSION;
 }
 
 std::string Directive::get_value() const {
@@ -34,7 +40,17 @@ void Directive::parse(Parser& p) {
         if (p.match_string()) {
             value = trim(p.last_match);
         }
-        type = STRING;
+        if (name == "import") {
+            type = IMPORT;
+            // TODO: improve parsing and formating
+            if (p.match_re(
+                    "(==|!=|<=?|>=?)\\s*[0-9]+[.][0-9]+[.][0-9]+(\\s*,\\s*(==|!=|<=?|>=?)\\s*[0-9]+[.][0-9]+[.][0-9]+)*"
+                )) {
+                version = trim(p.last_re_match.str(0));
+            }
+        } else {
+            type = STRING;
+        }
         valid = true;
     } else if (p.match("%marker")) {
         name = "marker";
@@ -44,11 +60,18 @@ void Directive::parse(Parser& p) {
         }
         type = MARKER;
         valid = true;
+    } else if (p.match("%version")) {
+        name = "version";
+        if (p.match_re("[0-9]+[.][0-9]+[.][0-9]+")) {
+            version = trim(p.last_re_match.str(0));
+        }
+        type = VERSION;
+        valid = true;
     }
-    parse_post_comment(p);
     if (!valid) {
         s.rollback();
     }
+    parse_post_comment(p);
 }
 
 std::string Directive::to_string(std::string indent) const {
@@ -60,7 +83,9 @@ std::string Directive::to_string(std::string indent) const {
     switch (type) {
     case CODE: result += " {"; break;
     case STRING: result += " \""; break;
+    case IMPORT: result += " \""; break;
     case MARKER: result += " "; break;
+    case VERSION: result += " "; break;
     }
 
     if (type == CODE && value[0] == '#') {
@@ -85,6 +110,8 @@ std::string Directive::to_string(std::string indent) const {
             // single line code
             result += " " + value + " ";
         }
+    } else if (type == VERSION) {
+        result += version;
     } else {
         result += value;
     }
@@ -92,6 +119,11 @@ std::string Directive::to_string(std::string indent) const {
         result += "}";
     } else if (type == STRING) {
         result += "\"";
+    } else if (type == IMPORT) {
+        result += "\"";
+        if (!version.empty()) {
+            result += " " + version;
+        }
     }
     if (!post_comment.empty()) {
         result += " #" + post_comment;
@@ -105,7 +137,9 @@ std::string Directive::dump(std::string indent) const {
     switch (type) {
     case CODE: result += " {" + to_c_string(value) + "}"; break;
     case STRING: result += " \"" + to_c_string(value) + "\""; break;
-    case MARKER: result += to_c_string(value); break;
+    case IMPORT: result += " \"" + to_c_string(value) + "\"" + (version.empty() ? "" : " " + version); break;
+    case MARKER: result += " " + to_c_string(value); break;
+    case VERSION: result += " " + version; break;
     }
     return result;
 }

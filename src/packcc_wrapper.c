@@ -37,7 +37,7 @@ bool_t pcc_match_quoted(void* parser, void* result) {
         "tmp",           // char *path;        /* the path name of the PEG file being parsed; "<stdin>" if stdin */
         dev_null(),      // FILE *file;        /* the input file stream of the PEG file */
         FALSE,           // bool_t ascii;      /* UTF-8 support is disabled if true  */
-        CODE_FLAG__NONE, // code_flag_t flags; /* the bitwise flags to control code generation; updated during PEG parsing */
+        CODE_FLAG_NONE,  // code_flag_t flags; /* the bitwise flags to control code generation; updated during PEG parsing */
         0,               // size_t errnum;     /* the current number of PEG parsing errors */
         0,               // size_t linenum;    /* the current line number (0-based) */
         0,               // size_t charnum;    /* the number of characters in the current line that are already flushed (0-based, UTF-8 support if not disabled) */
