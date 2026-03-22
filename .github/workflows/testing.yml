@@ -22,7 +22,7 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
       CMAKE_BUILD_TYPE: Release
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         submodules: recursive
@@ -62,7 +62,7 @@ jobs:
       INCLUDE_SLOW_TESTS: "1"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         submodules: recursive
