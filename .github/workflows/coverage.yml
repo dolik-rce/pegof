@@ -7,6 +7,8 @@ on:
 jobs:
   coverage:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     env:
       DEBIAN_FRONTEND: noninteractive
       CMAKE_BUILD_TYPE: Debug
