@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <sstream>
 #include <string.h>
 
 using namespace std::string_literals;
@@ -202,12 +203,20 @@ int Config::set_packcc_options(const std::string& next) {
 int Config::load_config(const std::string& next) {
     std::vector<std::string> arguments;
     std::ifstream file(next);
-    std::copy(
-        std::istream_iterator<std::string>(file),
-        std::istream_iterator<std::string>(),
-        std::back_inserter(arguments)
-    );
-
+    std::string line;
+    while (std::getline(file, line)) {
+        std::vector<std::string> words = split(line, "\\s+");
+        for (int i = 0; i < words.size(); i++) {
+            std::string argument = trim(words[i]);
+            if (argument[0] == '#') {
+                // rest of line is comment, continue on next line
+                break;
+            }
+            if (!argument.empty()) {
+                arguments.push_back(argument);
+            }
+        }
+    }
     process_args(arguments, true);
     return 1;
 }
