@@ -7,5 +7,3 @@ main <- A B C D E "f"
 %import "import3.peg"
 
 %import "import4.peg" >= 12.34.56, < 15.0.0
-
-%import "import5.peg"

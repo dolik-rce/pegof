@@ -6,15 +6,15 @@
 #include <set>
 
 Grammar::Grammar(const std::vector<TopLevel>& nodes, const Code& code, const std::string& input_file):
-    Node("Grammar", nullptr), nodes(nodes), code(code), input_file(input_file) {}
+    Node("Grammar", nullptr), nodes(nodes), code(code), input_file(input_file), importLevel(0) {}
 
 Grammar::Grammar(Parser& p, const std::string& input_file):
-    Node("Grammar", nullptr), code("", this), input_file(input_file) {
+    Node("Grammar", nullptr), code("", this), input_file(input_file), importLevel(0) {
     parse(p);
 }
 
 Grammar::Grammar(const std::string& s, const std::string& input_file):
-    Node("Grammar", nullptr), code("", this), input_file(input_file) {
+    Node("Grammar", nullptr), code("", this), input_file(input_file), importLevel(0) {
     Parser p(s);
     parse(p);
 }
@@ -43,26 +43,14 @@ void Grammar::parse(Parser& p) {
                 if (path.empty()) {
                     error(IO_ERROR, "File '%s' not found", d.get_value().c_str());
                 }
-                log(1, "Importing file '%s'...", path.c_str());
-
+                importLevel++;
+                log(1, "Importing file '%s' (import level = %d)...", path.c_str(), importLevel);
                 Parser parser(read_file(path));
-                while (true) {
-                    Rule r(parser, this);
-                    if (r) {
-                        nodes.push_back(r);
-                        continue;
-                    }
-                    Directive d(parser, this);
-                    if (d) {
-                        // version directives are relevant only within their file
-                        if (!d.is_version()) {
-                            nodes.push_back(d);
-                        }
-                        continue;
-                    }
-                    break;
-                }
-                log(3, "Import done, returning to previous file.");
+                parse(parser);
+                importLevel--;
+                log(3, "Import done, returning to previous file (import level = %d).", importLevel);
+            } else if (importLevel > 0 && d.is_version()) {
+                log(4, "Skipping %version from imported file.");
             } else {
                 nodes.push_back(d);
             }

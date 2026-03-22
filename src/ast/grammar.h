@@ -11,6 +11,7 @@ class Grammar: public Node {
     std::vector<TopLevel> nodes;
     Code code;
     std::string input_file;
+    int importLevel;
 
 public:
     Grammar(const std::vector<TopLevel>& nodes, const Code& code, const std::string& input_file);
