@@ -40,8 +40,13 @@ std::string Stats::compare(const Stats& s) const {
     return result;
 }
 
+Stats::operator bool() const {
+    return lines >= 0;
+}
+
 Checker::Checker() {
     output = TempDir::get("output");
+    skipValidation = Config::get<bool>("skip-validation") && Config::get().output_type != Config::OT_PACKCC;
 }
 
 Checker::~Checker() {}
@@ -51,7 +56,7 @@ void Checker::set_input_file(const std::string& input) {
 }
 
 bool Checker::call_packcc(const std::string& input, const std::string& output, std::string& errors) const {
-    if (Config::get<bool>("skip-validation") && Config::get().output_type != Config::OT_PACKCC) {
+    if (skipValidation) {
         log(2, "Skipping validation due to --skip-validation");
         return true;
     }
@@ -90,6 +95,10 @@ bool Checker::packcc(const std::string& peg, const std::string& output) const {
 }
 
 Stats Checker::stats(Grammar& g) const {
+    if (skipValidation) {
+        log(2, "Skipping statistics calculation due to --skip-validation");
+        return Stats();
+    }
     std::string code = read_file(output + ".c");
     std::size_t lines = std::count(code.begin(), code.end(), '\n');
     int rules = g.find_children<Rule>().size();

@@ -13,12 +13,15 @@ class Stats {
 public:
     Stats(int bytes, int lines, int rules, int terms, int duration, int memory):
         lines(lines), bytes(bytes), rules(rules), terms(terms), duration(duration), memory(memory) {};
+    Stats(): lines(-1), bytes(-1), rules(-1), terms(-1), duration(-1), memory(-1) {};
     std::string compare(const Stats& s) const;
+    operator bool() const;
 };
 
 class Checker {
     std::string input_file;
     std::string output;
+    bool skipValidation;
     bool call_packcc(const std::string& input, const std::string& output, std::string& errors) const;
     bool validate(const std::string& input) const;
     void benchmark(int& duration, int& memory) const;

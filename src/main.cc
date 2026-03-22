@@ -65,7 +65,7 @@ void process(
         checker.validate_string("formatted.peg", result);
     }
 
-    if (Config::get(O_ALL) && (Config::verbose(1) || !Config::get<std::string>("benchmark").empty())) {
+    if (in_stats && Config::get(O_ALL) && (Config::verbose(1) || !Config::get<std::string>("benchmark").empty())) {
         log(1, "Computing stats ...");
         Stats out_stats = checker.stats(g);
         log(0, "%s", out_stats.compare(in_stats).c_str());
