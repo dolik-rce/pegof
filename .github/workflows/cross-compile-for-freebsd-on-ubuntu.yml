@@ -24,7 +24,7 @@ jobs:
       LDFLAGS:  -flto -Os -static -stdlib=libc++ -fuse-ld=lld
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-tags: true
