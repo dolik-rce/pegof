@@ -27,7 +27,7 @@ jobs:
     - name: Build github pages
       run: ./emscripten.sh build site
     - name: Upload
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v4
       with:
         path: ./site
     - name: Deploy
