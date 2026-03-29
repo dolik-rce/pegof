@@ -31,6 +31,6 @@ jobs:
       with:
         path: ./site
     - name: Deploy
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v5
       with:
         token: ${{ github.token }}
