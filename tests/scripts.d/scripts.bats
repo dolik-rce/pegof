@@ -4,7 +4,7 @@ load "$TESTDIR/utils.sh"
 
 normalize_output() {
     sed '
-        s/pegof_[0-9]\+/pegof_<random>/g;
+        s/pegof_[0-9]*/pegof_<random>/g;
         s/| [ 0-9]\{9\}%/|  <number>%/g;
         s/| [ 0-9]\{10\}/|   <number>/g;
     ' <<<"$output"

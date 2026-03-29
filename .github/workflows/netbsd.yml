@@ -1,0 +1,39 @@
+name: "NetBSD build"
+
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['9.2', '9.3', '9.4', '10.0']
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Test on NetBSD
+      uses: cross-platform-actions/action@v0.25.0
+      with:
+        operating_system: netbsd
+        version: ${{ matrix.version }}
+        shell: bash
+        run: |
+          set -ex
+          export PKG_REPOS="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r)/All/"
+          sudo -E pkgin clean
+          sudo -E pkgin update
+          sudo -E pkgin -y install gcc13 cmake bats git
+          export CC=/usr/pkg/gcc13/bin/cc
+          export CXX=/usr/pkg/gcc13/bin/c++
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target test --verbose
